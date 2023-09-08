@@ -21,6 +21,7 @@ pub struct UserModel {
     pub user_id: i32,
     pub username: String,
     pub password: String,
+    pub secret: Option<String>,
     pub email: String,
     #[serde(rename = "createdAt")]
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,

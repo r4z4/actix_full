@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
+        secret TEXT DEFAULT NULL,
         password TEXT NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
