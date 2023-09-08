@@ -6,6 +6,8 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 
+use crate::extractors::auth_token::AuthToken;
+
 pub fn user_scope() -> Scope {
     web::scope("/user")
         .route("/encode-token/{id}", web::get().to(encode_token))
@@ -75,7 +77,8 @@ async fn decode_token(body: web::Json<DecodeBody>, secret: String) -> HttpRespon
     }
 }
 
-async fn protected() -> HttpResponse {
+async fn protected(auth_token: AuthToken) -> HttpResponse {
+    println!("{}", auth_token.id);
     HttpResponse::Ok().json(Response {
         message: "protected".to_owned(),
     })

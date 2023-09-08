@@ -4,7 +4,7 @@ use actix_web::{
     dev::Payload,
     error::ErrorUnauthorized,
     http::{self, header::HeaderValue},
-    Error as ActixWebError, FromRequest, HttpRequest,
+    Error as ActixWebError, FromRequest, HttpRequest, web,
 };
 use jsonwebtoken::{
     decode, errors::Error as JwtError, Algorithm, DecodingKey, TokenData, Validation,
@@ -14,7 +14,7 @@ use std::future::{ready, Ready};
 
 #[derive(Serialize, Deserialize)]
 pub struct AuthToken {
-    id: usize,
+    pub id: usize,
 }
 
 impl FromRequest for AuthToken {
@@ -25,12 +25,12 @@ impl FromRequest for AuthToken {
         // Get auth token from auth header
         let auth_header: Option<HeaderValue> =
             req.headers().get(http::header::AUTHORIZATION).cloned();
-        let auth_token: String = auth_header.unwrap().to_str().unwrap().to_string();
+        let auth_token: String = auth_header.unwrap().to_str().unwrap_or("").to_string();
         if auth_token.is_empty() {
             return ready(Err(ErrorUnauthorized("Invalid auth token")));
         }
 
-        let app_data: &AppState = req.app_data::<AppState>().unwrap();
+        let app_data: &AppState = req.app_data::<web::Data<AppState>>().unwrap();
         // Decode token w/ secret
         let decode: Result<TokenData<Claims>, JwtError> = decode::<Claims>(
             &app_data.secret,

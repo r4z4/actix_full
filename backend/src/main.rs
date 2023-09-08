@@ -42,11 +42,11 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    let data = Arc::new(Mutex::new(web::Data::new(AppState {
-        db: pool.clone(),
-        secret: secret.clone(),
-        token: "".to_string().clone(),
-    })));
+    // let data = Arc::new(Mutex::new(web::Data::new(AppState {
+    //     db: pool.clone(),
+    //     secret: secret.clone(),
+    //     token: "".to_string().clone(),
+    // })));
 
     println!("🚀 Server started successfully");
 
@@ -61,7 +61,11 @@ async fn main() -> std::io::Result<()> {
             ])
             .supports_credentials();
         App::new()
-            .app_data(data.clone())
+            .app_data(web::Data::new(AppState {
+                db: pool.clone(),
+                secret: secret.clone(),
+                token: "".to_string().clone(),
+            }))
             .service(user_scope())
             .configure(handler::config)
             .wrap(cors)
