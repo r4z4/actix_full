@@ -1,4 +1,4 @@
-use common::{ErrorResponse, Engagement, EngagementListResponse, EngagementResponse};
+use common::{Engagement, EngagementListResponse, EngagementResponse, ErrorResponse};
 use reqwasm::http;
 
 pub async fn api_create_engagement(engagement_data: &str) -> Result<Engagement, String> {

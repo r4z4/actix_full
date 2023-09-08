@@ -37,7 +37,7 @@ fn App() -> Html {
                      />
                 }
             <main class="main-class">
-                <div class={stylesheet}> 
+                <div class={stylesheet}>
                     <EngagementForm />
                     <EngagementStats />
                     <EngagementList />

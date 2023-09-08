@@ -1,18 +1,21 @@
+mod extractors;
 mod handler;
 mod model;
 mod schema;
-use std::sync::{Mutex, Arc};
+mod scopes;
+
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use std::sync::{Arc, Mutex};
 
 pub struct AppState {
     db: Pool<Postgres>,
+    secret: String,
     token: String,
 }
 
-mod scopes;
 use scopes::user::user_scope;
 
 #[actix_web::main]
@@ -39,7 +42,11 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    let data = Arc::new(Mutex::new(web::Data::new(AppState { db: pool.clone(), token: secret.clone() })));
+    let data = Arc::new(Mutex::new(web::Data::new(AppState {
+        db: pool.clone(),
+        secret: secret.clone(),
+        token: "".to_string().clone(),
+    })));
 
     println!("🚀 Server started successfully");
 
