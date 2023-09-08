@@ -1,6 +1,6 @@
 use actix_web::{ web, Scope, HttpResponse };
 use chrono::{ Utc, Duration };
-use jsonwebtoken::{encode, Header, EncodingKey};
+use jsonwebtoken::{encode, decode, errors::Error as JwtError, TokenData, Header, EncodingKey, DecodingKey, Validation, Algorithm};
 use serde::{Serialize, Deserialize};
 
 pub fn user_scope() -> Scope {
@@ -42,8 +42,31 @@ async fn encode_token(path: web::Path<usize>, secret: String) -> HttpResponse {
     })
 }
 
-async fn decode_token() -> HttpResponse {
-    HttpResponse::Ok().json(Response { message: "decode_token".to_owned() })
+#[derive(Serialize, Deserialize)]
+struct DecodeBody {
+    token: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct DecodeResponse {
+    message: String,
+    id: usize,
+}
+
+async fn decode_token(body: web::Json<DecodeBody>, secret: String) -> HttpResponse {
+    let decoded: Result<TokenData<Claims>, JwtError> = decode::<Claims>(
+        &body.token,
+        &DecodingKey::from_secret(secret.as_str().as_ref()),
+        &Validation::new(Algorithm::HS256)
+    );
+
+    match decoded {
+        Ok(token) => HttpResponse::Ok().json(DecodeResponse {
+            message: "Authorized".to_string(),
+            id: token.claims.id,
+        }),
+        Err(e) => HttpResponse::BadRequest().json(Response { message: e.to_string() })
+    }
 }
 
 async fn protected() -> HttpResponse {
