@@ -1,7 +1,7 @@
 mod handler;
 mod model;
 mod schema;
-
+use std::sync::{Mutex, Arc};
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
@@ -9,8 +9,11 @@ use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 pub struct AppState {
     db: Pool<Postgres>,
-    secret: String,
+    token: String,
 }
+
+mod scopes;
+use scopes::user::user_scope;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -20,6 +23,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     let database_url = env!("DATABASE_URL");
+    let secret = "secret".to_string();
     let pool = match PgPoolOptions::new()
         .max_connections(10)
         .connect(&database_url)
@@ -35,11 +39,13 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    let data = Arc::new(Mutex::new(web::Data::new(AppState { db: pool.clone(), token: secret.clone() })));
+
     println!("🚀 Server started successfully");
 
     HttpServer::new(move || {
         let cors = Cors::default()
-            .allowed_origin("http://localhost:3000")
+            .allowed_origin("http://localhost:8080")
             .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE"])
             .allowed_headers(vec![
                 header::CONTENT_TYPE,
@@ -48,7 +54,8 @@ async fn main() -> std::io::Result<()> {
             ])
             .supports_credentials();
         App::new()
-            .app_data(web::Data::new(AppState { db: pool.clone(), secret: String::from("secret") }))
+            .app_data(data.clone())
+            .service(user_scope())
             .configure(handler::config)
             .wrap(cors)
             .wrap(Logger::default())
