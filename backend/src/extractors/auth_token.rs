@@ -22,6 +22,7 @@ impl FromRequest for AuthToken {
     type Future = Ready<Result<Self, Self::Error>>;
 
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
+        dbg!(req);
         // Get auth token from auth header
         let auth_header: Option<HeaderValue> =
             req.headers().get(http::header::AUTHORIZATION).cloned();
@@ -30,13 +31,17 @@ impl FromRequest for AuthToken {
             return ready(Err(ErrorUnauthorized("Invalid auth token")));
         }
 
+        dbg!(&auth_token);
+
         let app_data: &AppState = req.app_data::<web::Data<AppState>>().unwrap();
         // Decode token w/ secret
         let decode: Result<TokenData<Claims>, JwtError> = decode::<Claims>(
-            &app_data.secret,
+            &auth_token,
             &DecodingKey::from_secret(app_data.secret.as_str().as_ref()),
             &Validation::new(Algorithm::HS256),
         );
+
+        dbg!(&decode);
         // Return self (auth token)
         match decode {
             Ok(token) => ready(Ok(AuthToken {

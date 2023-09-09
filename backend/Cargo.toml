@@ -18,3 +18,8 @@ uuid = { version = "1.4.1", features = ["serde", "v4"] }
 common = { version = "0.1.0", path = "../common" }
 dotenvy_macro = "0.15.7"
 jsonwebtoken = "8.3.0"
+actix-multipart = "0.6.1"
+futures-util = "0.3.28"
+mime = "0.3.17"
+image = "0.24.7"
+tokio = { version = "1.32.0", features = ["fs"] }

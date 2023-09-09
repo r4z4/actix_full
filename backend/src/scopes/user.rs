@@ -26,7 +26,7 @@ struct EncodeResponse {
     token: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub id: usize,
     pub exp: usize,

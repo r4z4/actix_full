@@ -3,9 +3,16 @@ use crate::{
     schema::{CreateEngagementSchema, FilterOptions, UpdateEngagementSchema},
     AppState,
 };
-use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, patch, post, web, HttpResponse, Responder, HttpRequest, http::header::CONTENT_LENGTH};
 use chrono::prelude::*;
+use futures_util::TryStreamExt;
+use image::{DynamicImage, imageops::FilterType};
 use serde_json::json;
+use mime::{ Mime, IMAGE_JPEG, IMAGE_PNG, IMAGE_SVG, IMAGE_GIF};
+use actix_multipart::Multipart;
+use tokio::fs;
+use tokio::io::AsyncWriteExt;
+use uuid::Uuid;
 
 #[get("/healthchecker")]
 async fn health_checker_handler() -> impl Responder {
@@ -184,6 +191,65 @@ async fn delete_engagement_handler(
     HttpResponse::NoContent().finish()
 }
 
+#[post("/upload/{id}")]
+async fn upload(mut payload: Multipart, req: HttpRequest) ->  HttpResponse {
+    // 1. Limit file size
+    // 2. Limit file count
+    // 3. Limit file type
+    // 4. Save file
+    // 5. Covert into Gif
+
+    let max_file_size: usize = 10_000;
+    let max_file_count: usize = 3;
+    let legal_file_types: [Mime; 4] = [IMAGE_GIF, IMAGE_JPEG, IMAGE_PNG, IMAGE_SVG];
+
+    let content_length: usize = match req.headers().get(CONTENT_LENGTH) {
+        Some(header_value) => header_value.to_str().unwrap_or("0").parse().unwrap(),
+        None => 0, 
+    };
+
+    if content_length == 0 || content_length > max_file_size { return HttpResponse::BadRequest().into(); } 
+
+    let mut current_count: usize = 0;
+    loop {
+        if current_count >= max_file_count { break; }
+
+        if let Ok(Some(mut field)) = payload.try_next().await {
+            if field.name() != "upload" { continue; }
+            let filetype: Option<&Mime> = field.content_type();
+            if filetype.is_none() { continue; }
+            if !legal_file_types.contains(&filetype.unwrap()) { continue; }
+            let dir: &str = "./upload";
+
+            let destination: String = format!(
+                "{}{}-{}",
+                dir,
+                Uuid::new_v4(),
+                field.content_disposition().get_filename().unwrap(),
+            );
+            let mut saved_file = fs::File::create(&destination).await.unwrap();
+            while let Ok(Some(chunk)) = field.try_next().await {
+                let _ = saved_file.write_all(&chunk).await.unwrap();
+            }
+
+            web::block(move || async move {
+                let updated_img: DynamicImage = image::open(&destination).unwrap();
+                let _ = fs::remove_file(&destination).await.unwrap();
+                updated_img
+                    .resize_exact(200, 200, FilterType::Nearest)
+                    .save(format!("{}{}.gif", dir, Uuid::new_v4()))
+                    .unwrap();
+            }).await.unwrap().await;
+
+        } else {
+            break;
+        }
+        current_count += 1;
+    }
+
+    HttpResponse::Ok().into()
+}
+
 pub fn config(conf: &mut web::ServiceConfig) {
     let scope = web::scope("/api")
         .service(health_checker_handler)
@@ -195,3 +261,5 @@ pub fn config(conf: &mut web::ServiceConfig) {
 
     conf.service(scope);
 }
+
+
