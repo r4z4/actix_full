@@ -1,6 +1,7 @@
 use super::rating::Rating;
 use crate::store::{set_engagement, set_loading, set_show_alert, Store};
 use common::Engagement;
+use gloo::file::File;
 use uuid::Uuid;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
@@ -12,6 +13,7 @@ pub fn EngagementForm() -> Html {
     let (store, dispatch) = use_store::<Store>();
     let loading = &store.loading;
     let text = use_state(String::new);
+    let file: UseStateHandle<Option<File>> = use_state(|| None);
     let rating = use_state(|| 10_u8);
     let min = use_state(|| 10);
     let message = use_state(|| Option::<String>::None);
@@ -24,6 +26,14 @@ pub fn EngagementForm() -> Html {
             rating.set(value);
         })
     };
+
+    // let handle_file = {
+    //     let file = file.clone();
+    //     dbg!(&file);
+    //     Callback::from(move |value| {
+    //         file.set(value);
+    //     })
+    // };
 
     let handle_input = {
         let text = text.clone();
@@ -101,6 +111,7 @@ pub fn EngagementForm() -> Html {
                 } else {
                     html! {}
                 }}
+                <input type="file" />
             </form>
         </div>
     }
