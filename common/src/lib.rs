@@ -1,6 +1,19 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
+pub struct Consult {
+    pub consult_id: uuid::Uuid,
+    pub client_id: i32,
+    pub consultant_id: i32,
+    pub specialty: String,
+    pub territory: String,
+    pub user_id: i32,
+    // String in common?
+    pub created_at: String,
+    pub updated_at: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct Engagement {
     pub id: uuid::Uuid,
     pub text: String,

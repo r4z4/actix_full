@@ -3,6 +3,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::router::Route;
+use crate::components::consults_display::ConsultsDisplay;
 
 #[function_component(Consults)]
 pub fn consults() -> Html {
@@ -18,10 +19,12 @@ pub fn consults() -> Html {
             <details>
                 <summary>{"Add a Consult"}</summary>
                 <div class={"form_container"}>
-
+                    
                 </div>
             </details>
-
+            <div id={"provider_display"}>
+                <ConsultsDisplay title={"Consults 👩"} on_load={data_display_loaded} />
+            </div>
         </div>
     }
 }
