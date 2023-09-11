@@ -5,7 +5,7 @@ use uuid::Uuid;
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 #[allow(non_snake_case)]
 pub struct EngagementModel {
-    pub id: Uuid,
+    pub engagement_id: i32,
     pub text: String,
     pub rating: i32,
     pub user_id: Option<i32>,

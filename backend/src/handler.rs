@@ -31,7 +31,7 @@ pub async fn engagement_list_handler(
 
     let query_result = sqlx::query_as!(
         EngagementModel,
-        "SELECT * FROM engagements ORDER by id LIMIT $1 OFFSET $2",
+        "SELECT * FROM engagements ORDER by engagement_id LIMIT $1 OFFSET $2",
         limit as i32,
         offset as i32
     )
@@ -92,13 +92,13 @@ async fn create_engagement_handler(
 
 #[get("/engagement/{id}")]
 async fn get_engagement_handler(
-    path: web::Path<uuid::Uuid>,
+    path: web::Path<i32>,
     data: web::Data<AppState>,
 ) -> impl Responder {
     let engagement_id = path.into_inner();
     let query_result = sqlx::query_as!(
         EngagementModel,
-        "SELECT * FROM engagements WHERE id = $1",
+        "SELECT * FROM engagements WHERE engagement_id = $1",
         engagement_id
     )
     .fetch_one(&data.db)
@@ -122,14 +122,14 @@ async fn get_engagement_handler(
 
 #[patch("/engagement/{id}")]
 async fn edit_engagement_handler(
-    path: web::Path<uuid::Uuid>,
+    path: web::Path<i32>,
     body: web::Json<UpdateEngagementSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
     let engagement_id = path.into_inner();
     let query_result = sqlx::query_as!(
         EngagementModel,
-        "SELECT * FROM engagements WHERE id = $1",
+        "SELECT * FROM engagements WHERE engagement_id = $1",
         engagement_id
     )
     .fetch_one(&data.db)
@@ -146,7 +146,7 @@ async fn edit_engagement_handler(
 
     let query_result = sqlx::query_as!(
         EngagementModel,
-        "UPDATE engagements SET text = $1, rating = $2, updated_at = $3 WHERE id = $4 RETURNING *",
+        "UPDATE engagements SET text = $1, rating = $2, updated_at = $3 WHERE engagement_id = $4 RETURNING *",
         body.text.to_owned().unwrap_or(engagement.text),
         body.rating.to_owned().unwrap_or(engagement.rating),
         now,
@@ -173,11 +173,11 @@ async fn edit_engagement_handler(
 
 #[delete("/engagement/{id}")]
 async fn delete_engagement_handler(
-    path: web::Path<uuid::Uuid>,
+    path: web::Path<i32>,
     data: web::Data<AppState>,
 ) -> impl Responder {
     let engagement_id = path.into_inner();
-    let rows_affected = sqlx::query!("DELETE FROM engagements WHERE id = $1", engagement_id)
+    let rows_affected = sqlx::query!("DELETE FROM engagements WHERE engagement_id = $1", engagement_id)
         .execute(&data.db)
         .await
         .unwrap()

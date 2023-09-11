@@ -1,5 +1,6 @@
 mod api;
 mod components;
+mod router;
 mod store;
 
 use components::{
@@ -11,7 +12,13 @@ use components::{
 use store::Store;
 use stylist::Style;
 use yew::prelude::*;
+use yew_router::{prelude::Link, BrowserRouter, Switch};
 use yewdux::prelude::*;
+
+use crate::{
+    components::nav::Nav,
+    router::{switch, Route},
+};
 
 const CSS_FILE: &str = include_str!("main.css");
 
@@ -36,12 +43,28 @@ fn App() -> Html {
                         delay_ms={alert_props.delay_ms}
                      />
                 }
-            <main class="main-class">
-                <div class={stylesheet}>
-                    <EngagementForm />
-                    <EngagementStats />
-                    <EngagementList />
-                </div>
+            <main class={stylesheet}>
+
+            // if store.token.is_some() {
+                <BrowserRouter>
+                    // Nav needs to be child of BrowserRouter
+                    // <Logout label={"⇥"} />
+                    <Nav color={"black"} />
+                    <Switch<Route> render={switch} />
+
+                    // <div class={stylesheet}>
+                    //     <EngagementForm />
+                    //     <EngagementStats />
+                    //     <EngagementList />
+                    // </div>
+                </BrowserRouter>
+            // } else {
+            //     <BrowserRouter>
+            //         <h2 class={"login-route"}><Link<Route> to={Route::Login}>{"Welcome to the External Review Portal. Click the Key to Login & Continue. 🔑"}</Link<Route>></h2>
+            //         <Switch<Route> render={switch} />
+            //     </BrowserRouter>
+            // }
+
             </main>
             if *loading {
                 <div
