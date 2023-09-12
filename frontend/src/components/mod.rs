@@ -1,9 +1,13 @@
 pub mod alert;
+pub mod login_form;
+pub mod register_form;
 pub mod engagement_form;
 pub mod engagement_item;
 pub mod engagement_list;
 pub mod engagement_stats;
 pub mod consults_display;
+pub mod email_input;
+pub mod button;
 pub mod nav;
 pub mod pages;
 pub mod rating;
