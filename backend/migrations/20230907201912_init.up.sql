@@ -2,6 +2,8 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE TYPE consultant_specialty AS ENUM ('Insurance', 'Finance', 'Government');
+
 CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
@@ -14,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS consultants (
         consultant_id SERIAL PRIMARY KEY,
-        specialty TEXT NOT NULL,
+        specialty consultant_specialty NOT NULL,
         territory TEXT NULL,
         user_id INTEGER NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -30,8 +32,8 @@ CREATE TABLE IF NOT EXISTS clients (
         client_address_one TEXT NOT NULL,
         client_address_two TEXT NULL,
         client_city TEXT NOT NULL,
-        client_state TEXT NOT NULL,
-        client_zip INTEGER NOT NULL,
+        client_state CHAR (2) NOT NULL,
+        client_zip VARCHAR (5) NOT NULL,
         client_home_phone TEXT NULL,
         client_mobile_phone TEXT NULL,
         client_office_phone TEXT NULL,
