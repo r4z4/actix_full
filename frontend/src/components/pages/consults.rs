@@ -18,7 +18,7 @@ pub fn consults() -> Html {
             <h1>{"Consults"}</h1>
             <details>
                 <summary>{"Add a Consult"}</summary>
-                <div class={"form_container"}>
+                <div class={"container"}>
                     
                 </div>
             </details>

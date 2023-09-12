@@ -23,13 +23,14 @@ pub fn engagements() -> Html {
             <h1>{"Engagements"}</h1>
             <details>
                 <summary>{"Add an Engagement"}</summary>
-                <div class={"form_container"}>
+                <div class={"container"}>
                     <EngagementForm />
-                    <EngagementStats />
-                    <EngagementList />
                 </div>
             </details>
-
+            <div class={"container"}>
+                <EngagementStats />
+                <EngagementList />
+            </div>
         </div>
     }
 }

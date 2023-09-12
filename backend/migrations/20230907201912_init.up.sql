@@ -1,8 +1,27 @@
 -- Add up migration script here
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+DROP TYPE IF EXISTS consultant_specialty;
+DROP TYPE IF EXISTS consultant_territory;
+DROP TYPE IF EXISTS state_abbr;
+DROP TYPE IF EXISTS state_name;
+DROP TYPE IF EXISTS us_territories;
 
 CREATE TYPE consultant_specialty AS ENUM ('Insurance', 'Finance', 'Government');
+
+CREATE TYPE consultant_territory AS ENUM ('Midwest', 'East', 'West', 'North', 'South');
+
+CREATE TYPE state_abbr AS ENUM ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA',
+        'MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN',
+        'TX','UT','VT','VA','WA','WV','WI','WY','AS','GU','MP','PR','VI','DC');
+
+CREATE TYPE state_name AS ENUM ('Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia',
+        'Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts',
+        'Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New_Hampshire','New_Jersey','New_Mexico',
+        'New_York','North_Carolina','North_Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode_Island','South_Carolina',
+        'South_Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West_Virginia','Wisconsin','Wyoming');
+
+CREATE TYPE us_territories AS ENUM ('American_Samoa', 'Guam', 'Northern_Mariana_Islands', 'Peurto_Rico', 'Virgin_Islands', 'District_of_Columbia');
 
 CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
@@ -17,7 +36,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS consultants (
         consultant_id SERIAL PRIMARY KEY,
         specialty consultant_specialty NOT NULL,
-        territory TEXT NULL,
+        territory consultant_territory NULL,
         user_id INTEGER NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -32,7 +51,7 @@ CREATE TABLE IF NOT EXISTS clients (
         client_address_one TEXT NOT NULL,
         client_address_two TEXT NULL,
         client_city TEXT NOT NULL,
-        client_state CHAR (2) NOT NULL,
+        client_state state_abbr NOT NULL,
         client_zip VARCHAR (5) NOT NULL,
         client_home_phone TEXT NULL,
         client_mobile_phone TEXT NULL,
@@ -93,8 +112,8 @@ VALUES
 
 INSERT INTO clients (client_id, client_address_one, client_city, client_state, client_zip, user_id) 
 VALUES 
-(1, '1111 Client St.', 'Client City', 'NE', 68114, 5),
-(2, '2222 Client St.', 'Client Town', 'MN', 55057, 6);
+(1, '1111 Client St.', 'Client City', 'NE', '68114', 5),
+(2, '2222 Client St.', 'Client Town', 'MN', '55057', 6);
 
 INSERT INTO consultants (consultant_id, specialty, user_id) 
 VALUES 

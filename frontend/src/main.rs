@@ -16,7 +16,7 @@ use yew_router::{prelude::Link, BrowserRouter, Switch};
 use yewdux::prelude::*;
 
 use crate::{
-    components::nav::Nav,
+    components::{nav::Nav, pages::home::Home},
     router::{switch, Route},
 };
 
@@ -51,12 +51,6 @@ fn App() -> Html {
                     // <Logout label={"⇥"} />
                     <Nav color={"black"} />
                     <Switch<Route> render={switch} />
-
-                    // <div class={stylesheet}>
-                    //     <EngagementForm />
-                    //     <EngagementStats />
-                    //     <EngagementList />
-                    // </div>
                 </BrowserRouter>
             // } else {
             //     <BrowserRouter>

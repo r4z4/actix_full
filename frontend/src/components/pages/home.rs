@@ -13,12 +13,15 @@ pub fn home() -> Html {
     // let navigator = use_navigator().unwrap();
 
     html! {
-        <div>
+        <div id="home_main">
             <h1>{"Home"}</h1>
             if store.token.is_some() {
-                <h1>{"Halo"}</h1>
+                <h1>{"Some Office"}</h1>
             } else {
-                <h1>{"Goodbye"}</h1>
+                <div>
+                    <h1>{"Please Login to view our offerings."}</h1>
+                    <Link<Route> to={Route::Register}>{"Login"}</Link<Route>>
+                </div>
             }
         </div>
     }
