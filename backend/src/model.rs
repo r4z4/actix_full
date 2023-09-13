@@ -83,3 +83,19 @@ pub struct ConsultModel {
     #[serde(rename = "updatedAt")]
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+#[allow(non_snake_case)]
+pub struct MessageModel {
+    pub message_id: i32,
+    pub content: String,
+    pub subject: String,
+    pub sent_to: i32,
+    pub sent_from: i32,
+    pub sent_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub read_at: Option<chrono::DateTime<chrono::Utc>>,
+    #[serde(rename = "createdAt")]
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}

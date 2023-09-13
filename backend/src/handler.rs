@@ -261,5 +261,3 @@ pub fn config(conf: &mut web::ServiceConfig) {
 
     conf.service(scope);
 }
-
-

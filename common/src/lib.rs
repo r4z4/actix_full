@@ -14,6 +14,21 @@ pub struct Consult {
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
+pub struct Message {
+    pub message_id: i32,
+    pub content: String,
+    pub subject: String,
+    pub sent_to: i32,
+    pub sent_from: i32,
+    pub sent_at: Option<String>,
+    pub read_at: Option<String>,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct Engagement {
     pub id: uuid::Uuid,
     pub text: String,

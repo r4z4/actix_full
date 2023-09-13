@@ -77,6 +77,24 @@ CREATE TABLE IF NOT EXISTS engagements (
 	            REFERENCES users(user_id)
     );
 
+CREATE TABLE IF NOT EXISTS messages (
+        message_id SERIAL PRIMARY KEY,
+        content TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        sent_to INTEGER NOT NULL,
+        sent_from INTEGER NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+        read_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+        CONSTRAINT fk_sent_to
+            FOREIGN KEY(sent_to) 
+	            REFERENCES users(user_id),
+        CONSTRAINT fk_sent_from
+            FOREIGN KEY(sent_from) 
+	            REFERENCES users(user_id)
+    );
+
 CREATE TABLE IF NOT EXISTS consults (
         consult_id SERIAL PRIMARY KEY,
         consultant_id INTEGER NOT NULL,
