@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM engagements WHERE engagement_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "414f2e48011881bac115d77cbac1175abaa1fc3f42a1ddf815c09cdfc3d583f9"
+}
