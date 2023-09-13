@@ -21,7 +21,7 @@ CREATE TYPE state_name AS ENUM ('Alabama','Alaska','Arizona','Arkansas','Califor
         'New_York','North_Carolina','North_Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode_Island','South_Carolina',
         'South_Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West_Virginia','Wisconsin','Wyoming');
 
-CREATE TYPE us_territories AS ENUM ('American_Samoa', 'Guam', 'Northern_Mariana_Islands', 'Peurto_Rico', 'Virgin_Islands', 'District_of_Columbia');
+CREATE TYPE us_territories AS ENUM ('American_Samoa', 'Guam', 'Northern_Mariana_Islands', 'Puerto_Rico', 'Virgin_Islands', 'District_of_Columbia');
 
 CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,

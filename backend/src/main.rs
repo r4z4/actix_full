@@ -17,6 +17,7 @@ pub struct AppState {
 }
 
 use scopes::user::user_scope;
+use scopes::message::message_scope;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -67,6 +68,7 @@ async fn main() -> std::io::Result<()> {
                 token: "".to_string().clone(),
             }))
             .service(user_scope())
+            .service(message_scope())
             .configure(handler::config)
             .wrap(cors)
             .wrap(Logger::default())
