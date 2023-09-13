@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
     }
     env_logger::init();
 
-    let database_url = env!("DATABASE_URL");
+    let database_url = if env!("DATABASE_URL").is_empty() {env!("DATABASE_URL")} else {""};
     let secret = "secret".to_string();
     let pool = match PgPoolOptions::new()
         .max_connections(10)
