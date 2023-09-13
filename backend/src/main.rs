@@ -9,6 +9,7 @@ use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use std::env;
 use std::sync::{Arc, Mutex};
 
 pub struct AppState {
@@ -26,8 +27,8 @@ async fn main() -> std::io::Result<()> {
         std::env::set_var("RUST_LOG", "actix_web=info");
     }
     env_logger::init();
-
-    let database_url = if env!("DATABASE_URL").is_empty() {env!("DATABASE_URL")} else {""};
+    let database_url = env::var("DATABASE_URL").unwrap();
+    // let database_url = env!("DATABASE_URL");
     let secret = "secret".to_string();
     let pool = match PgPoolOptions::new()
         .max_connections(10)
