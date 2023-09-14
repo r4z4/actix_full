@@ -9,6 +9,10 @@ DROP TYPE IF EXISTS us_territories;
 
 CREATE TYPE consultant_specialty AS ENUM ('Insurance', 'Finance', 'Government');
 
+CREATE TYPE mime_type AS ENUM ('application/pdf', 'application/json', 'video/mp4', 'image/jpeg', 'image/svg+xml', 'image/gif', 'image/png');
+
+CREATE TYPE attachment_channel AS ENUM ('Email', 'Upload');
+
 CREATE TYPE consultant_territory AS ENUM ('Midwest', 'East', 'West', 'North', 'South');
 
 CREATE TYPE state_abbr AS ENUM ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA',
@@ -95,6 +99,19 @@ CREATE TABLE IF NOT EXISTS messages (
 	            REFERENCES users(user_id)
     );
 
+CREATE TABLE IF NOT EXISTS attachments (
+        attachment_id SERIAL PRIMARY KEY,
+        path TEXT UNIQUE NOT NULL,
+        mime_type mime_type NOT NULL,
+        user_id INTEGER NOT NULL,
+        channel attachment_channel NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        CONSTRAINT fk_user_id
+            FOREIGN KEY(user_id) 
+	            REFERENCES users(user_id)
+    );
+
 CREATE TABLE IF NOT EXISTS consults (
         consult_id SERIAL PRIMARY KEY,
         consultant_id INTEGER NOT NULL,
@@ -147,3 +164,8 @@ INSERT INTO consults (consult_id, consultant_id, client_id, consult_location, co
 VALUES 
 (1, 1, 1, 'Consult Location #1', '2023-09-11 19:10:25-06', '2023-09-11 19:30:25-06'),
 (2, 2, 2, 'Consult Location #2', '2023-09-11 16:00:25-06', '2023-09-11 16:50:11-06');
+
+INSERT INTO attachments (attachment_id, path, mime_type, user_id, channel, created_at, updated_at) 
+VALUES 
+(1, 'https://upload.wikimedia.org/wikipedia/commons/5/5d/Kuchnia_polska-p243b.png', 'image/png', 3, 'Upload', '2023-09-11 19:10:25-06', '2023-09-11 19:30:25-06'),
+(2, 'https://upload.wikimedia.org/wikipedia/commons/f/f5/Kuchnia_polska-p35b.png', 'image/png', 4, 'Email', '2023-09-11 16:00:25-06', '2023-09-11 16:50:11-06');

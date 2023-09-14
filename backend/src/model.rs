@@ -6,6 +6,20 @@ use uuid::Uuid;
 pub enum StateAbbr {
     AK, AL, NE, MN
 }
+#[derive(Debug, Deserialize, Serialize)]
+pub enum MimeType {
+    ApplicationPdf,
+    ApplicationJson,
+    ImageJpeg,
+    ImagePng,
+    ImageGif,
+    ImageSvg,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub enum AttachmentChannel {
+    Email, Upload,
+}
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 #[allow(non_snake_case)]
@@ -99,3 +113,18 @@ pub struct MessageModel {
     #[serde(rename = "updatedAt")]
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+#[allow(non_snake_case)]
+pub struct AttachmentModel {
+    pub attachment_id: i32,
+    pub path: String,
+    pub mime_type: MimeType,
+    pub user_id: i32,
+    pub channel: AttachmentChannel,
+    #[serde(rename = "createdAt")]
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+

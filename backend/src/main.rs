@@ -21,6 +21,8 @@ pub struct AppState {
 use scopes::user::user_scope;
 use scopes::message::message_scope;
 
+use crate::scopes::admin::admin_scope;
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     if std::env::var_os("RUST_LOG").is_none() {
@@ -70,6 +72,7 @@ async fn main() -> std::io::Result<()> {
                 token: "".to_string().clone(),
             }))
             .service(user_scope())
+            .service(admin_scope())
             .service(message_scope())
             .configure(handler::config)
             .wrap(cors)
