@@ -58,7 +58,7 @@ fn subscribe(state: &impl RedisState) -> thread::JoinHandle<()> {
     thread::spawn(move || {
         let mut conn = client.get_connection().unwrap();
 
-        conn.subscribe(&["boo"], |msg| {
+        conn.subscribe(&["updates"], |msg| {
             let ch = msg.get_channel_name();
             let payload: String = msg.get_payload().unwrap();
             match payload.as_ref() {
@@ -80,8 +80,8 @@ fn publish(state: &impl RedisState) {
 
         for x in 0..11 {
             thread::sleep(Duration::from_millis(500));
-            println!("Publish {} to boo.", x);
-            let _: () = conn.publish("boo", x).unwrap();
+            println!("Publish {} to updates.", x);
+            let _: () = conn.publish("updates", x).unwrap();
         }
     });
 }

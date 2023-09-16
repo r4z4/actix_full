@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use sqlx::{FromRow, Statement};
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -57,7 +57,8 @@ pub struct UserModel {
 pub struct ConsultantModel {
     pub consultant_id: i32,
     pub user_id: i32,
-    pub specialty: Option<String>,
+    pub img_path: String,
+    pub specialty: String,
     pub territory: Option<String>,
     #[serde(rename = "createdAt")]
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,

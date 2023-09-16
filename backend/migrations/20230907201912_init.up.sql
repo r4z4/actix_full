@@ -9,25 +9,25 @@ DROP TYPE IF EXISTS us_territories;
 DROP TYPE IF EXISTS attachment_channel;
 DROP TYPE IF EXISTS mime_type;
 
-CREATE TYPE consultant_specialty AS ENUM ('Insurance', 'Finance', 'Government');
+-- CREATE TYPE consultant_specialty AS ENUM ('Insurance', 'Finance', 'Government');
 
-CREATE TYPE mime_type AS ENUM ('application/pdf', 'application/json', 'video/mp4', 'image/jpeg', 'image/svg+xml', 'image/gif', 'image/png');
+-- CREATE TYPE mime_type AS ENUM ('application/pdf', 'application/json', 'video/mp4', 'image/jpeg', 'image/svg+xml', 'image/gif', 'image/png');
 
-CREATE TYPE attachment_channel AS ENUM ('Email', 'Upload');
+-- CREATE TYPE attachment_channel AS ENUM ('Email', 'Upload');
 
-CREATE TYPE consultant_territory AS ENUM ('Midwest', 'East', 'West', 'North', 'South');
+-- CREATE TYPE consultant_territory AS ENUM ('Midwest', 'East', 'West', 'North', 'South');
 
-CREATE TYPE state_abbr AS ENUM ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA',
-        'MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN',
-        'TX','UT','VT','VA','WA','WV','WI','WY','AS','GU','MP','PR','VI','DC');
+-- CREATE TYPE state_abbr AS ENUM ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA',
+        -- 'MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN',
+        -- 'TX','UT','VT','VA','WA','WV','WI','WY','AS','GU','MP','PR','VI','DC');
 
-CREATE TYPE state_name AS ENUM ('Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia',
-        'Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts',
-        'Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New_Hampshire','New_Jersey','New_Mexico',
-        'New_York','North_Carolina','North_Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode_Island','South_Carolina',
-        'South_Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West_Virginia','Wisconsin','Wyoming');
+-- CREATE TYPE state_name AS ENUM ('Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia',
+        -- 'Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts',
+        -- 'Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New_Hampshire','New_Jersey','New_Mexico',
+        -- 'New_York','North_Carolina','North_Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode_Island','South_Carolina',
+        -- 'South_Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West_Virginia','Wisconsin','Wyoming');
 
-CREATE TYPE us_territories AS ENUM ('American_Samoa', 'Guam', 'Northern_Mariana_Islands', 'Puerto_Rico', 'Virgin_Islands', 'District_of_Columbia');
+-- CREATE TYPE us_territories AS ENUM ('American_Samoa', 'Guam', 'Northern_Mariana_Islands', 'Puerto_Rico', 'Virgin_Islands', 'District_of_Columbia');
 
 CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
@@ -41,9 +41,12 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS consultants (
         consultant_id SERIAL PRIMARY KEY,
-        specialty consultant_specialty NOT NULL,
-        territory consultant_territory NULL,
+        -- specialty consultant_specialty NOT NULL,
+        -- territory consultant_territory NULL,
+        specialty TEXT NOT NULL,
+        territory TEXT NULL,
         user_id INTEGER NOT NULL,
+        img_path TEXT DEFAULT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         CONSTRAINT fk_user
@@ -57,7 +60,8 @@ CREATE TABLE IF NOT EXISTS clients (
         client_address_one TEXT NOT NULL,
         client_address_two TEXT NULL,
         client_city TEXT NOT NULL,
-        client_state state_abbr NOT NULL,
+        -- client_state state_abbr NOT NULL,
+        client_state CHAR(2) NOT NULL,
         client_zip VARCHAR (5) NOT NULL,
         client_home_phone TEXT NULL,
         client_mobile_phone TEXT NULL,
@@ -104,9 +108,11 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS attachments (
         attachment_id SERIAL PRIMARY KEY,
         path TEXT UNIQUE NOT NULL,
-        mime_type mime_type NOT NULL,
         user_id INTEGER NOT NULL,
-        channel attachment_channel NOT NULL,
+        -- mime_type mime_type NOT NULL,
+        -- channel attachment_channel NOT NULL,
+        mime_type TEXT NOT NULL,
+        channel TEXT NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         CONSTRAINT fk_user_id
@@ -152,10 +158,10 @@ VALUES
 (1, '1111 Client St.', 'Client City', 'NE', '68114', 5),
 (2, '2222 Client St.', 'Client Town', 'MN', '55057', 6);
 
-INSERT INTO consultants (consultant_id, specialty, user_id) 
+INSERT INTO consultants (consultant_id, specialty, user_id, img_path) 
 VALUES 
-(1, 'Finance', 7),
-(2, 'Insurance', 8);
+(1, 'Finance', 7, '/img/consultants/consultant_one.svg'),
+(2, 'Insurance', 8, '/img/consultants/consultant_two.svg');
 
 INSERT INTO engagements (rating, text, user_id) 
 VALUES 

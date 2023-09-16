@@ -313,6 +313,53 @@ pub async fn get_users_handler(
     // HttpResponse::NoContent().finish()
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseConsultantList {
+    pub consultants: Vec<ResponseConsultant>,
+}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseConsultant {
+    pub consultant_id: i32,
+    pub specialty: String,
+    pub img_path: Option<String>,
+}
+
+#[get("/consultants")]
+pub async fn get_consultants_handler(
+    opts: web::Query<FilterOptions>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let limit = opts.limit.unwrap_or(10);
+    let offset = (opts.page.unwrap_or(1) - 1) * limit;
+
+    let query_result = sqlx::query_as!(
+        ResponseConsultant,
+        "SELECT consultant_id, specialty, img_path FROM consultants ORDER by consultant_id LIMIT $1 OFFSET $2",
+        limit as i32,
+        offset as i32
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    if query_result.is_err() {
+        let message = "Error occurred while fetching all consultant records";
+        return HttpResponse::InternalServerError()
+            .json(json!({"status": "error","message": message}));
+    }
+
+    let consultants = query_result.unwrap();
+
+    let json_response = ResponseConsultantList { consultants: consultants };
+
+    // let json_response = serde_json::json!({
+    //     "status": "success",
+    //     "results": users.len(),
+    //     "engagements": users
+    // });
+    HttpResponse::Ok().json(json_response)
+    // HttpResponse::NoContent().finish()
+}
+
 pub fn config(conf: &mut web::ServiceConfig) {
     let scope = web::scope("/api")
         .service(health_checker_handler)
@@ -321,7 +368,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(get_engagement_handler)
         .service(edit_engagement_handler)
         .service(delete_engagement_handler)
-        .service(get_users_handler);
+        .service(get_users_handler)
+        .service(get_consultants_handler);
 
     conf.service(scope);
 }
