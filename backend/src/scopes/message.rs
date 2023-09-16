@@ -2,8 +2,7 @@ use actix_web::{web, HttpResponse, Scope};
 use serde::{Deserialize, Serialize};
 
 pub fn message_scope() -> Scope {
-    web::scope("/messages")
-        .route("/consult/{id}", web::get().to(get_messages))
+    web::scope("/messages").route("/consult/{id}", web::get().to(get_messages))
 }
 
 // #[derive(Serialize, Deserialize)]

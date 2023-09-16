@@ -4,7 +4,10 @@ use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum StateAbbr {
-    AK, AL, NE, MN
+    AK,
+    AL,
+    NE,
+    MN,
 }
 #[derive(Debug, Deserialize, Serialize)]
 pub enum MimeType {
@@ -18,7 +21,8 @@ pub enum MimeType {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum AttachmentChannel {
-    Email, Upload,
+    Email,
+    Upload,
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -127,4 +131,3 @@ pub struct AttachmentModel {
     #[serde(rename = "updatedAt")]
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
-

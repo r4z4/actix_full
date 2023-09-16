@@ -3,12 +3,12 @@ use crate::components::email_input::EmailInput;
 use crate::store::AuthStore;
 // use crate::components::units::text_input::TextInput;
 use gloo::console::log;
-use web_sys::HtmlInputElement;
-use yew_router::prelude::use_navigator;
-use yewdux::prelude::use_store;
 use std::ops::Deref;
 use wasm_bindgen::JsCast;
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
+use yew_router::prelude::use_navigator;
+use yewdux::prelude::use_store;
 
 #[derive(Default, Clone)]
 pub struct Data {
@@ -40,19 +40,19 @@ pub fn register_form(props: &Props) -> Html {
         let cloned_data_state = state.clone();
         let dispatch = dispatch.clone();
         Callback::from(move |event: Event| {
-          let username: String = event.target_unchecked_into::<HtmlInputElement>().value();
-          let username: Option<String> = if username.is_empty() {
-              None
-          } else {
-            Some(username)
-          };
-          let cloned_username = username.clone();
-          dispatch.reduce_mut(|store| store.username = username);
-          let mut data = cloned_data_state.deref().clone();  
-          data.username = cloned_username.unwrap();
-          cloned_data_state.set(data);
+            let username: String = event.target_unchecked_into::<HtmlInputElement>().value();
+            let username: Option<String> = if username.is_empty() {
+                None
+            } else {
+                Some(username)
+            };
+            let cloned_username = username.clone();
+            dispatch.reduce_mut(|store| store.username = username);
+            let mut data = cloned_data_state.deref().clone();
+            data.username = cloned_username.unwrap();
+            cloned_data_state.set(data);
         })
-      };
+    };
 
     let cloned_state: UseStateHandle<Data> = state.clone();
     let password_changed: Callback<String> = Callback::from(move |password| {

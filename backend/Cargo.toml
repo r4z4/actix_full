@@ -23,3 +23,4 @@ futures-util = "0.3.28"
 mime = "0.3.17"
 image = "0.24.7"
 tokio = { version = "1.32.0", features = ["fs"] }
+redis = "0.23.3"

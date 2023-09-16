@@ -16,3 +16,4 @@ DROP TYPE IF EXISTS state_abbr;
 DROP TYPE IF EXISTS state_name;
 DROP TYPE IF EXISTS us_territories;
 DROP TYPE IF EXISTS attachment_channel;
+DROP TYPE IF EXISTS mime_type;

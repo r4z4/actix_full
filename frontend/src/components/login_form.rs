@@ -12,8 +12,8 @@ use yewdux::prelude::*;
 use yewdux::store::*;
 
 use crate::components::button::Button;
-use crate::store::AuthStore;
 use crate::router::{switch, Route};
+use crate::store::AuthStore;
 
 #[derive(Default, Clone)]
 pub struct Data {
@@ -71,37 +71,37 @@ pub fn login_form(props: &Props) -> Html {
         let cloned_data_state = state.clone();
         let dispatch = dispatch.clone();
         Callback::from(move |event: Event| {
-          let username: String = event.target_unchecked_into::<HtmlInputElement>().value();
-          let username: Option<String> = if username.is_empty() {
-              None
-          } else {
-            Some(username)
-          };
-          let cloned_username = username.clone();
-          dispatch.reduce_mut(|store| store.username = username);
-          let mut data = cloned_data_state.deref().clone();  
-          data.username = cloned_username.unwrap();
-          cloned_data_state.set(data);
+            let username: String = event.target_unchecked_into::<HtmlInputElement>().value();
+            let username: Option<String> = if username.is_empty() {
+                None
+            } else {
+                Some(username)
+            };
+            let cloned_username = username.clone();
+            dispatch.reduce_mut(|store| store.username = username);
+            let mut data = cloned_data_state.deref().clone();
+            data.username = cloned_username.unwrap();
+            cloned_data_state.set(data);
         })
-      };
+    };
 
-      let onchange_password = {
+    let onchange_password = {
         let cloned_data_state = state.clone();
         let dispatch = dispatch.clone();
         Callback::from(move |event: Event| {
-          let password: String = event.target_unchecked_into::<HtmlInputElement>().value();
-          let password: Option<String> = if password.is_empty() {
-              None
-          } else {
-            Some(password)
-          };
-          let cloned_password = password.clone();
-          // dispatch.reduce_mut(|store| store.password = password);
-          let mut data = cloned_data_state.deref().clone();  
-          data.password = cloned_password.unwrap();
-          cloned_data_state.set(data);
+            let password: String = event.target_unchecked_into::<HtmlInputElement>().value();
+            let password: Option<String> = if password.is_empty() {
+                None
+            } else {
+                Some(password)
+            };
+            let cloned_password = password.clone();
+            // dispatch.reduce_mut(|store| store.password = password);
+            let mut data = cloned_data_state.deref().clone();
+            data.password = cloned_password.unwrap();
+            cloned_data_state.set(data);
         })
-      };
+    };
 
     // let form_onsubmit = real_login_form_submit.clone();
     let cloned_state = state.clone();

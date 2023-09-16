@@ -2,9 +2,9 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use yewdux::prelude::use_store;
 
-use crate::store::AuthStore;
 use crate::components::nav::Nav;
 use crate::router::{switch, Route};
+use crate::store::AuthStore;
 
 #[function_component(Home)]
 pub fn home() -> Html {
