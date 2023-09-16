@@ -29,6 +29,7 @@ pub struct AuthUser {
 #[derive(Serialize, Deserialize)]
 pub struct CreateUserBody {
     username: String,
+    email: String,
     password: String,
 }
 
@@ -36,7 +37,7 @@ pub struct CreateUserBody {
 async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> impl Responder {
     let user: CreateUserBody = body.into_inner();
 
-    let hash_secret = std::env::var("HASH_SECRET").expect("Hash Secret must be set!");
+    let hash_secret = std::env::var("HASH_SECRET").unwrap_or(env!("HASH_SECRET").to_owned());
     let mut hasher = Hasher::default();
     let hash = hasher
         .with_password(user.password)
@@ -45,11 +46,12 @@ async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> imp
         .unwrap();
 
     match sqlx::query_as::<_, UserNoPassword>(
-        "INSERT INTO users (username, password)
-        VALUES ($1, $2)
+        "INSERT INTO users (user_id, username, email, password)
+        VALUES (DEFAULT, $1, $2, $3)
         RETURNING user_id, username"
     )
     .bind(user.username)
+    .bind(user.email)
     .bind(hash)
     .fetch_one(&state.db)
     .await
@@ -81,7 +83,7 @@ async fn basic_auth(state: Data<AppState>, credentials: BasicAuth) -> impl Respo
             .await
             {
                 Ok(user) => {
-                    let hash_secret = std::env::var("HASH_SECRET").expect("HASH_SECRET must be set");
+                    let hash_secret = std::env::var("HASH_SECRET").unwrap_or(env!("HASH_SECRET").to_owned());
                     // Build the verifier
                     let mut verifier = Verifier::default();
                     let is_valid = verifier

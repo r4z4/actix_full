@@ -138,19 +138,19 @@ CREATE TABLE IF NOT EXISTS consults (
 	            REFERENCES consultants(consultant_id)
     );
 
-INSERT INTO users (user_id, username, email, password) 
+INSERT INTO users (username, email, password) 
 VALUES 
-(1, 'root', 'root@consultancy.com', 'hashthissoon'),
-(2, 'admin', 'admin@consultancy.com', 'hashthissoon'),
+('root', 'root@consultancy.com', 'hashthissoon'),
+('admin', 'admin@consultancy.com', 'hashthissoon'),
 -- Users
-(3, 'jim_jam', 'jim@jam.com', 'hashthissoon'),
-(4, 'aaron', 'aaron@aaron.com', 'hashthissoon'),
+('jim_jam', 'jim@jam.com', 'hashthissoon'),
+('aaron', 'aaron@aaron.com', 'hashthissoon'),
 -- Clients
-(5, 'first_client', 'client_one@client.com', 'hashthissoon'),
-(6, 'second_client', 'client_two@client.com', 'hashthissoon'),
+('first_client', 'client_one@client.com', 'hashthissoon'),
+('second_client', 'client_two@client.com', 'hashthissoon'),
 -- Consultants
-(7, 'first_consultant', 'consultant_one@consultancy.com', 'hashthissoon'),
-(8, 'second_consultant', 'consultant_two@consultancy.com', 'hashthissoon');
+('first_consultant', 'consultant_one@consultancy.com', 'hashthissoon'),
+('second_consultant', 'consultant_two@consultancy.com', 'hashthissoon');
 
 
 INSERT INTO clients (client_id, client_address_one, client_city, client_state, client_zip, user_id) 

@@ -1,11 +1,12 @@
 mod extractors;
+mod config;
 mod handler;
 mod model;
 mod schema;
 mod scopes;
 mod tests;
 pub mod crypto;
-
+use crate::config::get_config;
 use crate::crypto::{basic_auth, register_user};
 use crate::scopes::user::Claims;
 use actix_web_httpauth::middleware::HttpAuthentication;
@@ -20,12 +21,9 @@ use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
 use actix_web_httpauth::extractors::{AuthenticationError, bearer};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
-use hmac::Hmac;
-use hmac::digest::KeyInit;
 use redis::{Client, Commands, ControlFlow, PubSubCommands};
-use sha2::Sha256;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc};
 use std::time::Duration;
 use std::{env, thread};
 
@@ -146,6 +144,7 @@ async fn main() -> std::io::Result<()> {
         std::env::set_var("RUST_LOG", "actix_web=info");
     }
     env_logger::init();
+    get_config();
     let database_url = env::var("DATABASE_URL").unwrap_or(env!("DATABASE_URL").to_owned());
     // let database_url = env!("DATABASE_URL");
     let secret = "secret".to_string();
