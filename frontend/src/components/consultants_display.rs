@@ -37,6 +37,11 @@ fn vec_to_html(list: &ResponseConsultantList) -> Vec<Html> {
                 <li>{consultant.consultant_id.clone()}</li>
                 <li>{consultant.specialty.clone()}</li>
                 <li>{consultant.img_path.clone()}</li>
+                <li>
+                    <div>
+                        <img src={consultant.img_path.clone()} width={50} height={50} />
+                    </div>
+                </li>
             </ul>}
         })
         .collect()
