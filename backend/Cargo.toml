@@ -24,3 +24,7 @@ mime = "0.3.17"
 image = "0.24.7"
 tokio = { version = "1.32.0", features = ["fs"] }
 redis = "0.23.3"
+argonautica = "0.2.0"
+actix-web-httpauth = "0.8.1"
+hmac = "0.12.1"
+sha2 = "0.10.7"

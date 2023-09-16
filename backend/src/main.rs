@@ -4,27 +4,69 @@ mod model;
 mod schema;
 mod scopes;
 mod tests;
+pub mod crypto;
 
+use crate::crypto::{basic_auth, register_user};
+use crate::scopes::user::Claims;
+use actix_web_httpauth::middleware::HttpAuthentication;
+use jsonwebtoken::{
+    decode, errors::Error as JwtError, Algorithm, DecodingKey, TokenData, Validation,
+};
+use serde::{Deserialize, Serialize};
 use actix_cors::Cors;
+use actix_web::{Error, HttpMessage};
+use actix_web::dev::ServiceRequest;
 use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
+use actix_web_httpauth::extractors::{AuthenticationError, bearer};
+use actix_web_httpauth::extractors::bearer::BearerAuth;
+use hmac::Hmac;
+use hmac::digest::KeyInit;
 use redis::{Client, Commands, ControlFlow, PubSubCommands};
+use sha2::Sha256;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use std::{env, thread};
+
+use scopes::message::message_scope;
+use scopes::user::user_scope;
+use scopes::admin::admin_scope;
 
 pub struct AppState {
     db: Pool<Postgres>,
     secret: String,
     token: String,
 }
+#[derive(Serialize, Deserialize)]
+pub struct TokenClaims {
+    id: i32,
+}
 
-use scopes::message::message_scope;
-use scopes::user::user_scope;
+async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+    // let jwt_secret: String = std::env::var("JWT_SCRET").expect("JWT SCRET must be set");
+    // let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_secret.as_bytes()).unwrap();
+    let token_string = credentials.token();
 
-use crate::scopes::admin::admin_scope;
+    let app_data: &AppState = req.app_data::<web::Data<AppState>>().unwrap();
+    let claims: Result<TokenData<Claims>, JwtError> = decode::<Claims>(
+        &token_string,
+        &DecodingKey::from_secret(app_data.secret.as_str().as_ref()),
+        &Validation::new(Algorithm::HS256),
+    );
 
+    match claims {
+        Ok(value) => {
+            req.extensions_mut().insert(value);
+            Ok(req)
+        }
+        Err(_) => {
+            let config = req.app_data::<bearer::Config>().cloned().unwrap_or_default().scope("");
+
+            Err((AuthenticationError::from(config).into(), req))
+        }
+    }
+}
 trait RedisState {
     fn client(&self) -> &Arc<Client>;
 }
@@ -164,15 +206,25 @@ async fn main() -> std::io::Result<()> {
                 header::ACCEPT,
             ])
             .supports_credentials();
+        let bearer_middleware = HttpAuthentication::bearer(validator);
         App::new()
             .app_data(web::Data::new(AppState {
                 db: pool.clone(),
                 secret: secret.clone(),
                 token: "".to_string().clone(),
             }))
+            .service(basic_auth)
+            .service(register_user)
+            .service(
+                web::scope("")
+                .wrap(bearer_middleware)
+                // Add effected routed
+                .service(message_scope())
+            )
             .service(user_scope())
             .service(admin_scope())
-            .service(message_scope())
+            // .service(message_scope())
+
             .configure(handler::config)
             .wrap(cors)
             .wrap(Logger::default())
