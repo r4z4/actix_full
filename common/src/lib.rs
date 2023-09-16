@@ -5,8 +5,6 @@ pub struct Consult {
     pub consult_id: uuid::Uuid,
     pub client_id: i32,
     pub consultant_id: i32,
-    pub specialty: String,
-    pub territory: String,
     pub user_id: i32,
     // String in common?
     pub created_at: String,
@@ -51,6 +49,18 @@ pub struct EngagementListResponse {
     pub status: String,
     pub results: i32,
     pub engagements: Vec<Engagement>,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
+pub struct Consultant {
+    pub consultant_id: uuid::Uuid,
+    pub img_path: i32,
+    pub specialty: String,
+    pub territory: String,
+    pub user_id: i32,
+    // String in common?
+    pub created_at: String,
+    pub updated_at: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

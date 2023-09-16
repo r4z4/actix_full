@@ -1,6 +1,7 @@
 pub mod alert;
 pub mod button;
 pub mod consults_display;
+pub mod consultants_display;
 pub mod email_input;
 pub mod engagement_form;
 pub mod engagement_item;

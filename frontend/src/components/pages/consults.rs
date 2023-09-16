@@ -1,9 +1,7 @@
 use gloo::console::log;
 use yew::prelude::*;
-use yew_router::prelude::*;
-
 use crate::components::consults_display::ConsultsDisplay;
-use crate::router::Route;
+
 
 #[function_component(Consults)]
 pub fn consults() -> Html {
@@ -23,7 +21,7 @@ pub fn consults() -> Html {
                 </div>
             </details>
             <div id={"provider_display"}>
-                <ConsultsDisplay title={"Consults 👩"} on_load={data_display_loaded} />
+                <ConsultsDisplay title={"Consults"} on_load={data_display_loaded} />
             </div>
         </div>
     }

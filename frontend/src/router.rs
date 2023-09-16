@@ -1,5 +1,6 @@
 use crate::components::pages::consults::Consults;
 use crate::components::pages::engagements::Engagements;
+use crate::components::pages::consultants::Consultants;
 use crate::components::pages::home::Home;
 use crate::components::pages::login::Login;
 use crate::components::pages::register::Register;
@@ -18,6 +19,8 @@ pub enum Route {
     Consults,
     #[at("/engagements")]
     Engagements,
+    #[at("/consultants")]
+    Consultants,
 }
 
 pub fn switch(route: Route) -> Html {
@@ -27,5 +30,6 @@ pub fn switch(route: Route) -> Html {
         Route::Register => html! { <Register /> },
         Route::Consults => html! { <Consults /> },
         Route::Engagements => html! { <Engagements /> },
+        Route::Consultants => html! { <Consultants /> },
     }
 }
