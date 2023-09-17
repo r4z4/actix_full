@@ -113,6 +113,32 @@ fn subscribe(state: &impl RedisState) -> thread::JoinHandle<()> {
     })
 }
 
+pub fn set_str(
+    con: &mut redis::Connection,
+    key: &str,
+    value: &str,
+    ttl_seconds: i32,
+) -> Result<(), String> {
+    con.set::<&str, &str, String>(key, value).map_err(|e| e.to_string());
+    if ttl_seconds > 0 {
+        con.expire::<&str, String>(key, ttl_seconds.try_into().unwrap()).map_err(|e| e.to_string());
+    }
+    Ok(())
+}
+
+pub fn set_int(
+    con: &mut redis::Connection,
+    key: &str,
+    value: i32,
+    ttl_seconds: i32,
+) -> Result<(), String> {
+    con.set::<&str, i32, String>(key, value).map_err(|e| e.to_string());
+    if ttl_seconds > 0 {
+        con.expire::<&str, String>(key, ttl_seconds.try_into().unwrap()).map_err(|e| e.to_string());
+    }
+    Ok(())
+}
+
 fn publish(state: &impl RedisState) {
     let client = Arc::clone(state.client());
     thread::spawn(move || {
@@ -177,7 +203,8 @@ async fn main() -> std::io::Result<()> {
     // let answer: i32 = con.get("answer").unwrap();
     // println!("Answer: {}", answer);
     let mut con = redis_connect();
-    let _: () = con.set("answer", 44).unwrap();
+    set_int(&mut con, "answer", 44, 60);
+    // let _: () = con.set("answer", 44).unwrap();
     let answer: i32 = con.get("answer").unwrap();
     println!("Answer: {}", answer);
 
