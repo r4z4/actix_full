@@ -13,3 +13,5 @@ pub mod pages;
 pub mod rating;
 pub mod register_form;
 pub mod logout;
+pub mod refresh_token;
+pub mod spinner;

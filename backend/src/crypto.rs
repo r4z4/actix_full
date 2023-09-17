@@ -1,7 +1,8 @@
-use std::{io::Error, sync::Arc};
+use std::{io::Error, sync::Arc, ops::Add};
 use actix_web::{http::StatusCode, web::{Json, Data}, Responder, post, HttpResponse, get};
 use actix_web_httpauth::extractors::basic::BasicAuth;
 use argonautica::{Hasher, Verifier};
+use chrono::{Utc, NaiveDateTime, Duration};
 use common::ApiLoginResponse;
 use hmac::{Hmac, digest::KeyInit};
 use jsonwebtoken::{EncodingKey, Header, encode};
@@ -94,9 +95,10 @@ async fn basic_auth(state: Data<AppState>, credentials: Json<LoginUser>) -> impl
                 .unwrap();
 
             if is_valid {
+                let exp: usize = (Utc::now() + Duration::hours(2)).timestamp() as usize;
                 let claims = Claims { 
                     user_id: user.user_id,
-                    exp: 1725148800,
+                    exp: exp,
                 };
                 let token: String = encode(
                     &Header::default(),
