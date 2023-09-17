@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use sqlx::FromRow;
 
-use crate::{AppState, TokenClaims};
+use crate::{AppState, TokenClaims, extractors::auth_token::LoginUser};
 
 pub struct CryptoService {
     pub key: Arc<String>
@@ -36,7 +36,8 @@ pub struct CreateUserBody {
 #[post("/register")]
 async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> impl Responder {
     let user: CreateUserBody = body.into_inner();
-
+    println!("Sanity");
+    dbg!("check");
     let hash_secret = std::env::var("HASH_SECRET").unwrap_or(env!("HASH_SECRET").to_owned());
     let mut hasher = Hasher::default();
     let hash = hasher
@@ -61,55 +62,50 @@ async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> imp
     }
 }
 
-#[get("/auth")]
-async fn basic_auth(state: Data<AppState>, credentials: BasicAuth) -> impl Responder {
+#[post("/auth")]
+async fn basic_auth(state: Data<AppState>, credentials: LoginUser) -> impl Responder {
     // let jwt_secret: Hmac<Sha256> = Hmac::new_from_slice(
     //     std::env::var("JWT_SECRET")
     //         .expect("JWT_SECRET must be set")
     //         .as_bytes()
     // ).unwrap();
+    println!("Ugh");
     let secret = std::env::var("JWT_SECRET").unwrap_or(env!("JWT_SECRET").to_owned());
-    let username = credentials.user_id();
-    let password = credentials.password();
+    let username = credentials.username;
+    let password = credentials.password;
 
-    match password {
-        None => HttpResponse::Unauthorized().json("Must provide username and password"),
-        Some(pass) => {
-            match sqlx::query_as::<_, AuthUser>(
-                "SELECT user_id, username, password FROM users WHERE username = $1",
-            )
-            .bind(username.to_string())
-            .fetch_one(&state.db)
-            .await
-            {
-                Ok(user) => {
-                    let hash_secret = std::env::var("HASH_SECRET").unwrap_or(env!("HASH_SECRET").to_owned());
-                    // Build the verifier
-                    let mut verifier = Verifier::default();
-                    let is_valid = verifier
-                        .with_hash(user.password)
-                        .with_password(pass)
-                        .with_secret_key(hash_secret)
-                        .verify()
-                        .unwrap();
+    match sqlx::query_as::<_, AuthUser>(
+        "SELECT user_id, username, password FROM users WHERE username = $1",
+    )
+    .bind(username.to_string())
+    .fetch_one(&state.db)
+    .await
+    {
+        Ok(user) => {
+            let hash_secret = std::env::var("HASH_SECRET").unwrap_or(env!("HASH_SECRET").to_owned());
+            // Build the verifier
+            let mut verifier = Verifier::default();
+            let is_valid = verifier
+                .with_hash(user.password)
+                .with_password(password)
+                .with_secret_key(hash_secret)
+                .verify()
+                .unwrap();
 
-                    if is_valid {
-                        let claims = TokenClaims { id: user.user_id };
-                        let token: String = encode(
-                            &Header::default(),
-                            &claims,
-                            &EncodingKey::from_secret(secret.as_str().as_ref()),
-                        )
-                        .unwrap();
-                        
-                        HttpResponse::Ok().json(token)
-                    } else {
-                        HttpResponse::Unauthorized().json("Incorrect username or password")
-                    }
-                }
-                Err(err) => HttpResponse::InternalServerError().json(format!("{:?}", err)),
+            if is_valid {
+                let claims = TokenClaims { id: user.user_id };
+                let token: String = encode(
+                    &Header::default(),
+                    &claims,
+                    &EncodingKey::from_secret(secret.as_str().as_ref()),
+                )
+                .unwrap();
+                
+                HttpResponse::Ok().json(token)
+            } else {
+                HttpResponse::Unauthorized().json("Incorrect username or password")
             }
         }
+        Err(err) => HttpResponse::InternalServerError().json(format!("{:?}", err)),
     }
 }
-

@@ -1,4 +1,5 @@
 use gloo::console::log;
+use reqwasm::Error;
 use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -33,22 +34,26 @@ pub struct ApiLoginResponse {
     pub token: String,
 }
 
-pub async fn login_user(username: String, password: String) -> ApiLoginResponse {
+pub async fn login_user(username: String, password: String) -> Result<ApiLoginResponse, Error> {
     let body = json!({
         "username": username,
         "password": password
     });
-    let response = Request::post("http://localhost:3000/users/login")
+    let response = Request::post("http://localhost:8000/auth")
         .header("Content-Type", "application/json")
         .body(body.to_string())
         .send()
         .await
         .unwrap()
         .json::<ApiLoginResponse>()
-        .await
-        .unwrap();
+        .await;
 
-    response
+        response
+
+    // match response {
+    //     Ok(response) => response.unwrap(),
+    //     Err(err) => Error::to_string(&self);
+    // }
 }
 
 // const real_login_form_submit = Callback::from(|event: SubmitEvent| {
@@ -63,13 +68,13 @@ pub async fn login_user(username: String, password: String) -> ApiLoginResponse 
 
 #[function_component(LoginForm)]
 pub fn login_form(props: &Props) -> Html {
-    let (store, dispatch) = use_store::<AuthStore>();
+    let (auth_store, auth_dispatch) = use_store::<AuthStore>();
     let state: UseStateHandle<Data> = use_state(|| Data::default());
     let navigator = use_navigator().unwrap();
 
     let onchange_username = {
         let cloned_data_state = state.clone();
-        let dispatch = dispatch.clone();
+        let dispatch = auth_dispatch.clone();
         Callback::from(move |event: Event| {
             let username: String = event.target_unchecked_into::<HtmlInputElement>().value();
             let username: Option<String> = if username.is_empty() {
@@ -87,7 +92,7 @@ pub fn login_form(props: &Props) -> Html {
 
     let onchange_password = {
         let cloned_data_state = state.clone();
-        let dispatch = dispatch.clone();
+        let dispatch = auth_dispatch.clone();
         Callback::from(move |event: Event| {
             let password: String = event.target_unchecked_into::<HtmlInputElement>().value();
             let password: Option<String> = if password.is_empty() {
@@ -107,17 +112,23 @@ pub fn login_form(props: &Props) -> Html {
     let cloned_state = state.clone();
 
     let onsubmit: Callback<SubmitEvent> = Callback::from(move |event: SubmitEvent| {
-        let dispatch = dispatch.clone();
+        let dispatch = auth_dispatch.clone();
         let navigator = navigator.clone();
         event.prevent_default();
         let username = state.username.clone();
         let password = state.password.clone();
         wasm_bindgen_futures::spawn_local(async move {
             let response = login_user(username, password).await;
+            match response {
+                Ok(response) => {
+                    dispatch.reduce_mut(|store| store.token = Some(response.token));
+                    navigator.push(&Route::Home);
+                },
+                Err(err) => navigator.push(&Route::Home),
+            }
             // Use this
             // log!(response.token)
-            dispatch.reduce_mut(|store| store.token = Some(response.token));
-            navigator.push(&Route::Home);
+
         })
     });
 

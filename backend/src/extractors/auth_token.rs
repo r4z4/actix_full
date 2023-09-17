@@ -17,6 +17,11 @@ pub struct AuthToken {
     pub id: usize,
 }
 
+pub struct LoginUser {
+    pub username: String,
+    pub password: String,
+}
+
 impl FromRequest for AuthToken {
     type Error = ActixWebError;
     type Future = Ready<Result<Self, Self::Error>>;
@@ -47,7 +52,22 @@ impl FromRequest for AuthToken {
             Ok(token) => ready(Ok(AuthToken {
                 id: token.claims.id,
             })),
-            Err(_e) => ready(Err(ErrorUnauthorized("Unauthorized"))),
+            Err(_e) => ready(Err(ErrorUnauthorized("Unauthorized :/"))),
         }
     }
+}
+
+impl FromRequest for LoginUser {
+    type Error = ActixWebError;
+    type Future = Ready<Result<Self, Self::Error>>;
+
+    fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
+        dbg!(req);
+        // Get auth token from auth header
+
+            ready(Ok(LoginUser {
+                username: "jimbo".to_owned(),
+                password: "password".to_owned(),
+            }))
+   }
 }
