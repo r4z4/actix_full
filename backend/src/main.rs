@@ -8,7 +8,6 @@ mod tests;
 pub mod crypto;
 use crate::config::get_config;
 use crate::crypto::{basic_auth, register_user};
-use crate::scopes::user::Claims;
 use actix_web_httpauth::middleware::HttpAuthentication;
 use jsonwebtoken::{
     decode, errors::Error as JwtError, Algorithm, DecodingKey, TokenData, Validation,
@@ -36,9 +35,10 @@ pub struct AppState {
     secret: String,
     token: String,
 }
-#[derive(Serialize, Deserialize)]
-pub struct TokenClaims {
-    id: i32,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub user_id: i32,
+    pub exp: usize,
 }
 
 async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, (Error, ServiceRequest)> {
@@ -119,9 +119,9 @@ pub fn set_str(
     value: &str,
     ttl_seconds: i32,
 ) -> Result<(), String> {
-    con.set::<&str, &str, String>(key, value).map_err(|e| e.to_string());
+    let _ = con.set::<&str, &str, String>(key, value).map_err(|e| e.to_string());
     if ttl_seconds > 0 {
-        con.expire::<&str, String>(key, ttl_seconds.try_into().unwrap()).map_err(|e| e.to_string());
+        let _ = con.expire::<&str, String>(key, ttl_seconds.try_into().unwrap()).map_err(|e| e.to_string());
     }
     Ok(())
 }
@@ -132,9 +132,9 @@ pub fn set_int(
     value: i32,
     ttl_seconds: i32,
 ) -> Result<(), String> {
-    con.set::<&str, i32, String>(key, value).map_err(|e| e.to_string());
+    let _ = con.set::<&str, i32, String>(key, value).map_err(|e| e.to_string());
     if ttl_seconds > 0 {
-        con.expire::<&str, String>(key, ttl_seconds.try_into().unwrap()).map_err(|e| e.to_string());
+        let _ = con.expire::<&str, String>(key, ttl_seconds.try_into().unwrap()).map_err(|e| e.to_string());
     }
     Ok(())
 }
@@ -173,7 +173,7 @@ async fn main() -> std::io::Result<()> {
     get_config();
     let database_url = env::var("DATABASE_URL").unwrap_or(env!("DATABASE_URL").to_owned());
     // let database_url = env!("DATABASE_URL");
-    let secret = "secret".to_string();
+    let secret = std::env::var("JWT_SECRET").unwrap_or(env!("JWT_SECRET").to_owned());
     let pool = match PgPoolOptions::new()
         .max_connections(10)
         .connect(&database_url)
@@ -203,7 +203,7 @@ async fn main() -> std::io::Result<()> {
     // let answer: i32 = con.get("answer").unwrap();
     // println!("Answer: {}", answer);
     let mut con = redis_connect();
-    set_int(&mut con, "answer", 44, 60);
+    let _ = set_int(&mut con, "answer", 44, 60);
     // let _: () = con.set("answer", 44).unwrap();
     let answer: i32 = con.get("answer").unwrap();
     println!("Answer: {}", answer);
@@ -241,12 +241,12 @@ async fn main() -> std::io::Result<()> {
             }))
             .service(basic_auth)
             .service(register_user)
-            .service(
-                web::scope("")
-                .wrap(bearer_middleware)
-                // Add effected routed
-                .service(message_scope())
-            )
+            // .service(
+            //     web::scope("")
+            //     .wrap(bearer_middleware)
+            //     // Add effected routed
+            //     .service(message_scope())
+            // )
             .service(user_scope())
             .service(admin_scope())
             // .service(message_scope())

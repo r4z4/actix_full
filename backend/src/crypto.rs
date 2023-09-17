@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use sqlx::FromRow;
 
-use crate::{AppState, TokenClaims, extractors::auth_token::LoginUser};
+use crate::{AppState, Claims, extractors::jwt_auth::LoginUser, redis_connect, set_str};
 
 pub struct CryptoService {
     pub key: Arc<String>
@@ -94,14 +94,18 @@ async fn basic_auth(state: Data<AppState>, credentials: Json<LoginUser>) -> impl
                 .unwrap();
 
             if is_valid {
-                let claims = TokenClaims { id: user.user_id };
+                let claims = Claims { 
+                    user_id: user.user_id,
+                    exp: 1725148800,
+                };
                 let token: String = encode(
                     &Header::default(),
                     &claims,
                     &EncodingKey::from_secret(secret.as_str().as_ref()),
                 )
                 .unwrap();
-                
+                let mut con = redis_connect();
+                let _ = set_str(&mut con, user.user_id.to_string().as_ref(), &token, 60);
                 HttpResponse::Ok().json(ApiLoginResponse {
                     user_id: user.user_id,
                     username: user.username,

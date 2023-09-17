@@ -1,5 +1,6 @@
-use crate::scopes::user::Claims;
+use crate::{redis_connect, Claims};
 use crate::AppState;
+use actix_web::HttpMessage;
 use actix_web::{
     dev::Payload,
     error::ErrorUnauthorized,
@@ -13,8 +14,8 @@ use serde::{Deserialize, Serialize};
 use std::future::{ready, Ready};
 
 #[derive(Serialize, Deserialize)]
-pub struct AuthToken {
-    pub id: usize,
+pub struct JwtAuth {
+    pub user_id: i32,
 }
 #[derive(Serialize, Deserialize)]
 pub struct LoginUser {
@@ -22,7 +23,7 @@ pub struct LoginUser {
     pub password: String,
 }
 
-impl FromRequest for AuthToken {
+impl FromRequest for JwtAuth {
     type Error = ActixWebError;
     type Future = Ready<Result<Self, Self::Error>>;
 
@@ -31,7 +32,10 @@ impl FromRequest for AuthToken {
         // Get auth token from auth header
         let auth_header: Option<HeaderValue> =
             req.headers().get(http::header::AUTHORIZATION).cloned();
+        dbg!(&auth_header);
         let auth_token: String = auth_header.unwrap().to_str().unwrap_or("").to_string();
+        // let mut con = redis_connect();
+        // let answer: i32 = con.get("answer").unwrap();
         if auth_token.is_empty() {
             return ready(Err(ErrorUnauthorized("Invalid auth token")));
         }
@@ -49,9 +53,12 @@ impl FromRequest for AuthToken {
         dbg!(&decode);
         // Return self (auth token)
         match decode {
-            Ok(token) => ready(Ok(AuthToken {
-                id: token.claims.id,
-            })),
+            Ok(token) => {
+                req.extensions_mut()
+                    .insert::<i32>(token.claims.user_id.to_owned());
+        
+                ready(Ok(JwtAuth { user_id: token.claims.user_id }))
+            },
             Err(_e) => ready(Err(ErrorUnauthorized("Unauthorized :/"))),
         }
     }
@@ -63,8 +70,6 @@ impl FromRequest for AuthToken {
 
 //     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
 //         dbg!(req);
-//         let username_input: String = req.match_info().query("username").parse().unwrap();
-//         let password_input: String = req.match_info().query("password").parse().unwrap();
 //         dbg!(username_input.clone());
 //         // Get auth token from auth header
 

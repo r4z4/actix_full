@@ -6,13 +6,13 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::extractors::auth_token::AuthToken;
+use crate::{extractors::jwt_auth::JwtAuth, Claims};
 
 pub fn user_scope() -> Scope {
     web::scope("/user")
         .route("/encode-token/{id}", web::get().to(encode_token))
         .route("/decode-token", web::post().to(decode_token))
-        .route("/protected", web::get().to(protected))
+        //.route("/protected", web::get().to(protected))
 }
 
 #[derive(Serialize, Deserialize)]
@@ -26,16 +26,10 @@ struct EncodeResponse {
     token: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
-    pub id: usize,
-    pub exp: usize,
-}
-
-async fn encode_token(path: web::Path<usize>, secret: String) -> HttpResponse {
-    let id: usize = path.into_inner();
+async fn encode_token(path: web::Path<i32>, secret: String) -> HttpResponse {
+    let user_id: i32 = path.into_inner();
     let exp: usize = (Utc::now() + Duration::days(365)).timestamp() as usize;
-    let claims: Claims = Claims { id, exp };
+    let claims: Claims = Claims { user_id, exp };
     let token: String = encode(
         &Header::default(),
         &claims,
@@ -56,7 +50,7 @@ struct DecodeBody {
 #[derive(Serialize, Deserialize)]
 struct DecodeResponse {
     message: String,
-    id: usize,
+    id: i32,
 }
 
 async fn decode_token(body: web::Json<DecodeBody>, secret: String) -> HttpResponse {
@@ -69,7 +63,7 @@ async fn decode_token(body: web::Json<DecodeBody>, secret: String) -> HttpRespon
     match decoded {
         Ok(token) => HttpResponse::Ok().json(DecodeResponse {
             message: "Authorized".to_string(),
-            id: token.claims.id,
+            id: token.claims.user_id,
         }),
         Err(e) => HttpResponse::BadRequest().json(Response {
             message: e.to_string(),
@@ -77,9 +71,9 @@ async fn decode_token(body: web::Json<DecodeBody>, secret: String) -> HttpRespon
     }
 }
 
-async fn protected(auth_token: AuthToken) -> HttpResponse {
-    println!("{}", auth_token.id);
-    HttpResponse::Ok().json(Response {
-        message: "protected".to_owned(),
-    })
-}
+// async fn protected(auth_token: AuthToken) -> HttpResponse {
+//     println!("{}", auth_token.id);
+//     HttpResponse::Ok().json(Response {
+//         message: "protected".to_owned(),
+//     })
+// }

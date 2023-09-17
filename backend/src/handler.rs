@@ -1,12 +1,12 @@
 use crate::{
     model::EngagementModel,
     schema::{CreateEngagementSchema, FilterOptions, UpdateEngagementSchema},
-    AppState,
+    AppState, extractors::jwt_auth,
 };
 use actix_multipart::Multipart;
 use actix_web::{
     delete, get, http::header::CONTENT_LENGTH, patch, post, web, HttpRequest, HttpResponse,
-    Responder,
+    Responder, HttpMessage,
 };
 use chrono::prelude::*;
 use futures_util::TryStreamExt;
@@ -279,9 +279,14 @@ pub struct ResponseUser {
 
 #[get("/users")]
 pub async fn get_users_handler(
+    req: HttpRequest,
     opts: web::Query<FilterOptions>,
     data: web::Data<AppState>,
+    _: jwt_auth::JwtAuth,
 ) -> impl Responder {
+    let ext = req.extensions();
+    let user_id = ext.get::<i32>().unwrap();
+    dbg!(user_id);
     let limit = opts.limit.unwrap_or(10);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 

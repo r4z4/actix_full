@@ -1,1 +1,1 @@
-pub mod auth_token;
+pub mod jwt_auth;
