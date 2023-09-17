@@ -29,3 +29,4 @@ actix-web-httpauth = "0.8.1"
 hmac = "0.12.1"
 sha2 = "0.10.7"
 config = "0.13.3"
+actix-session = { version = "0.8.0", features = ["redis-rs-tls-session"] }

@@ -64,7 +64,7 @@ async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> imp
 }
 
 #[post("/auth")]
-async fn basic_auth(state: Data<AppState>, credentials: LoginUser) -> impl Responder {
+async fn basic_auth(state: Data<AppState>, credentials: Json<LoginUser>) -> impl Responder {
     // let jwt_secret: Hmac<Sha256> = Hmac::new_from_slice(
     //     std::env::var("JWT_SECRET")
     //         .expect("JWT_SECRET must be set")
@@ -72,8 +72,8 @@ async fn basic_auth(state: Data<AppState>, credentials: LoginUser) -> impl Respo
     // ).unwrap();
     println!("Ugh");
     let secret = std::env::var("JWT_SECRET").unwrap_or(env!("JWT_SECRET").to_owned());
-    let username = credentials.username;
-    let password = credentials.password;
+    let username = &credentials.username;
+    let password = &credentials.password;
 
     match sqlx::query_as::<_, AuthUser>(
         "SELECT user_id, username, password FROM users WHERE username = $1",

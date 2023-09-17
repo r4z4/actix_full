@@ -12,3 +12,4 @@ pub mod nav;
 pub mod pages;
 pub mod rating;
 pub mod register_form;
+pub mod logout;

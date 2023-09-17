@@ -16,7 +16,7 @@ use std::future::{ready, Ready};
 pub struct AuthToken {
     pub id: usize,
 }
-
+#[derive(Serialize, Deserialize)]
 pub struct LoginUser {
     pub username: String,
     pub password: String,
@@ -57,17 +57,20 @@ impl FromRequest for AuthToken {
     }
 }
 
-impl FromRequest for LoginUser {
-    type Error = ActixWebError;
-    type Future = Ready<Result<Self, Self::Error>>;
+// impl FromRequest for LoginUser {
+//     type Error = ActixWebError;
+//     type Future = Ready<Result<Self, Self::Error>>;
 
-    fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
-        dbg!(req);
-        // Get auth token from auth header
+//     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
+//         dbg!(req);
+//         let username_input: String = req.match_info().query("username").parse().unwrap();
+//         let password_input: String = req.match_info().query("password").parse().unwrap();
+//         dbg!(username_input.clone());
+//         // Get auth token from auth header
 
-            ready(Ok(LoginUser {
-                username: "jimbo".to_owned(),
-                password: "password".to_owned(),
-            }))
-   }
-}
+//             ready(Ok(LoginUser {
+//                 username: username_input,
+//                 password: password_input,
+//             }))
+//    }
+// }

@@ -21,6 +21,7 @@ use crate::store::AuthStore;
 pub struct Data {
     pub username: String,
     pub password: String,
+    pub error: Option<String>,
 }
 
 #[derive(Properties, PartialEq)]
@@ -104,8 +105,8 @@ pub fn login_form(props: &Props) -> Html {
 
     // let form_onsubmit = real_login_form_submit.clone();
     let cloned_state = state.clone();
-
     let onsubmit: Callback<SubmitEvent> = Callback::from(move |event: SubmitEvent| {
+        let cloned_data_state = state.clone();
         let dispatch = auth_dispatch.clone();
         let navigator = navigator.clone();
         event.prevent_default();
@@ -119,8 +120,10 @@ pub fn login_form(props: &Props) -> Html {
                     navigator.push(&Route::Home);
                 },
                 Err(err) => {
-                    println!("Error that I need to handle is => {err}");
-                    navigator.push(&Route::Home);
+                    let mut data = cloned_data_state.deref().clone();
+                    data.error = Some(err.to_string());
+                    cloned_data_state.set(data);
+                    // navigator.push(&Route::Home);
                 },
             }
             // Use this
@@ -134,11 +137,14 @@ pub fn login_form(props: &Props) -> Html {
     // } else {
     //     String::new() // Just get new empty string
     // };
-
+    
     html! {
         <div>
             <h3>{props.form_title.deref().clone()}</h3>
             <form onsubmit={onsubmit}>
+                if cloned_state.error.is_some() {
+                    <p>{cloned_state.error.as_ref()}</p>
+                }
                 <input type="text" placeholder="Username" onchange={onchange_username} />
                 <input type="text" placeholder="Username" onchange={onchange_password} />
                 <Button label="Login" />
