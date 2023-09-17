@@ -2,6 +2,7 @@ use std::{io::Error, sync::Arc};
 use actix_web::{http::StatusCode, web::{Json, Data}, Responder, post, HttpResponse, get};
 use actix_web_httpauth::extractors::basic::BasicAuth;
 use argonautica::{Hasher, Verifier};
+use common::ApiLoginResponse;
 use hmac::{Hmac, digest::KeyInit};
 use jsonwebtoken::{EncodingKey, Header, encode};
 use serde::{Deserialize, Serialize};
@@ -101,7 +102,11 @@ async fn basic_auth(state: Data<AppState>, credentials: LoginUser) -> impl Respo
                 )
                 .unwrap();
                 
-                HttpResponse::Ok().json(token)
+                HttpResponse::Ok().json(ApiLoginResponse {
+                    user_id: user.user_id,
+                    username: user.username,
+                    token: token,
+                })
             } else {
                 HttpResponse::Unauthorized().json("Incorrect username or password")
             }

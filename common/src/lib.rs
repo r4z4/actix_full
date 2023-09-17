@@ -26,6 +26,13 @@ pub struct Message {
     pub updated_at: Option<String>,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ApiLoginResponse {
+    pub user_id: i32,
+    pub username: String,
+    pub token: String,
+}
+
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct Engagement {
     pub id: uuid::Uuid,

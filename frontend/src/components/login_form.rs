@@ -1,3 +1,4 @@
+use common::ApiLoginResponse;
 use gloo::console::log;
 use reqwasm::Error;
 use reqwasm::http::Request;
@@ -25,13 +26,6 @@ pub struct Data {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub form_title: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct ApiLoginResponse {
-    pub id: i32,
-    pub username: String,
-    pub token: String,
 }
 
 pub async fn login_user(username: String, password: String) -> Result<ApiLoginResponse, Error> {
@@ -124,7 +118,10 @@ pub fn login_form(props: &Props) -> Html {
                     dispatch.reduce_mut(|store| store.token = Some(response.token));
                     navigator.push(&Route::Home);
                 },
-                Err(err) => navigator.push(&Route::Home),
+                Err(err) => {
+                    println!("Error that I need to handle is => {err}");
+                    navigator.push(&Route::Home);
+                },
             }
             // Use this
             // log!(response.token)
