@@ -32,6 +32,7 @@ use scopes::message::message_scope;
 use scopes::user::user_scope;
 use scopes::admin::admin_scope;
 
+#[derive(Debug)]
 pub struct AppState {
     db: Pool<Postgres>,
     secret: String,

@@ -63,6 +63,15 @@ async fn create_engagement_handler(
     body: web::Json<CreateEngagementSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
+    let request_id = Uuid::new_v4();
+    let request_span = tracing::info_span!(
+        "Adding an engagement.",
+        %request_id,
+        // user_id = %form.email,
+        text= body.text.to_string()
+    );
+    let _request_span_guard = request_span.enter();
+
     let query_result = sqlx::query_as!(
         EngagementModel,
         "INSERT INTO engagements (text,rating) VALUES ($1, $2) RETURNING *",

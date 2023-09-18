@@ -9,6 +9,8 @@ use jsonwebtoken::{EncodingKey, Header, encode};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use sqlx::FromRow;
+use tracing::instrument;
+use uuid::Uuid;
 
 use crate::{AppState, Claims, extractors::jwt_auth::LoginUser, redis_connect, set_str};
 
@@ -28,18 +30,17 @@ pub struct AuthUser {
     password: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CreateUserBody {
     username: String,
     email: String,
     password: String,
 }
 
+#[instrument]
 #[post("/register")]
 async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> impl Responder {
     let user: CreateUserBody = body.into_inner();
-    println!("Sanity");
-    dbg!("check");
     let hash_secret = std::env::var("HASH_SECRET").unwrap_or(env!("HASH_SECRET").to_owned());
     let mut hasher = Hasher::default();
     let hash = hasher
