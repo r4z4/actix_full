@@ -32,20 +32,21 @@ impl FromRequest for JwtAuth {
         // Get auth token from auth header
         let auth_header: Option<HeaderValue> =
             req.headers().get(http::header::AUTHORIZATION).cloned();
+        if auth_header.is_none() {
+            return ready(Err(ErrorUnauthorized("No auth header")));
+        }
         dbg!(&auth_header);
-        let auth_token: String = auth_header.unwrap().to_str().unwrap_or("").to_string();
+        let auth_token: Option<String> = Some(auth_header.unwrap().to_str().unwrap().to_string());
         // let mut con = redis_connect();
         // let answer: i32 = con.get("answer").unwrap();
-        if auth_token.is_empty() {
-            return ready(Err(ErrorUnauthorized("Invalid auth token")));
-        }
+
 
         dbg!(&auth_token);
 
         let app_data: &AppState = req.app_data::<web::Data<AppState>>().unwrap();
         // Decode token w/ secret
         let decode: Result<TokenData<Claims>, JwtError> = decode::<Claims>(
-            &auth_token,
+            &auth_token.unwrap(),
             &DecodingKey::from_secret(app_data.secret.as_str().as_ref()),
             &Validation::new(Algorithm::HS256),
         );

@@ -318,6 +318,7 @@ pub async fn get_users_handler(
     // HttpResponse::NoContent().finish()
 }
 
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseConsultantList {
     pub consultants: Vec<ResponseConsultant>,

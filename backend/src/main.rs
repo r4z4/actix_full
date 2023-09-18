@@ -8,13 +8,15 @@ mod tests;
 pub mod crypto;
 use crate::config::get_config;
 use crate::crypto::{basic_auth, register_user};
+use actix_web::http::header::HeaderValue;
+use actix_web_httpauth::extractors::basic::{BasicAuth, self};
 use actix_web_httpauth::middleware::HttpAuthentication;
 use jsonwebtoken::{
     decode, errors::Error as JwtError, Algorithm, DecodingKey, TokenData, Validation,
 };
 use serde::{Deserialize, Serialize};
 use actix_cors::Cors;
-use actix_web::{Error, HttpMessage};
+use actix_web::{Error, HttpMessage, http};
 use actix_web::dev::ServiceRequest;
 use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
@@ -41,14 +43,22 @@ pub struct Claims {
     pub exp: usize,
 }
 
-async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+async fn validator(req: ServiceRequest, _credentials: BasicAuth) -> Result<ServiceRequest, (Error, ServiceRequest)> {
     // let jwt_secret: String = std::env::var("JWT_SCRET").expect("JWT SCRET must be set");
     // let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_secret.as_bytes()).unwrap();
-    let token_string = credentials.token();
+    println!("VALIDATOR!!");
+    let auth_header: Option<HeaderValue> =
+        req.headers().get(http::header::AUTHORIZATION).cloned();
+    if auth_header.is_none() {
+        let config = req.app_data::<basic::Config>().cloned().unwrap_or_default();
+        return Err((AuthenticationError::from(config).into(), req));
+    }
+    dbg!(&auth_header);
+    let auth_token: Option<String> = Some(auth_header.unwrap().to_str().unwrap().to_string());
 
     let app_data: &AppState = req.app_data::<web::Data<AppState>>().unwrap();
     let claims: Result<TokenData<Claims>, JwtError> = decode::<Claims>(
-        &token_string,
+        &auth_token.unwrap(),
         &DecodingKey::from_secret(app_data.secret.as_str().as_ref()),
         &Validation::new(Algorithm::HS256),
     );
@@ -59,8 +69,7 @@ async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<Servi
             Ok(req)
         }
         Err(_) => {
-            let config = req.app_data::<bearer::Config>().cloned().unwrap_or_default().scope("");
-
+            let config = req.app_data::<basic::Config>().cloned().unwrap_or_default();
             Err((AuthenticationError::from(config).into(), req))
         }
     }
@@ -232,7 +241,8 @@ async fn main() -> std::io::Result<()> {
                 header::ACCEPT,
             ])
             .supports_credentials();
-        let bearer_middleware = HttpAuthentication::bearer(validator);
+        // let bearer_middleware = HttpAuthentication::bearer(bearer_validator);
+        let auth = HttpAuthentication::basic(validator);
         App::new()
             .app_data(web::Data::new(AppState {
                 db: pool.clone(),
