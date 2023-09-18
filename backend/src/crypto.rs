@@ -9,7 +9,7 @@ use jsonwebtoken::{EncodingKey, Header, encode};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use sqlx::FromRow;
-use tracing::instrument;
+use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
 use crate::{AppState, Claims, extractors::jwt_auth::LoginUser, redis_connect, set_str};
@@ -49,6 +49,9 @@ async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> imp
         .hash()
         .unwrap();
 
+    let query_span = tracing::info_span!(
+        "Saving user details in the database"
+    );
     match sqlx::query_as::<_, UserNoPassword>(
         "INSERT INTO users (user_id, username, email, password)
         VALUES (DEFAULT, $1, $2, $3)
@@ -58,6 +61,7 @@ async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> imp
     .bind(user.email)
     .bind(hash)
     .fetch_one(&state.db)
+    .instrument(query_span)
     .await
     {
         Ok(user) => HttpResponse::Ok().json(user),
