@@ -75,6 +75,35 @@ CREATE TABLE IF NOT EXISTS clients (
 	            REFERENCES users(user_id)
     );
 
+CREATE TABLE IF NOT EXISTS contacts (
+        contact_id SERIAL PRIMARY KEY,
+        contact_title TEXT NULL,
+        contact_f_name TEXT NOT NULL,
+        contact_l_name TEXT NULL,
+        contact_email TEXT NOT NULL,
+        contact_primary_phone TEXT NULL,
+        contact_secondary_phone TEXT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
+CREATE TABLE IF NOT EXISTS locations (
+        location_id SERIAL PRIMARY KEY,
+        location_slug TEXT NOT NULL DEFAULT (uuid_generate_v4()),
+        location_address_one TEXT NOT NULL,
+        location_address_two TEXT NULL,
+        location_city TEXT NOT NULL,
+        location_state CHAR(2) NOT NULL,
+        location_zip VARCHAR (5) NOT NULL,
+        location_phone TEXT NULL,
+        location_contact_id INTEGER DEFAULT 1,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        CONSTRAINT fk_contact
+            FOREIGN KEY(location_contact_id) 
+	            REFERENCES contacts(contact_id)
+    );
+
 CREATE TABLE IF NOT EXISTS engagements (
         engagement_id SERIAL PRIMARY KEY,
         rating INTEGER NOT NULL,
@@ -124,7 +153,7 @@ CREATE TABLE IF NOT EXISTS consults (
         consult_id SERIAL PRIMARY KEY,
         consultant_id INTEGER NOT NULL,
         client_id INTEGER NOT NULL,
-        consult_location TEXT NOT NULL,
+        consult_location INTEGER NOT NULL,
         consult_start TIMESTAMP WITH TIME ZONE DEFAULT NULL,
         consult_end TIMESTAMP WITH TIME ZONE DEFAULT NULL,
         notes TEXT NULL,
@@ -133,6 +162,9 @@ CREATE TABLE IF NOT EXISTS consults (
         CONSTRAINT fk_client
             FOREIGN KEY(client_id) 
 	            REFERENCES clients(client_id),
+        CONSTRAINT fk_location
+            FOREIGN KEY(consult_location) 
+	            REFERENCES locations(location_id),
         CONSTRAINT fk_consultant
             FOREIGN KEY(consultant_id) 
 	            REFERENCES consultants(consultant_id)
@@ -153,27 +185,38 @@ VALUES
 ('second_consultant', 'consultant_two@consultancy.com', 'hashthissoon');
 
 
-INSERT INTO clients (client_id, client_address_one, client_city, client_state, client_zip, user_id) 
+INSERT INTO clients (client_address_one, client_city, client_state, client_zip, user_id) 
 VALUES 
-(1, '1111 Client St.', 'Client City', 'NE', '68114', 5),
-(2, '2222 Client St.', 'Client Town', 'MN', '55057', 6);
+('1111 Client St.', 'Client City', 'NE', '68114', 5),
+('2222 Client St.', 'Client Town', 'MN', '55057', 6);
 
-INSERT INTO consultants (consultant_id, specialty, user_id, img_path) 
+INSERT INTO consultants (specialty, user_id, img_path) 
 VALUES 
-(1, 'Finance', 7, '/img/consultants/consultant_one.svg'),
-(2, 'Insurance', 8, '/img/consultants/consultant_two.svg');
+('Finance', 7, '/img/consultants/consultant_one.svg'),
+('Insurance', 8, '/img/consultants/consultant_two.svg');
+
+INSERT INTO contacts (contact_title, contact_f_name, contact_l_name, contact_email, contact_primary_phone, contact_secondary_phone) 
+VALUES 
+('Site Admin', 'Greg', 'Cote', 'cote@gregslobos.com', '555-555-5555', '555-555-5555'),
+('Location Manager', 'Billy', 'Gil', 'bill@marlins.com', '555-555-5555', '555-555-5555');
+
+INSERT INTO locations (location_address_one, location_address_two, location_city, location_state, location_zip, location_phone, location_contact_id) 
+VALUES 
+('Default Location', NULL, 'Omaha', 'NE', '68114', '555-555-5555', DEFAULT),
+('5432 Postgres Ave', 'Ste. 101', 'Bend', 'OR', '97701', '555-555-5555', DEFAULT),
+('6379 Redis Lane', NULL, 'Austin', 'TX', '78799', '555-555-5555', 2);
 
 INSERT INTO engagements (rating, text, user_id) 
 VALUES 
 (7, 'It was a seven.', 1),
 (3, 'I give it a 3', 2);
 
-INSERT INTO consults (consult_id, consultant_id, client_id, consult_location, consult_start, consult_end) 
+INSERT INTO consults (consultant_id, client_id, consult_location, consult_start, consult_end, notes) 
 VALUES 
-(1, 1, 1, 'Consult Location #1', '2023-09-11 19:10:25-06', '2023-09-11 19:30:25-06'),
-(2, 2, 2, 'Consult Location #2', '2023-09-11 16:00:25-06', '2023-09-11 16:50:11-06');
+(1, 1, 2, '2023-09-11 19:10:25-06', '2023-09-11 19:30:25-06', NULL),
+(2, 2, 1, '2023-09-11 16:00:25-06', '2023-09-11 16:50:11-06', 'Using the Default Address. Location not persisted. Location was at the Clevelander.');
 
-INSERT INTO attachments (attachment_id, path, mime_type, user_id, channel, created_at, updated_at) 
+INSERT INTO attachments (path, mime_type, user_id, channel, created_at, updated_at) 
 VALUES 
-(1, 'https://upload.wikimedia.org/wikipedia/commons/5/5d/Kuchnia_polska-p243b.png', 'image/png', 3, 'Upload', '2023-09-11 19:10:25-06', '2023-09-11 19:30:25-06'),
-(2, 'https://upload.wikimedia.org/wikipedia/commons/f/f5/Kuchnia_polska-p35b.png', 'image/png', 4, 'Email', '2023-09-11 16:00:25-06', '2023-09-11 16:50:11-06');
+('https://upload.wikimedia.org/wikipedia/commons/5/5d/Kuchnia_polska-p243b.png', 'image/png', 3, 'Upload', '2023-09-11 19:10:25-06', '2023-09-11 19:30:25-06'),
+('https://upload.wikimedia.org/wikipedia/commons/f/f5/Kuchnia_polska-p35b.png', 'image/png', 4, 'Email', '2023-09-11 16:00:25-06', '2023-09-11 16:50:11-06');

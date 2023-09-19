@@ -89,11 +89,25 @@ pub struct ClientModel {
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 #[allow(non_snake_case)]
+pub struct ContactModel {
+    pub contact_id: i32,
+    pub contact_title: String,
+    pub contact_f_name: String,
+    pub contact_l_name: String,
+    pub contact_email: String,
+    #[serde(rename = "createdAt")]
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+#[allow(non_snake_case)]
 pub struct ConsultModel {
     pub consult_id: i32,
     pub client_id: i32,
     pub consultant_id: i32,
-    pub consult_location: String,
+    pub consult_location: i32,
     pub consult_start: Option<chrono::DateTime<chrono::Utc>>,
     pub consult_end: Option<chrono::DateTime<chrono::Utc>>,
     pub notes: String,
@@ -113,6 +127,24 @@ pub struct MessageModel {
     pub sent_from: i32,
     pub sent_at: Option<chrono::DateTime<chrono::Utc>>,
     pub read_at: Option<chrono::DateTime<chrono::Utc>>,
+    #[serde(rename = "createdAt")]
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+#[allow(non_snake_case)]
+pub struct LocationModel {
+    pub location_id: i32,
+    pub location_slug: uuid::Uuid,
+    pub location_address_one: String,
+    pub location_address_two: Option<String>,
+    pub location_city: String,
+    pub location_state: String,
+    pub location_zip: String,
+    pub location_phone: String,
+    pub location_contact_id: i32,
     #[serde(rename = "createdAt")]
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "updatedAt")]

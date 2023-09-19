@@ -6,11 +6,14 @@ use chrono::{Utc, NaiveDateTime, Duration};
 use common::ApiLoginResponse;
 use hmac::{Hmac, digest::KeyInit};
 use jsonwebtoken::{EncodingKey, Header, encode};
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use sqlx::FromRow;
 use tracing::{instrument, Instrument};
 use uuid::Uuid;
+use validator::{Validate, ValidationError};
+use lazy_static::lazy_static;
 
 use crate::{AppState, Claims, extractors::jwt_auth::LoginUser, redis_connect, set_str};
 
@@ -30,16 +33,62 @@ pub struct AuthUser {
     password: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+lazy_static! {
+    static ref RE_USER_NAME: Regex = Regex::new(r"^[a-zA-Z0-9]{6,}$").unwrap();
+    static ref RE_SPECIAL_CHAR: Regex = Regex::new("^.*?[@$!%*?&].*$").unwrap();
+}
+
+fn validate_password(password: &str) -> Result<(), ValidationError> {
+    let mut has_whitespace = false;
+    let mut has_upper = false;
+    let mut has_lower = false;
+    let mut has_digit = false;
+
+    for c in password.chars() {
+        has_whitespace |= c.is_whitespace();
+        has_lower |= c.is_lowercase();
+        has_upper |= c.is_uppercase();
+        has_digit |= c.is_digit(10);
+    }
+    if !has_whitespace && has_upper && has_lower && has_digit && password.len() >= 8 {
+        Ok(())
+    } else {
+        return Err(ValidationError::new("Password Validation Failed"));
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct CreateUserBody {
+    #[validate(
+        regex(
+            path = "RE_USER_NAME",
+            message = "Username must contain number & alphabets only & must be 6 characters long"
+        )
+    )]
     username: String,
+    #[validate(length(min = 3, message = "Username must be greater than 3 chars"))]
     email: String,
+    #[validate(
+        custom(
+            function = "validate_password",
+            message = "Must Contain At Least One Upper Case, Lower Case and Number. No spaces."
+        ),
+        regex(
+            path = "RE_SPECIAL_CHAR",
+            message = "Must Contain At Least One Special Character"
+        )
+    )]
     password: String,
 }
 
 #[instrument]
 #[post("/register")]
 async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> impl Responder {
+    let is_valid = body.validate();
+    if is_valid.is_err() {
+        return HttpResponse::InternalServerError().json(format!("{:?}", is_valid.err().unwrap()))
+    }
+    let _ = dbg!(is_valid);
     let user: CreateUserBody = body.into_inner();
     let hash_secret = std::env::var("HASH_SECRET").unwrap_or(env!("HASH_SECRET").to_owned());
     let mut hasher = Hasher::default();
