@@ -15,3 +15,5 @@ pub mod register_form;
 pub mod logout;
 pub mod refresh_token;
 pub mod spinner;
+pub mod location_select;
+pub mod consults_form;

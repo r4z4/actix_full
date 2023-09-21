@@ -14,7 +14,7 @@ pub fn register() -> Html {
     let data_display_loaded = Callback::from(|message: String| log!(message));
     html! {
         <div>
-            <div id={"register-form"}>
+            <div id={"form-container"}>
                 <RegisterForm form_title={"Register"} onsubmit={register_form_submit} />
                 <div class="sub-form">
                     <Link<Route> to={Route::Login}>{"Already have an account? Login Here"}</Link<Route>>

@@ -145,8 +145,8 @@ pub fn login_form(props: &Props) -> Html {
                 if cloned_state.error.is_some() {
                     <p>{cloned_state.error.as_ref()}</p>
                 }
-                <input type="text" placeholder="Username" onchange={onchange_username} />
-                <input type="text" placeholder="Username" onchange={onchange_password} />
+                <input type="text" placeholder="Username" onchange={onchange_username} /><br />
+                <input type="text" placeholder="Password" onchange={onchange_password} /><br />
                 <Button label="Login" />
             </form>
         </div>
