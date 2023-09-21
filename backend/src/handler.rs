@@ -210,7 +210,7 @@ async fn delete_engagement_handler(
 async fn location_options_handler(data: web::Data<AppState>) -> impl Responder {
     let query_result = sqlx::query_as!(
         SelectOption,
-        "SELECT location_slug AS key, location_id AS value FROM locations"
+        "SELECT location_name AS key, location_id AS value FROM locations"
     )
     .fetch_all(&data.db)
     .await;
@@ -226,6 +226,31 @@ async fn location_options_handler(data: web::Data<AppState>) -> impl Responder {
             let message = format!("errpr fetching locations");
             return HttpResponse::NotFound()
                 .json(serde_json::json!({"status": "fail","message": message}));
+        }
+    }
+}
+
+#[get("/consultant-options")]
+async fn consultant_options_handler(data: web::Data<AppState>) -> impl Responder {
+    // Maintain a map of slugs to names then
+    let query_result = sqlx::query_as!(
+        SelectOption,
+        "SELECT consultant_slug AS key, consultant_id AS value FROM consultants"
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    match query_result {
+        Ok(options) => {
+            let options_response = serde_json::json!({"status": "success", "options": options
+            });
+
+            return HttpResponse::Ok().json(options_response);
+        }
+        Err(_) => {
+            let message = format!("errpr fetching consultants");
+            return HttpResponse::NotFound()
+                .json(serde_json::json!({"status": "fail", "message": message}));
         }
     }
 }
@@ -412,7 +437,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(delete_engagement_handler)
         .service(get_users_handler)
         .service(get_consultants_handler)
-        .service(location_options_handler);
+        .service(location_options_handler)
+        .service(consultant_options_handler);
 
     conf.service(scope);
 }

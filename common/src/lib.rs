@@ -27,6 +27,12 @@ pub struct Message {
 }
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
+pub struct SelectOptionResponse {
+    pub status: String,
+    pub options: Option<Vec<SelectOption>>,
+}
+
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct SelectOption {
     pub key: String,
     pub value: i32,

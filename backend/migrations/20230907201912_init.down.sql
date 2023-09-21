@@ -7,6 +7,8 @@ DROP TABLE IF EXISTS clients;
 DROP TABLE IF EXISTS consultants;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS attachments;
+DROP TABLE IF EXISTS locations;
+DROP TABLE IF EXISTS contacts;
 -- This needs to be last
 DROP TABLE IF EXISTS users;
 

@@ -1,4 +1,6 @@
-use common::SelectOption;
+use std::ops::Deref;
+
+use common::{SelectOption, SelectOptionResponse};
 use reqwasm::http::Request;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
@@ -9,7 +11,7 @@ pub struct Props {
     #[prop_or_default]
     pub selected: u8,
     #[prop_or_default]
-    pub options: Vec<SelectOption>,
+    pub select_type: String,
     #[prop_or_default]
     pub onchange: Callback<u8>,
 }
@@ -35,20 +37,32 @@ pub struct Props {
 #[function_component]
 pub fn SelectInput(props: &Props) -> Html {
     let selected = props.selected;
+    let select_type = props.select_type.clone();
+    let route = 
+        match select_type.as_ref() {
+            "location" => "http://localhost:8000/api/location-options",
+            "consultant" => "http://localhost:8000/api/consultant-options",
+            _ => "",
+        };
     let state = use_state(|| None);
+    let cloned_state = state.clone();
     wasm_bindgen_futures::spawn_local(async move {
-        let response = Request::get("http://localhost:8000/location-options")
+        let response = Request::get(route)
             //.header("x-auth-token", &state.token)
             .send()
             .await
             // FIXME unwrap_or_else - handle
             .unwrap()
-            .json::<Vec<SelectOption>>()
+            .json::<SelectOptionResponse>()
             .await
             .unwrap();
 
         // log!(serde_json::to_string_pretty(&response).unwrap());
-        state.set(Some(response))
+        match response.status.as_ref() {
+            "success" => cloned_state.set(Some(response.options)),
+            "fail" => cloned_state.set(None),
+            _ => cloned_state.set(None),
+        }
     });
 
     let location_options: Vec<SelectOption> = vec![
@@ -62,10 +76,16 @@ pub fn SelectInput(props: &Props) -> Html {
         },
     ];
     let mut option_html = vec![];
-    for option in location_options {
-        option_html.push(html! {
-            <option value={option.value.to_string()}>{ option.key }</option>
-        })
+    let cloned_state = state.clone();
+    let data = cloned_state.deref().clone();
+    if let Some(options) = data {
+        if let Some(option) = options {
+            for opt in option {
+                option_html.push(html! {
+                    <option value={opt.value.to_string()}>{ opt.key }</option>
+                })
+            }
+        }
     }
     let onchange = props.onchange.clone();
     let on_input_change = Callback::from(move |event: Event| {

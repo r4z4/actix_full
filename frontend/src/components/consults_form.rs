@@ -92,7 +92,8 @@ pub fn ConsultsForm() -> Html {
             <form onsubmit={on_submit}>
                 <Rating selected={*rating} onchange={handle_select} />
                 <div class="form-body">
-                    <SelectInput />
+                    <SelectInput select_type={"location"} />
+                    <SelectInput select_type={"consultant"} />
                     <input
                         type="text"
                         ref={text_input_ref}

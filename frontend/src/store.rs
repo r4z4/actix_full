@@ -1,4 +1,4 @@
-use common::Engagement;
+use common::{Engagement, SelectOption};
 use serde::{Deserialize, Serialize};
 use yewdux::prelude::*;
 
@@ -15,6 +15,18 @@ pub struct AuthStore {
     pub password: Option<String>,
     pub token: Option<String>,
     pub is_authenticated: bool,
+}
+#[derive(Store, Default, PartialEq, Clone, Serialize, Deserialize)]
+#[store(storage = "local", storage_tab_sync)]
+pub struct OptionsStore {
+    pub location_options: Option<Vec<SelectOption>>,
+    pub consultant_options: Option<Vec<SelectOption>>
+}
+
+pub fn set_location_options(options: Vec<SelectOption>, dispatch: Dispatch<OptionsStore>) {
+    dispatch.reduce_mut(move |store| {
+        store.location_options = Some(options);
+    })
 }
 
 pub fn set_username(username: String, dispatch: Dispatch<AuthStore>) {
