@@ -5,7 +5,9 @@ mod model;
 mod schema;
 mod scopes;
 mod tests;
+mod actor;
 pub mod crypto;
+use crate::actor::MyActorHandle;
 use crate::config::get_config;
 use crate::crypto::{basic_auth, register_user};
 use actix_web::http::header::HeaderValue;
@@ -24,6 +26,7 @@ use actix_web_httpauth::extractors::{AuthenticationError, bearer};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use redis::{Client, Commands, ControlFlow, PubSubCommands};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use std::net::{TcpStream, SocketAddr};
 use std::sync::{Arc};
 use std::time::Duration;
 use std::{env, thread};
@@ -199,6 +202,19 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    let addrs = [
+        SocketAddr::from(([0, 0, 0, 0], 8000)),
+        SocketAddr::from(([0, 0, 0, 0], 8080)),
+    ];
+    if let Ok(conn) = TcpStream::connect(&addrs[..]) {
+        println!("Connected to the server!");
+        let handler: MyActorHandle = MyActorHandle::new(conn); 
+        let res = handler.send_message("Yo".to_string()).await;
+        dbg!(res);
+    } else {
+        println!("Couldn't connect to server...");
+    }
+    
     // let data = Arc::new(Mutex::new(web::Data::new(AppState {
     //     db: pool.clone(),
     //     secret: secret.clone(),
@@ -222,6 +238,7 @@ async fn main() -> std::io::Result<()> {
     let handle = subscribe(&ctx);
     publish(&ctx);
     handle.join().unwrap();
+    
     // let mut pubsub = con.as_pubsub();
     // pubsub.subscribe("channel_1")?;
     // pubsub.subscribe("channel_2")?;

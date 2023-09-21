@@ -34,3 +34,4 @@ tracing = { version = "0.1.37", features = ["log"] }
 validator = { version = "0.16.1", features = ["derive"] }
 lazy_static = "1.4.0"
 regex = "1.9.5"
+byteorder = "1.4.3"
