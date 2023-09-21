@@ -1,7 +1,7 @@
 use common::ApiLoginResponse;
 use gloo::console::log;
-use reqwasm::Error;
 use reqwasm::http::Request;
+use reqwasm::Error;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::ops::Deref;
@@ -43,7 +43,7 @@ pub async fn login_user(username: String, password: String) -> Result<ApiLoginRe
         .json::<ApiLoginResponse>()
         .await;
 
-        response
+    response
 
     // match response {
     //     Ok(response) => response.unwrap(),
@@ -118,17 +118,16 @@ pub fn login_form(props: &Props) -> Html {
                 Ok(response) => {
                     dispatch.reduce_mut(|store| store.token = Some(response.token));
                     navigator.push(&Route::Home);
-                },
+                }
                 Err(err) => {
                     let mut data = cloned_data_state.deref().clone();
                     data.error = Some(err.to_string());
                     cloned_data_state.set(data);
                     // navigator.push(&Route::Home);
-                },
+                }
             }
             // Use this
             // log!(response.token)
-
         })
     });
 
@@ -137,7 +136,7 @@ pub fn login_form(props: &Props) -> Html {
     // } else {
     //     String::new() // Just get new empty string
     // };
-    
+
     html! {
         <div>
             <h3>{props.form_title.deref().clone()}</h3>

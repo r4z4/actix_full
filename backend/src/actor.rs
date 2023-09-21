@@ -1,7 +1,7 @@
-use std::{net::TcpStream, io::Write};
 use futures_util::io;
-use tokio::sync::{mpsc, oneshot};
 use std::io::Read;
+use std::{io::Write, net::TcpStream};
+use tokio::sync::{mpsc, oneshot};
 struct MyActor {
     receiver: mpsc::Receiver<ActorMessage>,
     connection: TcpStream,
@@ -17,7 +17,10 @@ enum ActorMessage {
 impl MyActor {
     async fn handle_message(&mut self, msg: ActorMessage) -> io::Result<()> {
         match msg {
-            ActorMessage::SendMessage { message, respond_to } => {
+            ActorMessage::SendMessage {
+                message,
+                respond_to,
+            } => {
                 dbg!(message.clone());
                 self.connection.write_all(message.as_bytes())?;
                 //let response = self.connection.read(&mut [0; 128])?;
@@ -43,7 +46,10 @@ pub struct MyActorHandle {
 impl MyActorHandle {
     pub fn new(conn: TcpStream) -> Self {
         let (sender, receiver) = mpsc::channel(8);
-        let actor = MyActor { receiver: receiver, connection: conn };
+        let actor = MyActor {
+            receiver: receiver,
+            connection: conn,
+        };
         tokio::spawn(run_my_actor(actor));
         println!("actor spawned");
 
@@ -59,7 +65,7 @@ impl MyActorHandle {
             respond_to: send,
             message: msg,
         };
-        // Ignore the errors. If this send fails, so does recv.await 
+        // Ignore the errors. If this send fails, so does recv.await
         // below. There is no reason to check the failure twice.
         let _ = self.sender.send(msg).await;
         recv.await.expect("Actor task has been killed")

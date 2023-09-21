@@ -31,7 +31,8 @@ pub struct ResponseConsultant {
 // }
 
 fn vec_to_html(list: &ResponseConsultantList) -> Vec<Html> {
-    list.consultants.iter()
+    list.consultants
+        .iter()
         .map(|consultant| {
             html! {<ul class="data-display">
                 <li>{consultant.consultant_id.clone()}</li>

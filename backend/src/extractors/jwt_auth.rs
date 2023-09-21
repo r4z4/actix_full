@@ -1,5 +1,5 @@
-use crate::{redis_connect, Claims};
 use crate::AppState;
+use crate::{redis_connect, Claims};
 use actix_web::HttpMessage;
 use actix_web::{
     dev::Payload,
@@ -40,7 +40,6 @@ impl FromRequest for JwtAuth {
         // let mut con = redis_connect();
         // let answer: i32 = con.get("answer").unwrap();
 
-
         dbg!(&auth_token);
 
         let app_data: &AppState = req.app_data::<web::Data<AppState>>().unwrap();
@@ -57,9 +56,11 @@ impl FromRequest for JwtAuth {
             Ok(token) => {
                 req.extensions_mut()
                     .insert::<i32>(token.claims.user_id.to_owned());
-        
-                ready(Ok(JwtAuth { user_id: token.claims.user_id }))
-            },
+
+                ready(Ok(JwtAuth {
+                    user_id: token.claims.user_id,
+                }))
+            }
             Err(_e) => ready(Err(ErrorUnauthorized("Unauthorized :/"))),
         }
     }

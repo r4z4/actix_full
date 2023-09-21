@@ -3,8 +3,8 @@ use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 use yewdux::prelude::use_store;
 
-use crate::store::AuthStore;
 use crate::router::{switch, Route};
+use crate::store::AuthStore;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {

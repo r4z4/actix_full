@@ -1,6 +1,6 @@
+use crate::components::pages::consultants::Consultants;
 use crate::components::pages::consults::Consults;
 use crate::components::pages::engagements::Engagements;
-use crate::components::pages::consultants::Consultants;
 use crate::components::pages::home::Home;
 use crate::components::pages::login::Login;
 use crate::components::pages::register::Register;

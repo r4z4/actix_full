@@ -1,11 +1,11 @@
 use std::ops::Deref;
 
-use reqwasm::http;
+use crate::store::{set_show_alert, set_token, AuthStore, Store};
 use common::{ApiLoginResponse, ErrorResponse};
+use reqwasm::http;
 use web_sys::MouseEvent;
-use yew::{html, function_component, Html, Callback, use_state, UseStateHandle};
+use yew::{function_component, html, use_state, Callback, Html, UseStateHandle};
 use yewdux::functional::use_store;
-use crate::store::{AuthStore, set_show_alert, set_token, Store};
 
 pub async fn api_refresh_access_token(token: String) -> Result<ApiLoginResponse, String> {
     let response = match http::Request::get("http://localhost:8000/api/auth/refresh")
@@ -71,19 +71,21 @@ pub fn refresh_token() -> Html {
                             let token = response.token.clone();
                             auth_dispatch.reduce_mut(|store| store.token = Some(response.token));
                             set_token(token, auth_dispatch.clone());
-                            set_show_alert("Token has been refreshed. Thank you!".to_string(), dispatch);
-                        },
+                            set_show_alert(
+                                "Token has been refreshed. Thank you!".to_string(),
+                                dispatch,
+                            );
+                        }
                         Err(err) => {
                             let cloned_state = cloned_state.clone();
                             let mut data = cloned_state.deref().clone();
                             data.error = Some(err.to_string());
                             cloned_state.set(data);
                             // navigator.push(&Route::Home);
-                        },
+                        }
                     }
                     // Use this
                     // log!(response.token)
-        
                 })
             }
         })

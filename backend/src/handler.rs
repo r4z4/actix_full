@@ -1,14 +1,16 @@
 use crate::{
+    extractors::jwt_auth,
     model::EngagementModel,
     schema::{CreateEngagementSchema, FilterOptions, UpdateEngagementSchema},
-    AppState, extractors::jwt_auth,
+    AppState,
 };
 use actix_multipart::Multipart;
 use actix_web::{
-    delete, get, http::header::CONTENT_LENGTH, patch, post, web, HttpRequest, HttpResponse,
-    Responder, HttpMessage,
+    delete, get, http::header::CONTENT_LENGTH, patch, post, web, HttpMessage, HttpRequest,
+    HttpResponse, Responder,
 };
 use chrono::prelude::*;
+use common::SelectOption;
 use futures_util::TryStreamExt;
 use image::{imageops::FilterType, DynamicImage};
 use mime::{Mime, IMAGE_GIF, IMAGE_JPEG, IMAGE_PNG, IMAGE_SVG};
@@ -204,6 +206,30 @@ async fn delete_engagement_handler(
     HttpResponse::NoContent().finish()
 }
 
+#[get("/location-options")]
+async fn location_options_handler(data: web::Data<AppState>) -> impl Responder {
+    let query_result = sqlx::query_as!(
+        SelectOption,
+        "SELECT location_slug AS key, location_id AS value FROM locations"
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    match query_result {
+        Ok(options) => {
+            let options_response = serde_json::json!({"status": "success", "options": options
+            });
+
+            return HttpResponse::Ok().json(options_response);
+        }
+        Err(_) => {
+            let message = format!("errpr fetching locations");
+            return HttpResponse::NotFound()
+                .json(serde_json::json!({"status": "fail","message": message}));
+        }
+    }
+}
+
 #[post("/upload/{id}")]
 async fn upload(mut payload: Multipart, req: HttpRequest) -> HttpResponse {
     // 1. Limit file size
@@ -327,7 +353,6 @@ pub async fn get_users_handler(
     // HttpResponse::NoContent().finish()
 }
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseConsultantList {
     pub consultants: Vec<ResponseConsultant>,
@@ -364,7 +389,9 @@ pub async fn get_consultants_handler(
 
     let consultants = query_result.unwrap();
 
-    let json_response = ResponseConsultantList { consultants: consultants };
+    let json_response = ResponseConsultantList {
+        consultants: consultants,
+    };
 
     // let json_response = serde_json::json!({
     //     "status": "success",
@@ -384,7 +411,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(edit_engagement_handler)
         .service(delete_engagement_handler)
         .service(get_users_handler)
-        .service(get_consultants_handler);
+        .service(get_consultants_handler)
+        .service(location_options_handler);
 
     conf.service(scope);
 }

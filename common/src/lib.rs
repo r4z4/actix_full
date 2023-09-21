@@ -26,6 +26,12 @@ pub struct Message {
     pub updated_at: Option<String>,
 }
 
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
+pub struct SelectOption {
+    pub key: String,
+    pub value: i32,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ApiLoginResponse {
     pub user_id: i32,

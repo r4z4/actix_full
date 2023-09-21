@@ -1,39 +1,41 @@
-mod extractors;
+mod actor;
 mod config;
+pub mod crypto;
+mod extractors;
 mod handler;
 mod model;
 mod schema;
 mod scopes;
 mod tests;
-mod actor;
-pub mod crypto;
 use crate::actor::MyActorHandle;
 use crate::config::get_config;
 use crate::crypto::{basic_auth, register_user};
+use actix_cors::Cors;
+use actix_web::dev::ServiceRequest;
 use actix_web::http::header::HeaderValue;
-use actix_web_httpauth::extractors::basic::{BasicAuth, self};
+use actix_web::middleware::Logger;
+use actix_web::{http, Error, HttpMessage};
+use actix_web::{http::header, web, App, HttpServer};
+use actix_web_httpauth::extractors::basic::{self, BasicAuth};
+use actix_web_httpauth::extractors::bearer::BearerAuth;
+use actix_web_httpauth::extractors::{bearer, AuthenticationError};
 use actix_web_httpauth::middleware::HttpAuthentication;
+use common::SelectOption;
 use jsonwebtoken::{
     decode, errors::Error as JwtError, Algorithm, DecodingKey, TokenData, Validation,
 };
-use serde::{Deserialize, Serialize};
-use actix_cors::Cors;
-use actix_web::{Error, HttpMessage, http};
-use actix_web::dev::ServiceRequest;
-use actix_web::middleware::Logger;
-use actix_web::{http::header, web, App, HttpServer};
-use actix_web_httpauth::extractors::{AuthenticationError, bearer};
-use actix_web_httpauth::extractors::bearer::BearerAuth;
 use redis::{Client, Commands, ControlFlow, PubSubCommands};
+use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
-use std::net::{TcpStream, SocketAddr};
-use std::sync::{Arc};
+use std::collections::BTreeMap;
+use std::net::{SocketAddr, TcpStream};
+use std::sync::Arc;
 use std::time::Duration;
 use std::{env, thread};
 
+use scopes::admin::admin_scope;
 use scopes::message::message_scope;
 use scopes::user::user_scope;
-use scopes::admin::admin_scope;
 
 #[derive(Debug)]
 pub struct AppState {
@@ -47,12 +49,14 @@ pub struct Claims {
     pub exp: usize,
 }
 
-async fn validator(req: ServiceRequest, _credentials: BasicAuth) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+async fn validator(
+    req: ServiceRequest,
+    _credentials: BasicAuth,
+) -> Result<ServiceRequest, (Error, ServiceRequest)> {
     // let jwt_secret: String = std::env::var("JWT_SCRET").expect("JWT SCRET must be set");
     // let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_secret.as_bytes()).unwrap();
     println!("VALIDATOR!!");
-    let auth_header: Option<HeaderValue> =
-        req.headers().get(http::header::AUTHORIZATION).cloned();
+    let auth_header: Option<HeaderValue> = req.headers().get(http::header::AUTHORIZATION).cloned();
     if auth_header.is_none() {
         let config = req.app_data::<basic::Config>().cloned().unwrap_or_default();
         return Err((AuthenticationError::from(config).into(), req));
@@ -132,9 +136,13 @@ pub fn set_str(
     value: &str,
     ttl_seconds: i32,
 ) -> Result<(), String> {
-    let _ = con.set::<&str, &str, String>(key, value).map_err(|e| e.to_string());
+    let _ = con
+        .set::<&str, &str, String>(key, value)
+        .map_err(|e| e.to_string());
     if ttl_seconds > 0 {
-        let _ = con.expire::<&str, String>(key, ttl_seconds.try_into().unwrap()).map_err(|e| e.to_string());
+        let _ = con
+            .expire::<&str, String>(key, ttl_seconds.try_into().unwrap())
+            .map_err(|e| e.to_string());
     }
     Ok(())
 }
@@ -145,9 +153,13 @@ pub fn set_int(
     value: i32,
     ttl_seconds: i32,
 ) -> Result<(), String> {
-    let _ = con.set::<&str, i32, String>(key, value).map_err(|e| e.to_string());
+    let _ = con
+        .set::<&str, i32, String>(key, value)
+        .map_err(|e| e.to_string());
     if ttl_seconds > 0 {
-        let _ = con.expire::<&str, String>(key, ttl_seconds.try_into().unwrap()).map_err(|e| e.to_string());
+        let _ = con
+            .expire::<&str, String>(key, ttl_seconds.try_into().unwrap())
+            .map_err(|e| e.to_string());
     }
     Ok(())
 }
@@ -208,13 +220,13 @@ async fn main() -> std::io::Result<()> {
     ];
     if let Ok(conn) = TcpStream::connect(&addrs[..]) {
         println!("Connected to the server!");
-        let handler: MyActorHandle = MyActorHandle::new(conn); 
+        let handler: MyActorHandle = MyActorHandle::new(conn);
         let res = handler.send_message("Yo".to_string()).await;
         dbg!(res);
     } else {
         println!("Couldn't connect to server...");
     }
-    
+
     // let data = Arc::new(Mutex::new(web::Data::new(AppState {
     //     db: pool.clone(),
     //     secret: secret.clone(),
@@ -229,16 +241,42 @@ async fn main() -> std::io::Result<()> {
     // let answer: i32 = con.get("answer").unwrap();
     // println!("Answer: {}", answer);
     let mut con = redis_connect();
+    let location_options: Vec<SelectOption> = vec![
+        SelectOption {
+            key: "location_one".to_string(),
+            value: 1,
+        },
+        SelectOption {
+            key: "location_two".to_string(),
+            value: 2,
+        },
+    ];
+    let mut option: BTreeMap<String, i32> = BTreeMap::new();
+    let prefix = "select-option";
+    option.insert(String::from("location_one"), 1);
+    option.insert(String::from("location_two"), 2);
+    // Set it in Redis
+    let _: () = redis::cmd("HSET")
+        .arg(format!("{}:{}", prefix, "location"))
+        .arg(option)
+        .query(&mut con)
+        .expect("failed to execute HSET");
     let _ = set_int(&mut con, "answer", 44, 60);
     // let _: () = con.set("answer", 44).unwrap();
     let answer: i32 = con.get("answer").unwrap();
     println!("Answer: {}", answer);
 
+    let info: BTreeMap<String, String> = redis::cmd("HGETALL")
+        .arg(format!("{}:{}", prefix, "location"))
+        .query(&mut con)
+        .expect("failed to execute HGETALL");
+    println!("info for rust redis driver: {:?}", info);
+
     let ctx = Ctx::new();
     let handle = subscribe(&ctx);
     publish(&ctx);
     handle.join().unwrap();
-    
+
     // let mut pubsub = con.as_pubsub();
     // pubsub.subscribe("channel_1")?;
     // pubsub.subscribe("channel_2")?;
@@ -278,7 +316,6 @@ async fn main() -> std::io::Result<()> {
             .service(user_scope())
             .service(admin_scope())
             // .service(message_scope())
-
             .configure(handler::config)
             .wrap(cors)
             .wrap(Logger::default())

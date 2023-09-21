@@ -1,24 +1,30 @@
-use std::{io::Error, sync::Arc, ops::Add};
-use actix_web::{http::StatusCode, web::{Json, Data}, Responder, post, HttpResponse, get};
+use actix_web::{
+    get,
+    http::StatusCode,
+    post,
+    web::{Data, Json},
+    HttpResponse, Responder,
+};
 use actix_web_httpauth::extractors::basic::BasicAuth;
 use argonautica::{Hasher, Verifier};
-use chrono::{Utc, NaiveDateTime, Duration};
+use chrono::{Duration, NaiveDateTime, Utc};
 use common::ApiLoginResponse;
-use hmac::{Hmac, digest::KeyInit};
-use jsonwebtoken::{EncodingKey, Header, encode};
+use hmac::{digest::KeyInit, Hmac};
+use jsonwebtoken::{encode, EncodingKey, Header};
+use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use sqlx::FromRow;
+use std::{io::Error, ops::Add, sync::Arc};
 use tracing::{instrument, Instrument};
 use uuid::Uuid;
 use validator::{Validate, ValidationError};
-use lazy_static::lazy_static;
 
-use crate::{AppState, Claims, extractors::jwt_auth::LoginUser, redis_connect, set_str};
+use crate::{extractors::jwt_auth::LoginUser, redis_connect, set_str, AppState, Claims};
 
 pub struct CryptoService {
-    pub key: Arc<String>
+    pub key: Arc<String>,
 }
 #[derive(FromRow, Serialize, Deserialize)]
 pub struct UserNoPassword {
@@ -59,12 +65,10 @@ fn validate_password(password: &str) -> Result<(), ValidationError> {
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct CreateUserBody {
-    #[validate(
-        regex(
-            path = "RE_USER_NAME",
-            message = "Username must contain number & alphabets only & must be 6 characters long"
-        )
-    )]
+    #[validate(regex(
+        path = "RE_USER_NAME",
+        message = "Username must contain number & alphabets only & must be 6 characters long"
+    ))]
     username: String,
     #[validate(length(min = 3, message = "Username must be greater than 3 chars"))]
     email: String,
@@ -86,11 +90,11 @@ pub struct CreateUserBody {
 async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> impl Responder {
     let is_valid = body.validate();
     if is_valid.is_err() {
-        return HttpResponse::InternalServerError().json(format!("{:?}", is_valid.err().unwrap()))
+        return HttpResponse::InternalServerError().json(format!("{:?}", is_valid.err().unwrap()));
     }
     let _ = dbg!(is_valid);
     let user: CreateUserBody = body.into_inner();
-    let hash_secret = std::env::var("HASH_SECRET").unwrap_or(env!("HASH_SECRET").to_owned());
+    let hash_secret = std::env::var("HASH_SECRET").unwrap();
     let mut hasher = Hasher::default();
     let hash = hasher
         .with_password(user.password)
@@ -98,13 +102,11 @@ async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> imp
         .hash()
         .unwrap();
 
-    let query_span = tracing::info_span!(
-        "Saving user details in the database"
-    );
+    let query_span = tracing::info_span!("Saving user details in the database");
     match sqlx::query_as::<_, UserNoPassword>(
         "INSERT INTO users (user_id, username, email, password)
         VALUES (DEFAULT, $1, $2, $3)
-        RETURNING user_id, username"
+        RETURNING user_id, username",
     )
     .bind(user.username)
     .bind(user.email)
@@ -114,7 +116,7 @@ async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> imp
     .await
     {
         Ok(user) => HttpResponse::Ok().json(user),
-        Err(err) => HttpResponse::InternalServerError().json(format!("{:?}", err))
+        Err(err) => HttpResponse::InternalServerError().json(format!("{:?}", err)),
     }
 }
 
@@ -126,7 +128,7 @@ async fn basic_auth(state: Data<AppState>, credentials: Json<LoginUser>) -> impl
     //         .as_bytes()
     // ).unwrap();
     println!("Ugh");
-    let secret = std::env::var("JWT_SECRET").unwrap_or(env!("JWT_SECRET").to_owned());
+    let secret = std::env::var("JWT_SECRET").unwrap();
     let username = &credentials.username;
     let password = &credentials.password;
 
@@ -138,7 +140,8 @@ async fn basic_auth(state: Data<AppState>, credentials: Json<LoginUser>) -> impl
     .await
     {
         Ok(user) => {
-            let hash_secret = std::env::var("HASH_SECRET").unwrap_or(env!("HASH_SECRET").to_owned());
+            let hash_secret =
+                std::env::var("HASH_SECRET").unwrap();
             // Build the verifier
             let mut verifier = Verifier::default();
             let is_valid = verifier
@@ -150,7 +153,7 @@ async fn basic_auth(state: Data<AppState>, credentials: Json<LoginUser>) -> impl
 
             if is_valid {
                 let exp: usize = (Utc::now() + Duration::hours(2)).timestamp() as usize;
-                let claims = Claims { 
+                let claims = Claims {
                     user_id: user.user_id,
                     exp: exp,
                 };

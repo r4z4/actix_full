@@ -1,5 +1,8 @@
 use super::rating::Rating;
-use crate::{store::{set_engagement, set_loading, set_show_alert, Store}, components::location_select::LocationSelect};
+use crate::{
+    components::select_input::SelectInput,
+    store::{set_engagement, set_loading, set_show_alert, Store},
+};
 use common::Engagement;
 use gloo::file::File;
 use uuid::Uuid;
@@ -89,7 +92,7 @@ pub fn ConsultsForm() -> Html {
             <form onsubmit={on_submit}>
                 <Rating selected={*rating} onchange={handle_select} />
                 <div class="form-body">
-                    <LocationSelect />
+                    <SelectInput />
                     <input
                         type="text"
                         ref={text_input_ref}

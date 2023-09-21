@@ -7,7 +7,7 @@ use config::{Config, File};
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,
-    pub application_port: u16
+    pub application_port: u16,
 }
 #[derive(serde::Deserialize)]
 pub struct DatabaseSettings {
@@ -21,7 +21,9 @@ pub struct DatabaseSettings {
 pub fn get_config() {
     let settings = Config::builder()
         // Add in `./Settings.toml`
-        .add_source(config::File::with_name("/home/ar3rz/rust/rust_full/backend/src/.config/Settings.toml"))
+        .add_source(config::File::with_name(
+            "/home/ar3rz/rust/rust_full/backend/src/.config/Settings.toml",
+        ))
         // .add_source(File::from_str("config/settings", config::FileFormat::Yaml))
         // Add in settings from the environment (with a prefix of APP)
         // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
@@ -46,4 +48,3 @@ impl DatabaseSettings {
         )
     }
 }
-    

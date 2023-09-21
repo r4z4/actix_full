@@ -12,7 +12,7 @@ pub fn user_scope() -> Scope {
     web::scope("/user")
         .route("/encode-token/{id}", web::get().to(encode_token))
         .route("/decode-token", web::post().to(decode_token))
-        //.route("/protected", web::get().to(protected))
+    //.route("/protected", web::get().to(protected))
 }
 
 #[derive(Serialize, Deserialize)]
