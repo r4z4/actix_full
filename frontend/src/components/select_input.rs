@@ -44,7 +44,7 @@ pub fn SelectInput(props: &Props) -> Html {
             "consultant" => "http://localhost:8000/api/consultant-options",
             _ => "",
         };
-    let state = use_state(|| None);
+    let state = use_state_eq(|| None);
     let cloned_state = state.clone();
     wasm_bindgen_futures::spawn_local(async move {
         let response = Request::get(route)
