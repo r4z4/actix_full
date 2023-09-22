@@ -240,13 +240,15 @@ async fn consults_form_handler(path: web::Path<i32>, data: web::Data<AppState>) 
 #[derive(FromRow, Serialize, Deserialize)]
 pub struct ConsultPostResponse {
     pub consult_id: i32,
-    pub consult_start: String,
+    pub consult_start: DateTime<FixedOffset>,
 }
 
-fn build_time(date: String, time: String) -> String {
+fn build_time(date: String, time: String) -> DateTime<FixedOffset> {
     // '2023-09-11 19:10:25-06'
-    let time = date + " " + &time + ":00-06";
-    time
+    let time = date + " " + &time + ":00 -06:00";
+    let datetime = DateTime::parse_from_str(&time, "%Y-%m-%d %H:%M:%S %:z").unwrap();
+    // let datetime_utc = datetime.with_timezone(&Utc);
+    datetime
 }
 
 #[instrument]
@@ -262,7 +264,7 @@ async fn consults_form_submit_handler(body: web::Json<ConsultPostRequest>, data:
     let query_span = tracing::info_span!("Saving a new consult in the database");
     match sqlx::query_as::<_, ConsultPostResponse>(
         "INSERT INTO consults (client_id, consultant_id, consult_location, consult_start, consult_end)
-        VALUES (DEFAULT, $1, $2, $3, $4, $5)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING consult_id, consult_start",
     )
     .bind(consult.client_id)

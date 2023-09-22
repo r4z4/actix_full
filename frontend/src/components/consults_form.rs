@@ -37,19 +37,20 @@ pub async fn post_consult(new_consult: ConsultPostRequest) -> Result<ApiConsultR
 pub fn ConsultsForm() -> Html {
     let (store, dispatch) = use_store::<Store>();
     let loading = &store.loading;
-    let text = use_state(String::new);
     let file: UseStateHandle<Option<File>> = use_state(|| None);
 
     let consultant_id: UseStateHandle<Option<i32>> = use_state(|| None);
     let client_id: UseStateHandle<Option<i32>> = use_state(|| None);
     let location_id: UseStateHandle<Option<i32>> = use_state(|| None);
-    let notes: UseStateHandle<Option<String>> = use_state(|| None);
 
     let start_date: UseStateHandle<Option<String>> = use_state(|| None);
     let end_date: UseStateHandle<Option<String>> = use_state(|| None);
 
     let start_time: UseStateHandle<Option<String>> = use_state(|| None);
     let end_time: UseStateHandle<Option<String>> = use_state(|| None);
+
+    let notes = use_state(|| None);
+
     let min = use_state(|| 10);
     let message = use_state(|| Option::<String>::None);
 
@@ -71,13 +72,13 @@ pub fn ConsultsForm() -> Html {
     // };
 
     let handle_input = {
-        let text = text.clone();
+        let notes = notes.clone();
         let message = message.clone();
         Callback::from(move |event: InputEvent| {
             let target = event.target().unwrap();
             let value = target.unchecked_into::<HtmlInputElement>().value();
             message.set(None);
-            text.set(value);
+            notes.set(Some(value));
         })
     };
 
@@ -132,8 +133,8 @@ pub fn ConsultsForm() -> Html {
     };
 
     let on_submit = {
+        log!("on submit");
         let cloned_dispatch = dispatch.clone();
-        let notes = notes.deref().clone();
         let consultant_id = consultant_id.deref().clone();
         let client_id = client_id.deref().clone();
         let location_id = location_id.deref().clone();
@@ -142,26 +143,31 @@ pub fn ConsultsForm() -> Html {
         let end_date = end_date.deref().clone();
         let start_time = start_time.deref().clone();
         let end_time = end_time.deref().clone();
-        let text = text.clone();
+        let notes = notes.clone();
         let message = message.clone();
         let text_input_ref = text_input_ref.clone();
 
         Callback::from(move |event: SubmitEvent| {
+            log!("hitting callback");
             let dispatch = cloned_dispatch.clone();
             event.prevent_default();
+            let notes = notes.clone();
             let start_date_ta = start_date.clone();
             let end_date_ta = end_date.clone();
             let start_time_ta = start_time.clone();
             let end_time_ta = end_time.clone();
-            let notes_ta = notes.clone();
+            let binding = notes.clone();
+            let notes_ta = binding.deref();
             set_loading(true, dispatch.clone());
 
-            if text.trim().len() < *min {
-                message.set(Some("Text must be at least 10 characters".to_string()));
-                set_loading(false, dispatch.clone());
-                return;
+            if let Some(notes) = notes_ta {
+                if notes.trim().len() < *min {
+                    message.set(Some("Text must be at least 10 characters".to_string()));
+                    set_loading(false, dispatch.clone());
+                    return;
+                }
             }
-
+            
             let new_consult = ConsultPostRequest {
                 // consult_id: i32,
                 client_id: client_id.unwrap(),
@@ -171,22 +177,23 @@ pub fn ConsultsForm() -> Html {
                 end_date: end_date_ta,
                 start_time: start_time_ta,
                 end_time: end_time_ta,
-                notes: notes_ta,
+                notes: notes_ta.clone(),
             };
 
             wasm_bindgen_futures::spawn_local(async move {
+                log!("local spawned");
                 let response = post_consult(new_consult).await;
                 match response {
                     Ok(response) => {
                         // dispatch.reduce_mut(|store| store.token = Some(response.token));
                         // navigator.push(&Route::Consult);
-                        set_show_alert("Consult added successfully".to_string(), dispatch.clone());
+                        set_show_alert(format!("Consult {} added successfully", response.consult_id).to_string(), dispatch.clone());
                     }
                     Err(err) => {
                         // let mut form_data = cloned_form_data.deref().clone();
                         // form_data.error = Some(err.to_string());
                         // cloned_form_data.set(data);
-                        set_show_alert("Error adding consult".to_string(), dispatch.clone());
+                        set_show_alert(format!("Error adding consult {}", err).to_string(), dispatch.clone());
                         // navigator.push(&Route::Home);
                     }
                 }
@@ -198,7 +205,7 @@ pub fn ConsultsForm() -> Html {
             let dispatch = cloned_dispatch.clone();
             let text_input = text_input_ref.cast::<HtmlInputElement>().unwrap();
             text_input.set_value("");
-            text.set(String::new());
+            notes.set(None);
             set_loading(false, dispatch);
         })
     };

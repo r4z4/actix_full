@@ -74,7 +74,7 @@ pub struct ConsultPostRequest {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ApiConsultResponse {
     pub consult_id: i32,
-    pub status: String,
+    pub consult_start: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
