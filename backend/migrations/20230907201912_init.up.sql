@@ -1,6 +1,7 @@
 -- Add up migration script here
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+--DROP TABLE IF EXISTS accounts;
 DROP TYPE IF EXISTS consultant_specialty;
 DROP TYPE IF EXISTS consultant_territory;
 DROP TYPE IF EXISTS state_abbr;
@@ -181,7 +182,7 @@ CREATE TABLE IF NOT EXISTS consults (
         consult_location INTEGER NOT NULL,
         consult_start TIMESTAMP WITH TIME ZONE DEFAULT NULL,
         consult_end TIMESTAMP WITH TIME ZONE DEFAULT NULL,
-        notes TEXT NULL,
+        notes TEXT DEFAULT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         CONSTRAINT fk_client

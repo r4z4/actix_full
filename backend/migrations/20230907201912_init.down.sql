@@ -9,8 +9,11 @@ DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS attachments;
 DROP TABLE IF EXISTS locations;
 DROP TABLE IF EXISTS contacts;
--- This needs to be last
+
 DROP TABLE IF EXISTS users;
+-- This needs to be last
+DROP TABLE IF EXISTS accounts;
+
 
 DROP TYPE IF EXISTS consultant_specialty;
 DROP TYPE IF EXISTS consultant_territory;

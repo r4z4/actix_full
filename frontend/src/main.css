@@ -29,7 +29,7 @@ summary {
 }
 
 .form-body {
-    display: flex; 
+    display: grid; 
     padding-left: 0.5rem;
     padding-right: 0.5rem; 
     padding-top: 0.75rem;
@@ -388,6 +388,10 @@ input[type=text] {
 
 .sub-form a {
     margin: 8px auto;
+}
+
+.input-div {
+    width: 100%;
 }
 
 #form-container {

@@ -27,6 +27,16 @@ pub struct Message {
 }
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
+pub struct ConsultsFormResponse {
+    pub today: String,
+    pub location_options: Vec<SelectOption>,
+    pub consultant_options: Vec<SelectOption>,
+    pub client_options: Vec<SelectOption>,
+    pub start_date: String,
+    pub end_date: String,
+}
+
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct SelectOptionResponse {
     pub status: String,
     pub options: Option<Vec<SelectOption>>,

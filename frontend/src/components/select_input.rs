@@ -42,6 +42,7 @@ pub fn SelectInput(props: &Props) -> Html {
         match select_type.as_ref() {
             "location" => "http://localhost:8000/api/location-options",
             "consultant" => "http://localhost:8000/api/consultant-options",
+            "client" => "http://localhost:8000/api/client-options",
             _ => "",
         };
     let state = use_state_eq(|| None);

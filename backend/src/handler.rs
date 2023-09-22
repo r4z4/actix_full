@@ -1,6 +1,6 @@
 use crate::{
     extractors::jwt_auth,
-    model::EngagementModel,
+    model::{EngagementModel, ConsultModel},
     schema::{CreateEngagementSchema, FilterOptions, UpdateEngagementSchema},
     AppState,
 };
@@ -9,7 +9,7 @@ use actix_web::{
     delete, get, http::header::CONTENT_LENGTH, patch, post, web, HttpMessage, HttpRequest,
     HttpResponse, Responder,
 };
-use chrono::prelude::*;
+use chrono::{prelude::*, format::strftime};
 use common::SelectOption;
 use futures_util::TryStreamExt;
 use image::{imageops::FilterType, DynamicImage};
@@ -206,11 +206,67 @@ async fn delete_engagement_handler(
     HttpResponse::NoContent().finish()
 }
 
+#[get("/consults/form/{id}")]
+async fn consults_form_handler(path: web::Path<i32>, data: web::Data<AppState>) -> impl Responder {
+    let consult_id = path.into_inner();
+    let today = Utc::now();
+    let formatted = today.format("%Y-%m-%d");
+    let consult = sqlx::query_as!(
+        ConsultModel,
+        "SELECT * FROM consults WHERE consult_id = $1",
+        consult_id
+    )
+    .fetch_one(&data.db)
+    .await;
+
+    match consult {
+        Ok(consult) => {
+            let options_response = serde_json::json!({"status": "success", "consult": consult
+            });
+
+            return HttpResponse::Ok().json(options_response);
+        }
+        Err(_) => {
+            let message = format!("errpr fetching locations");
+            return HttpResponse::NotFound()
+                .json(serde_json::json!({"status": "fail","message": message}));
+        }
+    }
+}
+
+
+
+
+
 #[get("/location-options")]
 async fn location_options_handler(data: web::Data<AppState>) -> impl Responder {
     let query_result = sqlx::query_as!(
         SelectOption,
         "SELECT location_name AS key, location_id AS value FROM locations"
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    match query_result {
+        Ok(options) => {
+            let options_response = serde_json::json!({"status": "success", "options": options
+            });
+
+            return HttpResponse::Ok().json(options_response);
+        }
+        Err(_) => {
+            let message = format!("errpr fetching locations");
+            return HttpResponse::NotFound()
+                .json(serde_json::json!({"status": "fail","message": message}));
+        }
+    }
+}
+
+#[get("/client-options")]
+async fn client_options_handler(data: web::Data<AppState>) -> impl Responder {
+    let query_result = sqlx::query_as!(
+        SelectOption,
+        "SELECT client_slug AS key, client_id AS value FROM clients"
     )
     .fetch_all(&data.db)
     .await;
@@ -438,7 +494,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(get_users_handler)
         .service(get_consultants_handler)
         .service(location_options_handler)
-        .service(consultant_options_handler);
+        .service(consultant_options_handler)
+        .service(client_options_handler);
 
     conf.service(scope);
 }

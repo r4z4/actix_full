@@ -16,4 +16,6 @@ pub mod rating;
 pub mod refresh_token;
 pub mod register_form;
 pub mod select_input;
+pub mod date_input;
+pub mod time_input;
 pub mod spinner;

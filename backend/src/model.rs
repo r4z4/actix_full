@@ -110,7 +110,7 @@ pub struct ConsultModel {
     pub consult_location: i32,
     pub consult_start: Option<chrono::DateTime<chrono::Utc>>,
     pub consult_end: Option<chrono::DateTime<chrono::Utc>>,
-    pub notes: String,
+    pub notes: Option<String>,
     #[serde(rename = "createdAt")]
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "updatedAt")]
