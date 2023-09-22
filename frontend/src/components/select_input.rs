@@ -9,11 +9,13 @@ use yew::prelude::*;
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     #[prop_or_default]
+    pub label: String,
+    #[prop_or_default]
     pub selected: u8,
     #[prop_or_default]
     pub select_type: String,
     #[prop_or_default]
-    pub onchange: Callback<u8>,
+    pub onchange: Callback<i32>,
 }
 
 // trait SelectOption {
@@ -37,6 +39,7 @@ pub struct Props {
 #[function_component]
 pub fn SelectInput(props: &Props) -> Html {
     let selected = props.selected;
+    let label = &props.label;
     let select_type = props.select_type.clone();
     let route = 
         match select_type.as_ref() {
@@ -92,13 +95,14 @@ pub fn SelectInput(props: &Props) -> Html {
     let on_input_change = Callback::from(move |event: Event| {
         let target = event.target().unwrap();
         let value = target.unchecked_into::<HtmlInputElement>().value();
-        let selected = value.parse::<u8>().unwrap();
+        let selected = value.parse::<i32>().unwrap();
         onchange.emit(selected)
     });
 
     html! {
-        <div>
-            <select onchange={on_input_change}>
+        <div class={"input-div"}>
+            <label for="select">{label}</label>
+            <select id="select" onchange={on_input_change}>
                 {option_html}
             </select>
         </div>

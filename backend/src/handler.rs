@@ -4,20 +4,23 @@ use crate::{
     schema::{CreateEngagementSchema, FilterOptions, UpdateEngagementSchema},
     AppState,
 };
+use validator::Validate;
 use actix_multipart::Multipart;
 use actix_web::{
     delete, get, http::header::CONTENT_LENGTH, patch, post, web, HttpMessage, HttpRequest,
     HttpResponse, Responder,
 };
 use chrono::{prelude::*, format::strftime};
-use common::SelectOption;
+use common::{SelectOption, ConsultPostRequest};
 use futures_util::TryStreamExt;
 use image::{imageops::FilterType, DynamicImage};
 use mime::{Mime, IMAGE_GIF, IMAGE_JPEG, IMAGE_PNG, IMAGE_SVG};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use sqlx::FromRow;
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
+use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
 #[get("/healthchecker")]
@@ -234,7 +237,47 @@ async fn consults_form_handler(path: web::Path<i32>, data: web::Data<AppState>) 
     }
 }
 
+#[derive(FromRow, Serialize, Deserialize)]
+pub struct ConsultPostResponse {
+    pub consult_id: i32,
+    pub consult_start: String,
+}
 
+fn build_time(date: String, time: String) -> String {
+    // '2023-09-11 19:10:25-06'
+    let time = date + " " + &time + ":00-06";
+    time
+}
+
+#[instrument]
+#[post("/consults/form")]
+async fn consults_form_submit_handler(body: web::Json<ConsultPostRequest>, data: web::Data<AppState>) -> impl Responder {
+    let is_valid = body.validate();
+    if is_valid.is_err() {
+        return HttpResponse::InternalServerError().json(format!("{:?}", is_valid.err().unwrap()));
+    }
+    let consult: ConsultPostRequest = body.into_inner();
+    let constructed_start_datetime = build_time(consult.start_date.unwrap(), consult.start_time.unwrap());
+    let constructed_end_datetime = build_time(consult.end_date.unwrap(), consult.end_time.unwrap());
+    let query_span = tracing::info_span!("Saving a new consult in the database");
+    match sqlx::query_as::<_, ConsultPostResponse>(
+        "INSERT INTO consults (client_id, consultant_id, consult_location, consult_start, consult_end)
+        VALUES (DEFAULT, $1, $2, $3, $4, $5)
+        RETURNING consult_id, consult_start",
+    )
+    .bind(consult.client_id)
+    .bind(consult.consultant_id)
+    .bind(consult.consult_location)
+    .bind(constructed_start_datetime)
+    .bind(constructed_end_datetime)
+    .fetch_one(&data.db)
+    .instrument(query_span)
+    .await
+    {
+        Ok(consult) => HttpResponse::Ok().json(consult),
+        Err(err) => HttpResponse::InternalServerError().json(format!("{:?}", err)),
+    }
+}
 
 
 
@@ -495,7 +538,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(get_consultants_handler)
         .service(location_options_handler)
         .service(consultant_options_handler)
-        .service(client_options_handler);
+        .service(client_options_handler)
+        .service(consults_form_submit_handler);
 
     conf.service(scope);
 }

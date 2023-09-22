@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct Consult {
@@ -53,6 +54,27 @@ pub struct ApiLoginResponse {
     pub user_id: i32,
     pub username: String,
     pub token: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct ConsultPostRequest {
+    // If passing, it is an edit
+    // pub consult_id: Option<i32>,
+    pub client_id: i32,
+    pub consultant_id: i32,
+    pub consult_location: i32,
+    pub start_date: Option<String>,
+    pub end_date: Option<String>,
+    pub start_time: Option<String>,
+    pub end_time: Option<String>,
+    #[validate(length(min = 10, message = "Notes must be greater than 10 chars"))]
+    pub notes: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ApiConsultResponse {
+    pub consult_id: i32,
+    pub status: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]

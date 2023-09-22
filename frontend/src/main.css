@@ -392,6 +392,11 @@ input[type=text] {
 
 .input-div {
     width: 100%;
+    padding: 1%;
+}
+
+.input-div label {
+    margin-right: 10px;
 }
 
 #form-container {

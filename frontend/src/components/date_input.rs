@@ -13,9 +13,7 @@ pub struct Props {
     #[prop_or_default]
     pub name: String,
     #[prop_or_default]
-    pub start_date: String,
-    #[prop_or_default]
-    pub end_date: String,
+    pub date: Option<String>,
     #[prop_or_default]
     pub onchange: Callback<String>,
 }
@@ -23,7 +21,7 @@ pub struct Props {
 
 #[function_component]
 pub fn DateInput(props: &Props) -> Html {
-
+    let date = props.date.clone();
     let label = &props.label;
     let name = &props.name;
     let cloned_name = name.clone();
@@ -40,7 +38,7 @@ pub fn DateInput(props: &Props) -> Html {
     html! {
         <div class={"input-div"}>
             <label for="start">{label}</label>
-            <input type="date" id="start" name={cloned_name} onchange={on_input_change.clone()} value="2018-07-22" min="2018-01-01" max="2018-12-31" />
+            <input type="date" id="start" name={cloned_name} onchange={on_input_change.clone()} value={date} min="2018-01-01" max="2018-12-31" />
         </div>
     }
 }
