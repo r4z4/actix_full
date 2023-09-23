@@ -1,5 +1,6 @@
 use crate::components::pages::consultants::Consultants;
 use crate::components::pages::consults::Consults;
+use crate::components::pages::clients::Clients;
 use crate::components::pages::engagements::Engagements;
 use crate::components::pages::home::Home;
 use crate::components::pages::login::Login;
@@ -17,6 +18,8 @@ pub enum Route {
     Register,
     #[at("/consults")]
     Consults,
+    #[at("/clients")]
+    Clients,
     #[at("/engagements")]
     Engagements,
     #[at("/consultants")]
@@ -27,6 +30,7 @@ pub fn switch(route: Route) -> Html {
     match route {
         Route::Home => html! { <Home /> },
         Route::Login => html! { <Login /> },
+        Route::Clients => html! { <Clients /> },
         Route::Register => html! { <Register /> },
         Route::Consults => html! { <Consults /> },
         Route::Engagements => html! { <Engagements /> },

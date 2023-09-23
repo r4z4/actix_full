@@ -71,6 +71,29 @@ pub struct ConsultPostRequest {
     pub notes: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct ClientPostRequest {
+    pub client_f_name: Option<String>,
+    pub client_l_name: Option<String>,
+    pub client_company_name: Option<String>,
+    pub client_address_one: String,
+    pub client_address_two: Option<String>,
+    pub client_city: String,
+    pub client_state: String,
+    pub client_zip: String,
+    pub client_home_phone: String,
+    pub client_mobile_phone: Option<String>,
+    pub client_office_phone: Option<String>,
+    pub client_email: String,
+    pub account_id: i32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ApiClientResponse {
+    pub client_id: i32,
+    pub consult_slug: String,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ApiConsultResponse {
     pub consult_id: i32,

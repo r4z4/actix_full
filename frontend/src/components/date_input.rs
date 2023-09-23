@@ -38,7 +38,10 @@ pub fn DateInput(props: &Props) -> Html {
     html! {
         <div class={"input-div"}>
             <label for="start">{label}</label>
-            <input type="date" id="start" name={cloned_name} onchange={on_input_change.clone()} value={date} min="2023-01-01" max="2025-12-31" />
+            <span class={"datepicker-toggle"}>
+                <span class={"datepicker-toggle-button"}></span>
+                <input type="date" class={"datepicker-input"} name={cloned_name} onchange={on_input_change.clone()} value={date} min="2023-01-01" max="2025-12-31" />
+            </span>
         </div>
     }
 }

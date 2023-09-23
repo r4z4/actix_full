@@ -1,7 +1,3 @@
-use wasm_bindgen::JsCast;
-use web_sys::HtmlInputElement;
-use yew::prelude::*;
-
 use yew::prelude::*;
 use yew_router::prelude::*;
 
@@ -21,6 +17,7 @@ pub fn nav(props: &Props) -> Html {
                 <li><Link<Route> to={Route::Consults}>{"Consults"}</Link<Route>></li>
                 <li><Link<Route> to={Route::Engagements}>{"Engagements"}</Link<Route>></li>
                 <li><Link<Route> to={Route::Consultants}>{"Consultants"}</Link<Route>></li>
+                <li><Link<Route> to={Route::Clients}>{"Clients"}</Link<Route>></li>
                 <li><Link<Route> to={Route::Home}>{"🏠"}</Link<Route>></li>
                 <li><Logout label={"->"}/></li>
             </ul>

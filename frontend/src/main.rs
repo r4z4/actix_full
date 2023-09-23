@@ -37,13 +37,13 @@ fn App() -> Html {
 
     html! {
         <>
+            <main class={stylesheet}>
             if show_alert {
                     <AlertComponent
                         message={alert_props.message}
                         delay_ms={alert_props.delay_ms}
                      />
                 }
-            <main class={stylesheet}>
 
             // if store.token.is_some() {
                 <BrowserRouter>
