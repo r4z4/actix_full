@@ -46,6 +46,7 @@ pub fn SelectInput(props: &Props) -> Html {
             "location" => "http://localhost:8000/api/location-options",
             "consultant" => "http://localhost:8000/api/consultant-options",
             "client" => "http://localhost:8000/api/client-options",
+            "account" => "http://localhost:8000/api/account-options",
             _ => "",
         };
     let state = use_state_eq(|| None);

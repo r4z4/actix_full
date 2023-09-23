@@ -75,6 +75,7 @@ pub struct ClientModel {
     pub client_company_name: String,
     pub client_f_name: String,
     pub client_l_name: String,
+    pub client_dob: Option<chrono::NaiveDate>,
     pub client_address_one: String,
     pub client_address_two: Option<String>,
     pub client_city: String,

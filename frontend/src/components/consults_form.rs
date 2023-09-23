@@ -1,16 +1,13 @@
 use std::ops::Deref;
-use super::rating::Rating;
 use gloo_console::log;
 use reqwasm::{Error, http::Request};
-use serde::Serialize;
 use serde_json::json;
 use crate::{
     components::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput},
-    store::{set_engagement, set_loading, set_show_alert, Store},
+    store::{set_loading, set_show_alert, Store},
 };
-use common::{Engagement, ApiConsultResponse, ConsultPostRequest};
+use common::{ApiConsultResponse, ConsultPostRequest};
 use gloo::file::File;
-use uuid::Uuid;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -167,7 +164,7 @@ pub fn ConsultsForm() -> Html {
                     return;
                 }
             }
-            
+
             let new_consult = ConsultPostRequest {
                 // consult_id: i32,
                 client_id: client_id.unwrap(),

@@ -84,9 +84,10 @@ CREATE TABLE IF NOT EXISTS clients (
         -- client_state state_abbr NOT NULL,
         client_state CHAR(2) NOT NULL,
         client_zip VARCHAR (5) NOT NULL,
-        client_home_phone TEXT NULL,
+        client_dob DATE NULL, 
+        client_primary_phone TEXT NULL,
         client_mobile_phone TEXT NULL,
-        client_office_phone TEXT NULL,
+        client_secondary_phone TEXT NULL,
         client_email TEXT NULL,
         account_id INTEGER NOT NULL,
         user_id INTEGER NOT NULL,
@@ -112,6 +113,8 @@ CREATE TABLE IF NOT EXISTS contacts (
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );
 
+
+-- FIXME: Add PostGIS and lat/long
 CREATE TABLE IF NOT EXISTS locations (
         location_id SERIAL PRIMARY KEY,
         location_slug TEXT NOT NULL DEFAULT (uuid_generate_v4()),
@@ -217,11 +220,11 @@ VALUES
 ('first_consultant', 2, 'consultant_one@consultancy.com', 'hashthissoon'),
 ('second_consultant', 2, 'consultant_two@consultancy.com', 'hashthissoon');
 
-INSERT INTO clients (client_f_name, client_l_name, client_company_name, client_address_one, client_city, client_state, client_zip, account_id, user_id) 
+INSERT INTO clients (client_f_name, client_l_name, client_company_name, client_primary_phone, client_address_one, client_city, client_state, client_zip, client_dob, account_id, user_id) 
 VALUES 
-('Mike', 'Ryan', NULL, '1111 Client St.', 'Client City', 'NE', '68114', 3, 5),
-(NULL, NULL, 'McGillicuddy & Sons LLC', '1111 Jupiter St.', 'Company Town', 'NE', '68114', 4, 5),
-('Chris', 'Cote', NULL, '2222 Client St.', 'Client Town', 'MN', '55057', 3, 6);
+('Mike', 'Ryan', NULL, '555-555-5555', '1111 Client St.', 'Client City', 'NE', '68114', '1989-01-08', 3, 5),
+(NULL, NULL, 'McGillicuddy & Sons LLC', '555-555-5555', '1111 Jupiter St.', 'Company Town', 'NE', '68114', NULL, 4, 5),
+('Chris', 'Cote', NULL, '555-555-5555', '2222 Client St.', 'Client Town', 'MN', '55057', '1966-07-22', 3, 6);
 
 INSERT INTO consultants (consultant_f_name, consultant_l_name, specialty, user_id, img_path) 
 VALUES 

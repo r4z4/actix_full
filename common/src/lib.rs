@@ -76,6 +76,7 @@ pub struct ClientPostRequest {
     pub client_f_name: Option<String>,
     pub client_l_name: Option<String>,
     pub client_company_name: Option<String>,
+    pub client_dob: Option<String>,
     pub client_address_one: String,
     pub client_address_two: Option<String>,
     pub client_city: String,

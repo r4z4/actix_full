@@ -1,16 +1,13 @@
 use std::ops::Deref;
-use super::rating::Rating;
 use gloo_console::log;
 use reqwasm::{Error, http::Request};
-use serde::Serialize;
 use serde_json::json;
 use crate::{
-    components::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput, text_input::TextInput},
+    components::{select_input::SelectInput, date_input::DateInput, text_input::TextInput},
     store::{set_engagement, set_loading, set_show_alert, Store},
 };
-use common::{Engagement, ApiConsultResponse, ConsultPostRequest, ClientPostRequest, ApiClientResponse};
+use common::{ClientPostRequest, ApiClientResponse};
 use gloo::file::File;
-use uuid::Uuid;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -46,6 +43,7 @@ pub fn ClientsForm() -> Html {
     let client_f_name: UseStateHandle<Option<String>> = use_state(|| None);
     let client_l_name: UseStateHandle<Option<String>> = use_state(|| None);
     let client_company_name: UseStateHandle<Option<String>> = use_state(|| None);
+    let client_dob = use_state(|| None);
 
     let client_address_one: UseStateHandle<String> = use_state(|| String::from(""));
     let client_address_two: UseStateHandle<Option<String>> = use_state(|| None);
@@ -75,17 +73,35 @@ pub fn ClientsForm() -> Html {
         })
     };
 
-    let handle_input = {
-        let message = message.clone();
+    let handle_l_name_input = {
         let l_name = client_l_name.clone();
         Callback::from(move |value| {
             l_name.set(value);
-            message.set(None);
-            // notes.set(Some(value));
         })
     };
 
-    let handle_client_id_select = {
+    let handle_f_name_input = {
+        let f_name = client_f_name.clone();
+        Callback::from(move |value| {
+            f_name.set(value);
+        })
+    };
+
+    let handle_company_name_input = {
+        let company_name = client_company_name.clone();
+        Callback::from(move |value| {
+            company_name.set(value);
+        })
+    };
+
+    let handle_dob_select = {
+        let dob = client_dob.clone();
+        Callback::from(move |value| {
+            dob.set(Some(value));
+        })
+    };
+
+    let handle_account_id_select = {
         let id = client_id.clone();
         Callback::from(move |value| {
             id.set(Some(value));
@@ -101,6 +117,7 @@ pub fn ClientsForm() -> Html {
         let client_f_name_deref = client_f_name.deref().clone();
         let client_l_name = client_l_name.deref().clone();
         let client_company_name = client_company_name.deref().clone();
+        let client_dob = client_dob.deref().clone();
 
         let client_address_one = client_address_one.deref().clone();
         let client_address_two = client_address_two.deref().clone();
@@ -159,6 +176,7 @@ pub fn ClientsForm() -> Html {
                 client_f_name: client_f_name_deref.clone(),
                 client_l_name: client_l_name.clone(),
                 client_company_name: client_company_name.clone(),
+                client_dob: client_dob.clone(),
                 client_address_one: client_address_one.clone(),
                 client_address_two: client_address_two.clone(),
                 client_city: client_city.clone(),
@@ -202,7 +220,7 @@ pub fn ClientsForm() -> Html {
             set_loading(false, dispatch);
         })
     };
-
+    let client_dob_clone = client_dob.deref().clone();
     html! {
         <div class="form-container">
             <header class="form-header">
@@ -210,9 +228,13 @@ pub fn ClientsForm() -> Html {
             </header>
             <form onsubmit={on_submit}>
                 <div class="form-body">
+                    <TextInput label={"First Name"} placeholder={"First Name"} onchange={handle_f_name_input} />
+                    <TextInput label={"Last Name"} placeholder={"Last Name"} onchange={handle_l_name_input} />
+                    <TextInput label={"Company Name"} placeholder={"Company Name"} onchange={handle_company_name_input} />
 
-                    <TextInput label={"Name"} placeholder={"First Name"} onchange={handle_input} />
+                    <DateInput date={client_dob_clone} label={"DOB"} onchange={handle_dob_select} />
 
+                    <SelectInput label={"Account"} select_type={"account"} onchange={handle_account_id_select} />
 
                     <input
                         type="textarea"

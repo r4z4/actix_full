@@ -307,6 +307,30 @@ async fn location_options_handler(data: web::Data<AppState>) -> impl Responder {
     }
 }
 
+#[get("/account-options")]
+async fn account_options_handler(data: web::Data<AppState>) -> impl Responder {
+    let query_result = sqlx::query_as!(
+        SelectOption,
+        "SELECT account_name AS key, account_id AS value FROM accounts"
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    match query_result {
+        Ok(options) => {
+            let options_response = serde_json::json!({"status": "success", "options": options
+            });
+
+            return HttpResponse::Ok().json(options_response);
+        }
+        Err(_) => {
+            let message = format!("errpr fetching locations");
+            return HttpResponse::NotFound()
+                .json(serde_json::json!({"status": "fail","message": message}));
+        }
+    }
+}
+
 #[get("/client-options")]
 async fn client_options_handler(data: web::Data<AppState>) -> impl Responder {
     let query_result = sqlx::query_as!(
@@ -541,7 +565,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(location_options_handler)
         .service(consultant_options_handler)
         .service(client_options_handler)
-        .service(consults_form_submit_handler);
+        .service(consults_form_submit_handler)
+        .service(account_options_handler);
 
     conf.service(scope);
 }

@@ -1,9 +1,9 @@
-use stylist::{style, yew::styled_component};
+use stylist::yew::styled_component;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 use yewdux::prelude::use_store;
 
-use crate::router::{switch, Route};
+use crate::router::Route;
 use crate::store::AuthStore;
 
 #[derive(Properties, PartialEq)]

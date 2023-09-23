@@ -1,8 +1,5 @@
-use gloo::console::log;
 use reqwasm::http::Request;
-use serde::{Deserialize, Serialize};
-use std::ops::Deref;
-use stylist::{style, yew::styled_component};
+use stylist::{yew::styled_component};
 use yew::prelude::*;
 
 use common::Consult;
