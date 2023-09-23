@@ -1,15 +1,16 @@
+use common::RegisterUserRequest;
 use gloo::console::log;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-use crate::components::register_form::{Data, RegisterForm};
+use crate::components::register_form::RegisterForm;
 use crate::router::Route;
 
 #[function_component(Register)]
 pub fn register() -> Html {
-    let register_form_submit = Callback::from(|data: Data| {
+    let register_form_submit = Callback::from(|data: RegisterUserRequest| {
         log!("Username is", data.username);
-        log!("Passwrod is", data.password);
+        log!("Password is", data.password);
     });
     let data_display_loaded = Callback::from(|message: String| log!(message));
     html! {

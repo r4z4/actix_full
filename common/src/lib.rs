@@ -56,6 +56,18 @@ pub struct ApiLoginResponse {
     pub token: String,
 }
 
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
+pub struct RegisterUserRequest {
+    pub username: String,
+    pub password: String,
+    pub email: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ApiRegisterResponse {
+    pub username: String,
+}
+
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct ConsultPostRequest {
     // If passing, it is an edit

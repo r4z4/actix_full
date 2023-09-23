@@ -3,7 +3,7 @@ use gloo_console::log;
 use reqwasm::{Error, http::Request};
 use serde_json::json;
 use crate::{
-    components::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput},
+    components::inputs::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput},
     store::{set_loading, set_show_alert, Store},
 };
 use common::{ApiConsultResponse, ConsultPostRequest};

@@ -399,6 +399,10 @@ input[type=text] {
     margin-right: 10px;
 }
 
+.slim-input-div {
+    width: auto;
+}
+
 *:before,
 *:after{
     padding: 0;
@@ -517,6 +521,23 @@ input[type=time] {
 #form-container form {
     margin: auto;
     text-align: center;
+}
+.matched-icon {
+    display: inline;
+}
+.curated-resources {
+    margin: 3em auto 1em;
+    text-align: center;
+}
+
+.curated-resources a {
+    text-decoration: none;
+    color: #96e7f2;
+}
+
+.curated-resources h4 {
+    text-decoration: none;
+    color: #c9f6c1;
 }
 
 .login-route a {

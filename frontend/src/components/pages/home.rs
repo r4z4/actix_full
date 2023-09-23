@@ -20,8 +20,11 @@ pub fn home() -> Html {
                 <p>{"Very privileged data lives here that only the logged in can see!"}</p>
             } else {
                 <div>
-                    <h1>{"Please Login to view our offerings."}</h1>
-                    <Link<Route> to={Route::Login}>{"Login"}</Link<Route>>
+                    <h1>{"You must be logged in to access our offerings."}</h1>
+                    <div class={"curated-resources"}>
+                        <h4>{"Though we have curated a few resources that may be of interest."}</h4>
+                        <Link<Route> to={Route::Inquire}>{"Inquire About Our Services"}</Link<Route>>
+                    </div>
 
                 </div>
             }

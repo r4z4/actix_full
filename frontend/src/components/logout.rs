@@ -18,6 +18,7 @@ pub fn logout(props: &Props) -> Html {
     let user_logout = Callback::from(move |_| {
         // Clear store
         dispatch.reduce_mut(|store| store.token = None);
+        dispatch.reduce_mut(|store| store.is_authenticated = false);
         dispatch.reduce_mut(|store| store.username = None);
         navigator.push(&Route::Home);
     });

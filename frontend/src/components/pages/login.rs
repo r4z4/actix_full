@@ -10,7 +10,7 @@ use crate::router::Route;
 pub fn login() -> Html {
     let login_form_submit = Callback::from(|data: Data| {
         log!("Username is", data.username);
-        log!("Passwrod is", data.password);
+        log!("Password is", data.password);
     });
 
     let data_display_loaded = Callback::from(|message: String| log!(message));

@@ -3,7 +3,7 @@ use gloo_console::log;
 use reqwasm::{Error, http::Request};
 use serde_json::json;
 use crate::{
-    components::{select_input::SelectInput, date_input::DateInput, text_input::TextInput},
+    components::inputs::{select_input::SelectInput, date_input::DateInput, text_input::TextInput},
     store::{set_engagement, set_loading, set_show_alert, Store},
 };
 use common::{ClientPostRequest, ApiClientResponse};
@@ -228,9 +228,9 @@ pub fn ClientsForm() -> Html {
             </header>
             <form onsubmit={on_submit}>
                 <div class="form-body">
-                    <TextInput label={"First Name"} placeholder={"First Name"} onchange={handle_f_name_input} />
-                    <TextInput label={"Last Name"} placeholder={"Last Name"} onchange={handle_l_name_input} />
-                    <TextInput label={"Company Name"} placeholder={"Company Name"} onchange={handle_company_name_input} />
+                    <TextInput label={"First Name"} name={"client_f_name"} placeholder={"First Name"} onchange={handle_f_name_input} />
+                    <TextInput label={"Last Name"} name={"client_l_name"} placeholder={"Last Name"} onchange={handle_l_name_input} />
+                    <TextInput label={"Company Name"} name={"client_company_name"} placeholder={"Company Name"} onchange={handle_company_name_input} />
 
                     <DateInput date={client_dob_clone} label={"DOB"} onchange={handle_dob_select} />
 

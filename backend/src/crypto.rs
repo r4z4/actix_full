@@ -70,7 +70,7 @@ pub struct CreateUserBody {
         message = "Username must contain number & alphabets only & must be 6 characters long"
     ))]
     username: String,
-    #[validate(length(min = 3, message = "Username must be greater than 3 chars"))]
+    #[validate(length(min = 3, message = "Email must be greater than 3 chars"))]
     email: String,
     #[validate(
         custom(

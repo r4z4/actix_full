@@ -1,17 +1,12 @@
 use common::ApiLoginResponse;
-use gloo::console::log;
 use reqwasm::http::Request;
 use reqwasm::Error;
-use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::ops::Deref;
-use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 use yewdux::functional::use_store;
-use yewdux::prelude::*;
-use yewdux::store::*;
 
 use crate::components::button::Button;
 use crate::router::{switch, Route};
@@ -117,6 +112,7 @@ pub fn login_form(props: &Props) -> Html {
             match response {
                 Ok(response) => {
                     dispatch.reduce_mut(|store| store.token = Some(response.token));
+                    dispatch.reduce_mut(|store| store.is_authenticated = true);
                     navigator.push(&Route::Home);
                 }
                 Err(err) => {

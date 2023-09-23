@@ -4,4 +4,5 @@ pub mod clients;
 pub mod engagements;
 pub mod home;
 pub mod login;
+pub mod inquire;
 pub mod register;

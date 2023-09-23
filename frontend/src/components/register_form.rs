@@ -1,91 +1,160 @@
-use crate::components::button::Button;
-use crate::components::email_input::EmailInput;
-use crate::store::AuthStore;
+use crate::components::inputs::required_text_input::RequiredTextInput;
+use crate::components::inputs::text_input::TextInput;
+use crate::components::matched_icon::MatchedIcon;
+use crate::{components::button::Button, store::set_show_alert};
+use crate::components::inputs::email_input::EmailInput;
+use crate::store::{AuthStore, Store};
+use reqwasm::http::Request;
+use reqwasm::Error;
+use serde_json::json;
 // use crate::components::units::text_input::TextInput;
 use std::ops::Deref;
+use common::{ApiRegisterResponse, RegisterUserRequest};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 use yewdux::prelude::use_store;
 
-#[derive(Default, Clone)]
-pub struct Data {
-    pub username: String,
-    pub password: String,
-    pub re_password: String,
-    pub email: String,
-}
-
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub form_title: String,
-    pub onsubmit: Callback<Data>,
+    pub onsubmit: Callback<RegisterUserRequest>,
+}
+
+pub async fn register_user(new_user: RegisterUserRequest) -> Result<ApiRegisterResponse, Error> {
+    let body = json!(new_user);
+    let response = Request::post("http://localhost:8000/register")
+        .header("Content-Type", "application/json")
+        .body(body.to_string())
+        .send()
+        .await
+        .unwrap()
+        .json::<ApiRegisterResponse>()
+        .await;
+
+    match response {
+        Ok(response) => Ok(response),
+        Err(err) => Err(err),
+    }
+}
+
+fn vec_to_html(list: &Vec<String>) -> Vec<Html> {
+    list.iter()
+        .map(|string| {
+            html! {<ul class="data-display">
+                <li>{string.clone()}</li>
+            </ul>}
+        })
+        .collect()
+}
+
+#[derive(Default, Clone)]
+pub struct RePass {
+    re_password: String,
+    matched: Option<bool>,
 }
 
 #[function_component(RegisterForm)]
 pub fn register_form(props: &Props) -> Html {
-    let (store, dispatch) = use_store::<AuthStore>();
-    let state: UseStateHandle<Data> = use_state(|| Data::default());
-    let navigator = use_navigator().unwrap();
+    let (auth_store, auth_dispatch) = use_store::<AuthStore>();
+    let (store, dispatch) = use_store::<Store>();
+    let u_state: UseStateHandle<String> = use_state(|| String::from(""));
+    let p_state: UseStateHandle<String> = use_state(|| String::from(""));
+    let e_state: UseStateHandle<String> = use_state(|| String::from(""));
+    let re_pass_state = use_state(|| RePass::default());
+    let error_state = use_state(|| None);
 
-    let cloned_state: UseStateHandle<Data> = state.clone();
-    // let username_changed: Callback<String> = Callback::from(move |username| {
-    //     let mut data: Data = cloned_state.deref().clone();
-    //     data.username = username;
-    //     cloned_state.set(data);
-    // });
-    let onchange_username = {
-        let cloned_data_state = state.clone();
-        let dispatch = dispatch.clone();
-        Callback::from(move |event: Event| {
-            let username: String = event.target_unchecked_into::<HtmlInputElement>().value();
-            let username: Option<String> = if username.is_empty() {
-                None
+    let u_state_clone = u_state.clone();
+    let username_changed: Callback<String> = Callback::from(move |username| {
+        // Move this inside so it clones the data in there
+        let cloned_state: UseStateHandle<String> = u_state_clone.clone();
+        cloned_state.set(username);
+    });
+
+    let p_state_clone = p_state.clone();
+    let password_changed: Callback<String> = Callback::from(move |password| {
+        // Move this inside so it clones the data in there
+        let cloned_state: UseStateHandle<String> = p_state_clone.clone();
+        cloned_state.set(password);
+    });
+    
+    let p_state_clone = p_state.clone();
+    let re_password_changed: Callback<String> = {
+        let cloned_state: UseStateHandle<RePass> = re_pass_state.clone();
+        Callback::from(move |re_password| {
+            let mut data: RePass = cloned_state.deref().clone();
+            if re_password == p_state_clone.deref().clone() {
+                data.matched = Some(true);
             } else {
-                Some(username)
-            };
-            let cloned_username = username.clone();
-            dispatch.reduce_mut(|store| store.username = username);
-            let mut data = cloned_data_state.deref().clone();
-            data.username = cloned_username.unwrap();
-            cloned_data_state.set(data);
+                data.matched = Some(false);
+            }
+            data.re_password = re_password;
+            cloned_state.set(data);
         })
     };
+    let re_pass_ref = re_pass_state.deref().clone();
 
-    let cloned_state: UseStateHandle<Data> = state.clone();
-    let password_changed: Callback<String> = Callback::from(move |password| {
-        let mut data: Data = cloned_state.deref().clone();
-        data.password = password;
+    let e_state_clone = e_state.clone();
+    let email_changed: Callback<String> = Callback::from(move |email| {
+        let cloned_state: UseStateHandle<String> = e_state_clone.clone();
+        let mut data: String = cloned_state.deref().clone();
         cloned_state.set(data);
     });
-
-    let cloned_state: UseStateHandle<Data> = state.clone();
-    let re_password_changed: Callback<String> = Callback::from(move |re_password| {
-        let mut data: Data = cloned_state.deref().clone();
-        data.re_password = re_password;
-        cloned_state.set(data);
-    });
-
-    let cloned_state: UseStateHandle<Data> = state.clone();
-    let email_changed: Callback<String> = Callback::from(move |password| {
-        let mut data: Data = cloned_state.deref().clone();
-        data.password = password;
-        cloned_state.set(data);
-    });
-
+    let error_state_clone = error_state.clone();
     let form_onsubmit = props.onsubmit.clone();
-    let cloned_state = state.clone();
     let onsubmit: Callback<SubmitEvent> = Callback::from(move |event: SubmitEvent| {
+        let dispatch_clone = dispatch.clone();
+        let error_state_ref = error_state_clone.clone();
         event.prevent_default();
-        let data = cloned_state.deref().clone();
-        form_onsubmit.emit(data);
+
+        // form_onsubmit.emit(data);
+        if re_pass_ref.matched.is_some() && re_pass_ref.matched.unwrap() == false {
+            let mut error_list = vec![];
+            let mut errors = error_state_ref.clone();
+            error_list.push("you suck".to_string());
+            errors.set(Some(error_list));
+        }
+        let username = u_state.deref().clone();
+        let password = p_state.deref().clone();
+        let email = e_state.deref().clone();
+        let new_user = RegisterUserRequest {
+            username: username,
+            password: password,
+            email: email,
+        };
+        wasm_bindgen_futures::spawn_local(async move {
+            let response = register_user(new_user).await;
+            match response {
+                Ok(response) => {
+                    set_show_alert(format!("Congrats {}. You have registered successfully", response.username).to_string(), dispatch_clone.clone());
+                    // dispatch.reduce_mut(|store| store.is_authenticated = true);
+                    // navigator.push(&Route::Home);
+                }
+                Err(err) => {
+                    let mut error_list = vec![];
+                    let mut errors = error_state_ref.clone();
+                    error_list.push(err.to_string());
+                    errors.set(Some(error_list));
+                    // navigator.push(&Route::Home);
+                }
+            }
+            // Use this
+            // log!(response.token)
+        })
     });
+    
     html! {
         <div>
             <h3>{props.form_title.deref().clone()}</h3>
             <form onsubmit={onsubmit}>
+                if let Some(errors) = error_state.deref() {
+                    <p>{vec_to_html(&errors)}</p>
+                }
                 // <TextInput class={"half-input"} name="username" placeholder="Userame" handle_onchange={username_changed} />
-                <input type="text" class={"half-input"} name="username" placeholder="Userame" onchange={onchange_username} /><br />
+                <RequiredTextInput name={"username"} class={"half-input"} placeholder={"Userame"} onchange={username_changed} /><br />
+                <RequiredTextInput name={"password"} class={"half-input"} placeholder={"Password"} onchange={password_changed}/>
+                <MatchedIcon state={re_pass_state.matched}/>
+                <RequiredTextInput name={"re-password"} class={"half-input"} placeholder={"Re-enter Password"} onchange={re_password_changed} />
                 <EmailInput name="email" placeholder="Email" handle_onchange={email_changed} /><br />
                 // <TextInput name="password" placeholder="Password" handle_onchange={password_changed} />
                 // <TextInput name="re_password" placeholder="Reenter Password" handle_onchange={re_password_changed} />
