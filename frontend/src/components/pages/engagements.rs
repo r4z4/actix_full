@@ -1,14 +1,8 @@
 use gloo::console::log;
 use yew::prelude::*;
-use yew_router::prelude::*;
 
-use crate::{
-    components::{
-        engagement_form::EngagementForm, engagement_list::EngagementList,
-        engagement_stats::EngagementStats,
-    },
-    router::Route,
-};
+use crate::components::engagements::{engagement_form::EngagementForm, engagement_stats::EngagementStats, engagement_list::EngagementList};
+
 
 #[function_component(Engagements)]
 pub fn engagements() -> Html {

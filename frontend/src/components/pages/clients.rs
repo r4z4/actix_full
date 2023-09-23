@@ -1,6 +1,7 @@
-use crate::components::{consults_display::ConsultsDisplay, consults_form::ConsultsForm, clients_form::ClientsForm, clients_display::ClientsDisplay};
 use gloo::console::log;
 use yew::prelude::*;
+
+use crate::components::clients::{clients_display::ClientsDisplay, clients_form::ClientsForm};
 
 #[function_component(Clients)]
 pub fn clients() -> Html {

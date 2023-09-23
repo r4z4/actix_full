@@ -3,20 +3,15 @@ mod components;
 mod router;
 mod store;
 
-use components::{
-    alert::{AlertComponent, Props as AlertProps},
-    engagement_form::EngagementForm,
-    engagement_list::EngagementList,
-    engagement_stats::EngagementStats,
-};
+use components::alert::{AlertComponent, Props as AlertProps};
 use store::Store;
 use stylist::Style;
 use yew::prelude::*;
-use yew_router::{prelude::Link, BrowserRouter, Switch};
+use yew_router::{BrowserRouter, Switch};
 use yewdux::prelude::*;
 
 use crate::{
-    components::{nav::Nav, pages::home::Home},
+    components::nav::Nav,
     router::{switch, Route},
 };
 

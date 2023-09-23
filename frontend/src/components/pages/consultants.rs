@@ -1,5 +1,5 @@
 use crate::components::{
-    consultants_display::ConsultantsDisplay, consults_display::ConsultsDisplay,
+    consultants_display::ConsultantsDisplay,
 };
 use gloo::console::log;
 use yew::prelude::*;

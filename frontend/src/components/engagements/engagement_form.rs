@@ -1,5 +1,4 @@
-use super::rating::Rating;
-use crate::store::{set_engagement, set_loading, set_show_alert, Store};
+use crate::{store::{set_engagement, set_loading, set_show_alert, Store}, components::rating::Rating};
 use common::Engagement;
 use gloo::file::File;
 use uuid::Uuid;
