@@ -17,8 +17,7 @@ use actix_web::middleware::Logger;
 use actix_web::{http, Error, HttpMessage};
 use actix_web::{http::header, web, App, HttpServer};
 use actix_web_httpauth::extractors::basic::{self, BasicAuth};
-use actix_web_httpauth::extractors::bearer::BearerAuth;
-use actix_web_httpauth::extractors::{bearer, AuthenticationError};
+use actix_web_httpauth::extractors::AuthenticationError;
 use actix_web_httpauth::middleware::HttpAuthentication;
 use common::SelectOption;
 use dotenv::dotenv;
@@ -35,7 +34,6 @@ use std::time::Duration;
 use std::{env, thread};
 
 use scopes::admin::admin_scope;
-use scopes::message::message_scope;
 use scopes::user::user_scope;
 
 #[derive(Debug)]

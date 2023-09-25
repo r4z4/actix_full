@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Statement};
-use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum StateAbbr {
@@ -111,7 +110,7 @@ pub struct ConsultModel {
     pub consult_id: i32,
     pub client_id: i32,
     pub consultant_id: i32,
-    pub consult_location: i32,
+    pub location_id: i32,
     pub consult_start: Option<chrono::DateTime<chrono::Utc>>,
     pub consult_end: Option<chrono::DateTime<chrono::Utc>>,
     pub notes: Option<String>,

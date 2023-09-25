@@ -3,25 +3,25 @@ use gloo_console::log;
 use reqwasm::{Error, http::Request};
 use serde_json::json;
 use crate::{
-    components::inputs::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput},
+    components::inputs::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput, required_text_input::RequiredTextInput},
     store::{set_loading, set_show_alert, Store},
 };
-use common::{ResponseConsult, ConsultPostRequest, ConsultPostResponse};
+use common::{ApiConsultantResponse, ConsultantPostRequest};
 use gloo::file::File;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;
 
-pub async fn post_consult(new_consult: ConsultPostRequest) -> Result<ConsultPostResponse, Error> {
-    let body = json!(new_consult);
-    let response = Request::post("http://localhost:8000/api/consults/form")
+pub async fn post_consultant(new_consultant: ConsultantPostRequest) -> Result<ApiConsultantResponse, Error> {
+    let body = json!(new_consultant);
+    let response = Request::post("http://localhost:8000/api/consultants/form")
         .header("Content-Type", "application/json")
         .body(body.to_string())
         .send()
         .await
         .unwrap()
-        .json::<ConsultPostResponse>()
+        .json::<ApiConsultantResponse>()
         .await;
 
     match response {
@@ -35,16 +35,32 @@ pub fn ConsultsForm() -> Html {
     let (store, dispatch) = use_store::<Store>();
     let loading = &store.loading;
     let file: UseStateHandle<Option<File>> = use_state(|| None);
+    let f_state: UseStateHandle<String> = use_state(|| String::from(""));
+    let l_state: UseStateHandle<String> = use_state(|| String::from(""));
 
-    let consultant_id: UseStateHandle<Option<i32>> = use_state(|| None);
-    let client_id: UseStateHandle<Option<i32>> = use_state(|| None);
-    let location_id: UseStateHandle<Option<i32>> = use_state(|| None);
+    let error_state = use_state(|| None);
+
+    let f_state_clone = f_state.clone();
+    let consultant_f_name_changed: Callback<String> = Callback::from(move |consultant_f_name| {
+        // Move this inside so it clones the data in there
+        let cloned_state: UseStateHandle<String> = f_state_clone.clone();
+        cloned_state.set(consultant_f_name);
+    });
+
+    let l_state_clone = l_state.clone();
+    let consultant_l_name_changed: Callback<String> = Callback::from(move |consultant_l_name| {
+        // Move this inside so it clones the data in there
+        let cloned_state: UseStateHandle<String> = l_state_clone.clone();
+        cloned_state.set(consultant_l_name);
+    });
 
     let start_date: UseStateHandle<Option<String>> = use_state(|| None);
     let end_date: UseStateHandle<Option<String>> = use_state(|| None);
+    let specialty_id: UseStateHandle<Option<i32>> = use_state(|| None);
+    let territory_id: UseStateHandle<Option<i32>> = use_state(|| None);
 
-    let start_time: UseStateHandle<Option<String>> = use_state(|| None);
-    let end_time: UseStateHandle<Option<String>> = use_state(|| None);
+    let consultant_f_name: UseStateHandle<Option<String>> = use_state(|| None);
+    let consultant_l_name: UseStateHandle<Option<String>> = use_state(|| None);
 
     let notes = use_state(|| None);
 
@@ -79,22 +95,15 @@ pub fn ConsultsForm() -> Html {
         })
     };
 
-    let handle_client_id_select = {
-        let id = client_id.clone();
+    let handle_territory_id_select = {
+        let id = territory_id.clone();
         Callback::from(move |value| {
             id.set(Some(value));
         })
     };
 
-    let handle_consultant_id_select = {
-        let id = consultant_id.clone();
-        Callback::from(move |value| {
-            id.set(Some(value));
-        })
-    };
-
-    let handle_location_id_select = {
-        let id = location_id.clone();
+    let handle_specialty_id_select = {
+        let id = specialty_id.clone();
         Callback::from(move |value| {
             id.set(Some(value));
         })
@@ -107,39 +116,23 @@ pub fn ConsultsForm() -> Html {
         })
     };
 
-    let handle_start_time_select = {
-        let time = start_time.clone();
-        Callback::from(move |value: String| {
-            log!(value.clone());
-            time.set(Some(value));
-        })
-    };
-
     let handle_end_date_select = {
         let date = end_date.clone();
         Callback::from(move |value| {
             date.set(Some(value));
         })
     };
-
-    let handle_end_time_select = {
-        let time = end_time.clone();
-        Callback::from(move |value| {
-            time.set(Some(value));
-        })
-    };
-
+    let error_state_clone = error_state.clone();
     let on_submit = {
         log!("on submit");
         let cloned_dispatch = dispatch.clone();
-        let consultant_id = consultant_id.deref().clone();
-        let client_id = client_id.deref().clone();
-        let location_id = location_id.deref().clone();
+
+        let specialty_id = specialty_id.deref().clone();
+        let territory_id = territory_id.deref().clone();
 
         let start_date = start_date.deref().clone();
         let end_date = end_date.deref().clone();
-        let start_time = start_time.deref().clone();
-        let end_time = end_time.deref().clone();
+
         let notes = notes.clone();
         let message = message.clone();
         let text_input_ref = text_input_ref.clone();
@@ -147,12 +140,14 @@ pub fn ConsultsForm() -> Html {
         Callback::from(move |event: SubmitEvent| {
             log!("hitting callback");
             let dispatch = cloned_dispatch.clone();
+            let consultant_f_name = consultant_f_name.deref();
+            let consultant_l_name = consultant_l_name.deref();
+            let error_state_ref = error_state_clone.clone();
             event.prevent_default();
             let notes = notes.clone();
             let start_date_ta = start_date.clone();
             let end_date_ta = end_date.clone();
-            let start_time_ta = start_time.clone();
-            let end_time_ta = end_time.clone();
+
             let binding = notes.clone();
             let notes_ta = binding.deref();
             set_loading(true, dispatch.clone());
@@ -165,33 +160,34 @@ pub fn ConsultsForm() -> Html {
                 }
             }
 
-            let new_consult = ConsultPostRequest {
+            let new_consultant = ConsultantPostRequest {
                 // consult_id: i32,
-                client_id: client_id.unwrap(),
-                consultant_id: consultant_id.unwrap(),
-                consult_location: location_id.unwrap(),
+
+                consultant_f_name: consultant_f_name.clone().unwrap(),
+                consultant_l_name: consultant_l_name.clone().unwrap(),
+                specialty_id: specialty_id.unwrap(),
+                territory_id: specialty_id.unwrap(),
                 start_date: start_date_ta,
                 end_date: end_date_ta,
-                start_time: start_time_ta,
-                end_time: end_time_ta,
+
                 notes: notes_ta.clone(),
             };
 
             wasm_bindgen_futures::spawn_local(async move {
                 log!("local spawned");
-                let response = post_consult(new_consult).await;
+                let response = post_consultant(new_consultant).await;
                 match response {
                     Ok(response) => {
                         // dispatch.reduce_mut(|store| store.token = Some(response.token));
                         // navigator.push(&Route::Consult);
-                        set_show_alert(format!("Consult {} added successfully", response.consult_id).to_string(), dispatch.clone());
+                        set_show_alert(format!("Consult {} added successfully", response.consultant_id).to_string(), dispatch.clone());
                     }
                     Err(err) => {
-                        // let mut form_data = cloned_form_data.deref().clone();
-                        // form_data.error = Some(err.to_string());
-                        // cloned_form_data.set(data);
-                        set_show_alert(format!("Error adding consult {}", err).to_string(), dispatch.clone());
-                        // navigator.push(&Route::Home);
+                        set_show_alert(format!("Error adding consultant {}", err).to_string(), dispatch.clone());
+                        let mut error_list = vec![];
+                        let mut errors = error_state_ref.clone();
+                        error_list.push(err.to_string());
+                        errors.set(Some(error_list));
                     }
                 }
                 // Use this
@@ -208,8 +204,7 @@ pub fn ConsultsForm() -> Html {
     };
     let final_start_date_clone = start_date.clone().deref().clone();
     let final_end_date_clone = end_date.clone().deref().clone();
-    let final_start_time_clone = start_time.clone().deref().clone();
-    let final_end_time_clone = end_time.clone().deref().clone();
+
     html! {
         <div class="form-container">
             <header class="form-header">
@@ -217,21 +212,22 @@ pub fn ConsultsForm() -> Html {
             </header>
             <form onsubmit={on_submit}>
                 <div class="form-body">
-                    <SelectInput label={"Location"} select_type={"location"} onchange={handle_location_id_select} />
-                    <SelectInput label={"Consultant"} select_type={"consultant"} onchange={handle_consultant_id_select} />
-                    <SelectInput label={"Client"} select_type={"client"} onchange={handle_client_id_select} />
+
+                    <RequiredTextInput input_type={"text"} name={"consultant_f_name"} class={"half-input"} placeholder={"First Name"} onchange={consultant_f_name_changed} />
+                    <RequiredTextInput input_type={"text"} name={"consultant_l_name"} class={"half-input"} placeholder={"Userame"} onchange={consultant_l_name_changed} />
+
+                    <SelectInput label={"Specialty"} select_type={"location"} onchange={handle_specialty_id_select} />
+                    <SelectInput label={"Terrotiry"} select_type={"consultant"} onchange={handle_territory_id_select} />
 
                     <DateInput date={final_start_date_clone} label={"Start Date"} onchange={handle_start_date_select} />
                     <DateInput date={final_end_date_clone} label={"End Date"} onchange={handle_end_date_select} />
 
-                    <TimeInput time={final_start_time_clone} label={"Start Time"} onchange={handle_start_time_select} />
-                    <TimeInput time={final_end_time_clone} label={"End Time"} onchange={handle_end_time_select} />
                     <input
                         type="textarea"
                         ref={text_input_ref}
                         oninput={handle_input}
                         class="text-input"
-                        placeholder="Consult notes ..."
+                        placeholder="Consultant notes ..."
                     />
                 <button
                     type="submit"
