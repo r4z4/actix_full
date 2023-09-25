@@ -2,6 +2,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::components::logout::Logout;
+use crate::components::user_menu::UserMenu;
 use crate::router::Route;
 
 #[derive(Properties, PartialEq)]
@@ -19,6 +20,7 @@ pub fn nav(props: &Props) -> Html {
                 <li><Link<Route> to={Route::Consultants}>{"Consultants"}</Link<Route>></li>
                 <li><Link<Route> to={Route::Clients}>{"Clients"}</Link<Route>></li>
                 <li><Link<Route> to={Route::Home}>{"🏠"}</Link<Route>></li>
+                <li><UserMenu label={"label"} /></li>
                 <li><Logout label={"->"}/></li>
             </ul>
         </div>

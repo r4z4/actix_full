@@ -1,4 +1,4 @@
-use crate::components::{
+use crate::components::consultants::{
     consultants_display::ConsultantsDisplay,
 };
 use gloo::console::log;

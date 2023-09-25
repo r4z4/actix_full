@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 
 CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
-        account_id INTEGER NOT NULL,
+        account_id INTEGER NOT NULL DEFAULT 3,
         username TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
         secret TEXT DEFAULT NULL,
@@ -203,6 +203,7 @@ INSERT INTO accounts (account_name, account_secret)
 VALUES 
 ('root', 'root_secret'),
 ('admin', 'admin_secret'),
+('default_user', 'user_secret'),
 ('default_client', 'client_secret'),
 ('default_company_client', 'company_client_secret');
 

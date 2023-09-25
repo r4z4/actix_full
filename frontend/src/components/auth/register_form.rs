@@ -1,6 +1,6 @@
 use crate::components::inputs::required_text_input::RequiredTextInput;
 use crate::components::inputs::text_input::TextInput;
-use crate::components::matched_icon::MatchedIcon;
+use crate::components::auth::matched_icon::MatchedIcon;
 use crate::{components::button::Button, store::set_show_alert};
 use crate::components::inputs::email_input::EmailInput;
 use crate::store::{AuthStore, Store};
@@ -41,7 +41,7 @@ pub async fn register_user(new_user: RegisterUserRequest) -> Result<ApiRegisterR
 fn vec_to_html(list: &Vec<String>) -> Vec<Html> {
     list.iter()
         .map(|string| {
-            html! {<ul class="data-display">
+            html! {<ul class="errors-list">
                 <li>{string.clone()}</li>
             </ul>}
         })
@@ -97,8 +97,7 @@ pub fn register_form(props: &Props) -> Html {
     let e_state_clone = e_state.clone();
     let email_changed: Callback<String> = Callback::from(move |email| {
         let cloned_state: UseStateHandle<String> = e_state_clone.clone();
-        let mut data: String = cloned_state.deref().clone();
-        cloned_state.set(data);
+        cloned_state.set(email);
     });
     let error_state_clone = error_state.clone();
     let form_onsubmit = props.onsubmit.clone();
@@ -126,7 +125,7 @@ pub fn register_form(props: &Props) -> Html {
             let response = register_user(new_user).await;
             match response {
                 Ok(response) => {
-                    set_show_alert(format!("Congrats {}. You have registered successfully", response.username).to_string(), dispatch_clone.clone());
+                    set_show_alert(format!("Congrats {}. You have registered successfully. Click here to log in!", response.username).to_string(), dispatch_clone.clone());
                     // dispatch.reduce_mut(|store| store.is_authenticated = true);
                     // navigator.push(&Route::Home);
                 }
@@ -148,17 +147,19 @@ pub fn register_form(props: &Props) -> Html {
             <h3>{props.form_title.deref().clone()}</h3>
             <form onsubmit={onsubmit}>
                 if let Some(errors) = error_state.deref() {
-                    <p>{vec_to_html(&errors)}</p>
+                    <div class={"errors-div"}>
+                        {vec_to_html(&errors)}
+                    </div>
                 }
                 // <TextInput class={"half-input"} name="username" placeholder="Userame" handle_onchange={username_changed} />
-                <RequiredTextInput name={"username"} class={"half-input"} placeholder={"Userame"} onchange={username_changed} /><br />
-                <RequiredTextInput name={"password"} class={"half-input"} placeholder={"Password"} onchange={password_changed}/>
+                <RequiredTextInput input_type={"text"} name={"username"} class={"half-input"} placeholder={"Userame"} onchange={username_changed} />
+                <RequiredTextInput input_type={"password"} name={"password"} class={"half-input"} placeholder={"Password"} onchange={password_changed} />
                 <MatchedIcon state={re_pass_state.matched}/>
-                <RequiredTextInput name={"re-password"} class={"half-input"} placeholder={"Re-enter Password"} onchange={re_password_changed} />
-                <EmailInput name="email" placeholder="Email" handle_onchange={email_changed} /><br />
+                <RequiredTextInput input_type={"password"} name={"re-password"} class={"half-input"} placeholder={"Re-enter Password"} onchange={re_password_changed} />
+                <EmailInput name={"email"} class={"half-input"} placeholder={"Email"} handle_onchange={email_changed} required={true}/><br />
                 // <TextInput name="password" placeholder="Password" handle_onchange={password_changed} />
                 // <TextInput name="re_password" placeholder="Reenter Password" handle_onchange={re_password_changed} />
-                <Button label="Submit" />
+                <Button class={"submit-btn"} label={"Submit"} />
             </form>
         </div>
     }

@@ -3,7 +3,7 @@ use reqwasm::http::Request;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-use crate::components::login_form::{Data, LoginForm};
+use crate::components::auth::login_form::{Data, LoginForm};
 use crate::router::Route;
 
 #[function_component(Login)]

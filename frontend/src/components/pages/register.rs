@@ -3,7 +3,7 @@ use gloo::console::log;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-use crate::components::register_form::RegisterForm;
+use crate::components::auth::register_form::RegisterForm;
 use crate::router::Route;
 
 #[function_component(Register)]

@@ -31,6 +31,8 @@ fn App() -> Html {
         delay_ms: 5000,
     };
 
+    let auth_ref = auth_store.as_ref();
+
     html! {
         <>
             <main class={stylesheet}>
@@ -41,7 +43,7 @@ fn App() -> Html {
                      />
                 }
 
-            if auth_store.is_authenticated {
+            if auth_ref.token.is_some() {
                 <BrowserRouter>
                     // Nav needs to be child of BrowserRouter
                     // <Logout label={"⇥"} />

@@ -40,7 +40,7 @@ pub struct AuthUser {
 }
 
 lazy_static! {
-    static ref RE_USER_NAME: Regex = Regex::new(r"^[a-zA-Z0-9]{6,}$").unwrap();
+    static ref RE_USER_NAME: Regex = Regex::new(r"^[a-zA-Z0-9]{4,}$").unwrap();
     static ref RE_SPECIAL_CHAR: Regex = Regex::new("^.*?[@$!%*?&].*$").unwrap();
 }
 
@@ -94,7 +94,7 @@ async fn register_user(state: Data<AppState>, body: Json<CreateUserBody>) -> imp
     }
     let _ = dbg!(is_valid);
     let user: CreateUserBody = body.into_inner();
-    let hash_secret = std::env::var("HASH_SECRET").unwrap();
+    let hash_secret = std::env::var("HASH_SECRET").unwrap_or("Ugh".to_owned());
     let mut hasher = Hasher::default();
     let hash = hasher
         .with_password(user.password)

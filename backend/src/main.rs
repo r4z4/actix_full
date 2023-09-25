@@ -21,6 +21,7 @@ use actix_web_httpauth::extractors::bearer::BearerAuth;
 use actix_web_httpauth::extractors::{bearer, AuthenticationError};
 use actix_web_httpauth::middleware::HttpAuthentication;
 use common::SelectOption;
+use dotenv::dotenv;
 use jsonwebtoken::{
     decode, errors::Error as JwtError, Algorithm, DecodingKey, TokenData, Validation,
 };
@@ -195,6 +196,7 @@ async fn main() -> std::io::Result<()> {
         std::env::set_var("RUST_LOG", "actix_web=info");
     }
     env_logger::init();
+    dotenv().ok();
     get_config();
     let database_url = env::var("DATABASE_URL").unwrap_or(env!("DATABASE_URL").to_owned());
     // let database_url = env!("DATABASE_URL");

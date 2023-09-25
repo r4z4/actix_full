@@ -6,11 +6,15 @@ use yew::prelude::*;
 pub struct Props {
     pub name: String,
     pub placeholder: String,
+    pub class: String,
     pub handle_onchange: Callback<String>,
+    pub required: bool,
 }
 
 #[function_component(EmailInput)]
 pub fn email_input(props: &Props) -> Html {
+    let required = props.required;
+    let class = &props.class;
     let handle_onchange: Callback<String> = props.handle_onchange.clone();
     let input_string: UseStateHandle<String> = use_state(|| "".to_owned());
     let onchange = {
@@ -23,6 +27,6 @@ pub fn email_input(props: &Props) -> Html {
         })
     };
     html! {
-        <input type="email" name={props.name.clone()} placeholder={props.placeholder.clone()} onchange={onchange}/>
+        <input type={"email"} class={class} name={props.name.clone()} placeholder={props.placeholder.clone()} onchange={onchange} required={required} />
     }
 }

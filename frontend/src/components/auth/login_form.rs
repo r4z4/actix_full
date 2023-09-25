@@ -138,11 +138,13 @@ pub fn login_form(props: &Props) -> Html {
             <h3>{props.form_title.deref().clone()}</h3>
             <form onsubmit={onsubmit}>
                 if cloned_state.error.is_some() {
-                    <p>{cloned_state.error.as_ref()}</p>
+                    <div class={"errors-div"}>
+                        {cloned_state.error.as_ref()}
+                    </div>
                 }
-                <input type="text" placeholder="Username" onchange={onchange_username} /><br />
-                <input type="text" placeholder="Password" onchange={onchange_password} /><br />
-                <Button label="Login" />
+                <input type="text" placeholder="Username" onchange={onchange_username} required={true} /><br />
+                <input type="password" placeholder="Password" onchange={onchange_password} required={true} /><br />
+                <Button class={"submit-btn"} label="Login" />
             </form>
         </div>
     }

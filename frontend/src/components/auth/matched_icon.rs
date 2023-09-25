@@ -11,9 +11,9 @@ pub fn matched_icon(props: &Props) -> Html {
     html! {
         if props.state.is_some() {
             if props.state.unwrap() == true {
-                <icon class={"matched-icon"}>{"✅"}</icon>
+                <icon class={"matched-icon text-green"}>{"✅ Passwords Match"}</icon>
             } else {
-                <icon class={"matched-icon"}>{"❌"}</icon>
+                <icon class={"matched-icon text-red"}>{"❌ Passwords Do Not Match"}</icon>
             }
         }
     }
