@@ -138,7 +138,7 @@ pub struct ResponseConsult {
     pub consult_id: i32,
     pub location_id: i32,
     // #[serde(serialize_with = "serialize_dt", skip_serializing_if  = "Option::is_none")]
-    pub consult_start: DateTime<Utc>,
+    // pub consult_start_utc: Option<DateTime<Utc>>,
     pub notes: Option<String>,
 }
 

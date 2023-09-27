@@ -513,7 +513,7 @@ pub async fn get_consults_handler(
 
     let query_result = sqlx::query_as!(
         ResponseConsult,
-        "SELECT consult_id, location_id, consult_start, notes FROM consults ORDER by consult_id LIMIT $1 OFFSET $2",
+        "SELECT consult_id, location_id, notes FROM consults ORDER by consult_id LIMIT $1 OFFSET $2",
         limit as i32,
         offset as i32
     )
