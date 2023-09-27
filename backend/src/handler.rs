@@ -11,7 +11,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use chrono::{prelude::*, format::strftime};
-use common::{SelectOption, ConsultPostRequest, ResponseConsult, ResponseConsultList};
+use common::{SelectOption, ConsultPostRequest};
 use futures_util::TryStreamExt;
 use image::{imageops::FilterType, DynamicImage};
 use mime::{Mime, IMAGE_GIF, IMAGE_JPEG, IMAGE_PNG, IMAGE_SVG};
@@ -503,44 +503,6 @@ pub async fn get_users_handler(
     // HttpResponse::NoContent().finish()
 }
 
-#[get("/consults")]
-pub async fn get_consults_handler(
-    opts: web::Query<FilterOptions>,
-    data: web::Data<AppState>,
-) -> impl Responder {
-    let limit = opts.limit.unwrap_or(10);
-    let offset = (opts.page.unwrap_or(1) - 1) * limit;
-
-    let query_result = sqlx::query_as!(
-        ResponseConsult,
-        "SELECT consult_id, location_id, notes FROM consults ORDER by consult_id LIMIT $1 OFFSET $2",
-        limit as i32,
-        offset as i32
-    )
-    .fetch_all(&data.db)
-    .await;
-
-    if query_result.is_err() {
-        let message = "Error occurred while fetching all consult records";
-        return HttpResponse::InternalServerError()
-            .json(json!({"status": "error","message": message}));
-    }
-
-    let consults = query_result.unwrap();
-
-    let json_response = ResponseConsultList {
-        consults: consults,
-    };
-
-    // let json_response = serde_json::json!({
-    //     "status": "success",
-    //     "results": users.len(),
-    //     "engagements": users
-    // });
-    HttpResponse::Ok().json(json_response)
-    // HttpResponse::NoContent().finish()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseConsultantList {
     pub consultants: Vec<ResponseConsultant>,
@@ -548,7 +510,7 @@ pub struct ResponseConsultantList {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseConsultant {
     pub consultant_id: i32,
-    pub specialty_id: i32,
+    pub specialty: String,
     pub img_path: Option<String>,
 }
 
@@ -562,7 +524,7 @@ pub async fn get_consultants_handler(
 
     let query_result = sqlx::query_as!(
         ResponseConsultant,
-        "SELECT consultant_id, specialty_id, img_path FROM consultants ORDER by consultant_id LIMIT $1 OFFSET $2",
+        "SELECT consultant_id, specialty, img_path FROM consultants ORDER by consultant_id LIMIT $1 OFFSET $2",
         limit as i32,
         offset as i32
     )
@@ -604,7 +566,6 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(consultant_options_handler)
         .service(client_options_handler)
         .service(consults_form_submit_handler)
-        .service(get_consults_handler)
         .service(account_options_handler);
 
     conf.service(scope);

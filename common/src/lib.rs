@@ -1,5 +1,4 @@
-use chrono::{FixedOffset, DateTime, serde::ts_seconds, Utc};
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
@@ -7,7 +6,6 @@ pub struct Consult {
     pub consult_id: uuid::Uuid,
     pub client_id: i32,
     pub consultant_id: i32,
-    pub location_id: i32,
     pub user_id: i32,
     // String in common?
     pub created_at: String,
@@ -106,58 +104,13 @@ pub struct ClientPostRequest {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ApiClientResponse {
     pub client_id: i32,
-    pub client_slug: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ConsultPostResponse {
-    pub consult_id: i32,
     pub consult_slug: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ResponseConsultList {
-    pub consults: Vec<ResponseConsult>,
-}
-pub fn serialize_dt<S>(
-    dt: &Option<DateTime<Utc>>, 
-    serializer: S
-) -> Result<S::Ok, S::Error> 
-where
-    S: Serializer {
-    match dt {
-        Some(dt) => {
-            ts_seconds::serialize(dt, serializer)
-        },
-        _ => unreachable!(),
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ResponseConsult {
-    pub consult_id: i32,
-    pub location_id: i32,
-    // #[serde(serialize_with = "serialize_dt", skip_serializing_if  = "Option::is_none")]
-    // pub consult_start_utc: Option<DateTime<Utc>>,
-    pub notes: Option<String>,
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ApiConsultantResponse {
-    pub consultant_id: i32,
-    pub consultant_start: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct ConsultantPostRequest {
-    pub consultant_f_name: String,
-    pub consultant_l_name: String,
-    pub specialty_id: i32,
-    pub territory_id: i32,
-    pub start_date: Option<String>,
-    pub end_date: Option<String>,
-    #[validate(length(min = 10, message = "Notes must be greater than 10 chars"))]
-    pub notes: Option<String>,
+pub struct ApiConsultResponse {
+    pub consult_id: i32,
+    pub consult_start: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]

@@ -6,14 +6,14 @@ use crate::{
     components::inputs::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput},
     store::{set_loading, set_show_alert, Store},
 };
-use common::{ResponseConsult, ConsultPostRequest, ConsultPostResponse};
+use common::{ApiConsultResponse, ConsultPostRequest};
 use gloo::file::File;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;
 
-pub async fn post_consult(new_consult: ConsultPostRequest) -> Result<ConsultPostResponse, Error> {
+pub async fn post_consult(new_consult: ConsultPostRequest) -> Result<ApiConsultResponse, Error> {
     let body = json!(new_consult);
     let response = Request::post("http://localhost:8000/api/consults/form")
         .header("Content-Type", "application/json")
@@ -21,7 +21,7 @@ pub async fn post_consult(new_consult: ConsultPostRequest) -> Result<ConsultPost
         .send()
         .await
         .unwrap()
-        .json::<ConsultPostResponse>()
+        .json::<ApiConsultResponse>()
         .await;
 
     match response {
