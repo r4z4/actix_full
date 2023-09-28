@@ -34,8 +34,8 @@ CREATE TABLE IF NOT EXISTS accounts (
         account_id SERIAL PRIMARY KEY,
         account_name TEXT NOT NULL UNIQUE,
         account_secret TEXT DEFAULT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
     );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -45,11 +45,22 @@ CREATE TABLE IF NOT EXISTS users (
         email TEXT NOT NULL UNIQUE,
         secret TEXT DEFAULT NULL,
         password TEXT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_account_id
             FOREIGN KEY(account_id) 
 	            REFERENCES accounts(account_id)
+    );
+
+CREATE TABLE IF NOT EXISTS specialties (
+        specialty_id SERIAL PRIMARY KEY,
+        specialty_name TEXT NOT NULL
+    );
+
+CREATE TABLE IF NOT EXISTS territories (
+        territory_id SERIAL PRIMARY KEY,
+        territory_name TEXT NOT NULL,
+        territory_states TEXT[] NULL
     );
 
 CREATE TABLE IF NOT EXISTS consultants (
@@ -59,15 +70,41 @@ CREATE TABLE IF NOT EXISTS consultants (
         -- territory consultant_territory NULL,
         consultant_f_name TEXT NOT NULL,
         consultant_l_name TEXT NOT NULL,
-        specialty TEXT NOT NULL,
-        territory TEXT NULL,
+        specialty_id INTEGER NOT NULL,
+        territory_id INTEGER NULL,
         user_id INTEGER NOT NULL,
         img_path TEXT DEFAULT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_user
             FOREIGN KEY(user_id) 
-	            REFERENCES users(user_id)
+	            REFERENCES users(user_id),
+        CONSTRAINT fk_specialty
+            FOREIGN KEY(specialty_id) 
+	            REFERENCES specialties(specialty_id),
+        CONSTRAINT fk_territory
+            FOREIGN KEY(territory_id) 
+	            REFERENCES territories(territory_id)
+    );
+
+CREATE TABLE IF NOT EXISTS consultant_ties (
+        consultant_tie_id SERIAL PRIMARY KEY,
+        consultant_id INTEGER NOT NULL,
+        specialty_id INTEGER NOT NULL,
+        territory_id INTEGER NULL,
+        consultant_start DATE NOT NULL DEFAULT CURRENT_DATE,
+        consultant_end DATE DEFAULT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        CONSTRAINT fk_consultant
+            FOREIGN KEY(consultant_id) 
+	            REFERENCES consultants(consultant_id),
+        CONSTRAINT fk_specialty
+            FOREIGN KEY(specialty_id) 
+	            REFERENCES specialties(specialty_id),
+        CONSTRAINT fk_territory
+            FOREIGN KEY(territory_id) 
+	            REFERENCES territories(territory_id)
     );
 
 CREATE TABLE IF NOT EXISTS clients (
@@ -91,8 +128,8 @@ CREATE TABLE IF NOT EXISTS clients (
         client_email TEXT NULL,
         account_id INTEGER NOT NULL,
         user_id INTEGER NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_user
             FOREIGN KEY(user_id) 
 	            REFERENCES users(user_id),
@@ -109,8 +146,8 @@ CREATE TABLE IF NOT EXISTS contacts (
         contact_email TEXT NOT NULL,
         contact_primary_phone TEXT NULL,
         contact_secondary_phone TEXT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
     );
 
 
@@ -126,11 +163,15 @@ CREATE TABLE IF NOT EXISTS locations (
         location_zip VARCHAR (5) NOT NULL,
         location_phone TEXT NULL,
         location_contact_id INTEGER DEFAULT 1,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        territory_id INTEGER NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_contact
             FOREIGN KEY(location_contact_id) 
-	            REFERENCES contacts(contact_id)
+	            REFERENCES contacts(contact_id),
+        CONSTRAINT fk_territory
+            FOREIGN KEY(territory_id) 
+	            REFERENCES territories(territory_id)
     );
 
 CREATE TABLE IF NOT EXISTS engagements (
@@ -138,8 +179,8 @@ CREATE TABLE IF NOT EXISTS engagements (
         rating INTEGER NOT NULL,
         text TEXT NOT NULL UNIQUE,
         user_id INTEGER DEFAULT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_user
             FOREIGN KEY(user_id) 
 	            REFERENCES users(user_id)
@@ -151,10 +192,10 @@ CREATE TABLE IF NOT EXISTS messages (
         subject TEXT NOT NULL,
         sent_to INTEGER NOT NULL,
         sent_from INTEGER NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
-        read_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        sent_at TIMESTAMPTZ DEFAULT NULL,
+        read_at TIMESTAMPTZ DEFAULT NULL,
         CONSTRAINT fk_sent_to
             FOREIGN KEY(sent_to) 
 	            REFERENCES users(user_id),
@@ -171,8 +212,8 @@ CREATE TABLE IF NOT EXISTS attachments (
         -- channel attachment_channel NOT NULL,
         mime_type TEXT NOT NULL,
         channel TEXT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_user_id
             FOREIGN KEY(user_id) 
 	            REFERENCES users(user_id)
@@ -182,22 +223,36 @@ CREATE TABLE IF NOT EXISTS consults (
         consult_id SERIAL PRIMARY KEY,
         consultant_id INTEGER NOT NULL,
         client_id INTEGER NOT NULL,
-        consult_location INTEGER NOT NULL,
-        consult_start TIMESTAMP WITH TIME ZONE DEFAULT NULL,
-        consult_end TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+        location_id INTEGER NOT NULL,
+        consult_start TIMESTAMPTZ DEFAULT NOW(),
+        consult_end TIMESTAMPTZ DEFAULT NULL,
         notes TEXT DEFAULT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_client
             FOREIGN KEY(client_id) 
 	            REFERENCES clients(client_id),
         CONSTRAINT fk_location
-            FOREIGN KEY(consult_location) 
+            FOREIGN KEY(location_id) 
 	            REFERENCES locations(location_id),
         CONSTRAINT fk_consultant
             FOREIGN KEY(consultant_id) 
 	            REFERENCES consultants(consultant_id)
     );
+
+INSERT INTO territories (territory_id, territory_name, territory_states)
+VALUES
+(1, 'Northeast', ARRAY['NY', 'MA','VT', 'NH', 'RI']),
+(2, 'Southeast', ARRAY['FL', 'GA','LA', 'VA', 'WV']),
+(3, 'West', ARRAY['CA', 'WA','OR', 'NV', 'NM', 'AZ', 'WY', 'ID']),
+(4, 'Midwest', ARRAY['NE', 'KS','OK', 'TX', 'IA', 'CO']);
+
+INSERT INTO specialties (specialty_id, specialty_name)
+VALUES
+(1, 'Finance'),
+(2, 'Insurance'),
+(3, 'Technology'),
+(4, 'Government');
 
 INSERT INTO accounts (account_name, account_secret) 
 VALUES 
@@ -209,17 +264,17 @@ VALUES
 
 INSERT INTO users (username, account_id, email, password) 
 VALUES 
-('root', 1, 'root@consultancy.com', 'hashthissoon'),
-('admin', 2, 'admin@consultancy.com', 'hashthissoon'),
+('root', 1, 'root@consultancy.com', '$argon2id$v=19$m=4096,t=192,p=12$l+EgZvJ/+GM1vOg3tNFD6dzeQtfGQiRA1bZLC/MBu/k$wU8nUrHybUQr25Un9CsCDKuWK9R8lLxKCH+Xp/P79l8'),
+('admin', 2, 'admin@consultancy.com', '$argon2id$v=19$m=4096,t=192,p=12$l+EgZvJ/+GM1vOg3tNFD6dzeQtfGQiRA1bZLC/MBu/k$wU8nUrHybUQr25Un9CsCDKuWK9R8lLxKCH+Xp/P79l8'),
 -- Users
-('jim_jam', 2, 'jim@jam.com', 'hashthissoon'),
-('aaron', 2, 'aaron@aaron.com', 'hashthissoon'),
+('jim_jam', 2, 'jim@jam.com', '$argon2id$v=19$m=4096,t=192,p=12$l+EgZvJ/+GM1vOg3tNFD6dzeQtfGQiRA1bZLC/MBu/k$wU8nUrHybUQr25Un9CsCDKuWK9R8lLxKCH+Xp/P79l8'),
+('aaron', 2, 'aaron@aaron.com', '$argon2id$v=19$m=4096,t=192,p=12$l+EgZvJ/+GM1vOg3tNFD6dzeQtfGQiRA1bZLC/MBu/k$wU8nUrHybUQr25Un9CsCDKuWK9R8lLxKCH+Xp/P79l8'),
 -- Clients
-('first_client', 3, 'client_one@client.com', 'hashthissoon'),
-('second_client', 3, 'client_two@client.com', 'hashthissoon'),
+('first_client', 3, 'client_one@client.com', '$argon2id$v=19$m=4096,t=192,p=12$l+EgZvJ/+GM1vOg3tNFD6dzeQtfGQiRA1bZLC/MBu/k$wU8nUrHybUQr25Un9CsCDKuWK9R8lLxKCH+Xp/P79l8'),
+('second_client', 3, 'client_two@client.com', '$argon2id$v=19$m=4096,t=192,p=12$l+EgZvJ/+GM1vOg3tNFD6dzeQtfGQiRA1bZLC/MBu/k$wU8nUrHybUQr25Un9CsCDKuWK9R8lLxKCH+Xp/P79l8'),
 -- Consultants
-('first_consultant', 2, 'consultant_one@consultancy.com', 'hashthissoon'),
-('second_consultant', 2, 'consultant_two@consultancy.com', 'hashthissoon');
+('first_consultant', 2, 'consultant_one@consultancy.com', '$argon2id$v=19$m=4096,t=192,p=12$l+EgZvJ/+GM1vOg3tNFD6dzeQtfGQiRA1bZLC/MBu/k$wU8nUrHybUQr25Un9CsCDKuWK9R8lLxKCH+Xp/P79l8'),
+('second_consultant', 2, 'consultant_two@consultancy.com', '$argon2id$v=19$m=4096,t=192,p=12$l+EgZvJ/+GM1vOg3tNFD6dzeQtfGQiRA1bZLC/MBu/k$wU8nUrHybUQr25Un9CsCDKuWK9R8lLxKCH+Xp/P79l8');
 
 INSERT INTO clients (client_f_name, client_l_name, client_company_name, client_primary_phone, client_address_one, client_city, client_state, client_zip, client_dob, account_id, user_id) 
 VALUES 
@@ -227,31 +282,38 @@ VALUES
 (NULL, NULL, 'McGillicuddy & Sons LLC', '555-555-5555', '1111 Jupiter St.', 'Company Town', 'NE', '68114', NULL, 4, 5),
 ('Chris', 'Cote', NULL, '555-555-5555', '2222 Client St.', 'Client Town', 'MN', '55057', '1966-07-22', 3, 6);
 
-INSERT INTO consultants (consultant_f_name, consultant_l_name, specialty, user_id, img_path) 
+INSERT INTO consultants (consultant_f_name, consultant_l_name, specialty_id, user_id, img_path) 
 VALUES 
-('Terry', 'Bolea', 'Finance', 7, '/img/consultants/consultant_one.svg'),
-('Joe', 'Zagacki', 'Insurance', 8, '/img/consultants/consultant_two.svg');
+('Terry', 'Bolea', 1, 7, '/img/consultants/consultant_one.svg'),
+('Joe', 'Zagacki', 2, 8, '/img/consultants/consultant_two.svg');
+
+INSERT INTO consultant_ties (consultant_id, specialty_id, territory_id, consultant_start, consultant_end) 
+VALUES 
+(1, 2, NULL, '2022-02-02', '2023-02-02'),
+(2, 1, NULL, '2022-02-02', '2023-02-02'),
+(1, 1, NULL, '2023-02-02', NULL),
+(2, 2, NULL, '2023-02-02', NULL);
 
 INSERT INTO contacts (contact_title, contact_f_name, contact_l_name, contact_email, contact_primary_phone, contact_secondary_phone) 
 VALUES 
 ('Site Admin', 'Greg', 'Cote', 'cote@gregslobos.com', '555-555-5555', '555-555-5555'),
 ('Location Manager', 'Billy', 'Gil', 'bill@marlins.com', '555-555-5555', '555-555-5555');
 
-INSERT INTO locations (location_name, location_address_one, location_address_two, location_city, location_state, location_zip, location_phone, location_contact_id) 
+INSERT INTO locations (location_name, location_address_one, location_address_two, location_city, location_state, location_zip, location_phone, location_contact_id, territory_id) 
 VALUES 
-('Default - Main Office', '1234 Main St.', NULL, 'Omaha', 'NE', '68114', '555-555-5555', DEFAULT),
-('Bend Conference Center', '5432 Postgres Ave', 'Ste. 101', 'Bend', 'OR', '97701', '555-555-5555', DEFAULT),
-('Austin Heights', '6379 Redis Lane', NULL, 'Austin', 'TX', '78799', '555-555-5555', 2);
+('Default - Main Office', '1234 Main St.', NULL, 'Omaha', 'NE', '68114', '555-555-5555', DEFAULT, 4),
+('Bend Conference Center', '5432 Postgres Ave', 'Ste. 101', 'Bend', 'OR', '97701', '555-555-5555', DEFAULT, 3),
+('Austin Heights', '6379 Redis Lane', NULL, 'Austin', 'TX', '78799', '555-555-5555', 2, 4);
 
 INSERT INTO engagements (rating, text, user_id) 
 VALUES 
 (7, 'It was a seven.', 1),
 (3, 'I give it a 3', 2);
 
-INSERT INTO consults (consultant_id, client_id, consult_location, consult_start, consult_end, notes) 
+INSERT INTO consults (consultant_id, client_id, location_id, consult_start, consult_end, notes) 
 VALUES 
-(1, 1, 2, '2023-09-11 19:10:25-06', '2023-09-11 19:30:25-06', NULL),
-(2, 2, 1, '2023-09-11 16:00:25-06', '2023-09-11 16:50:11-06', 'Using the Default Address. Location not persisted. Location was at the Clevelander.');
+(1, 1, 2, '2023-09-11 19:10:25', '2023-09-11 19:30:25', NULL),
+(2, 2, 1, '2023-09-11 16:00:25', '2023-09-11 16:50:11', 'Using the Default Address. Location not persisted. Location was at the Clevelander.');
 
 INSERT INTO attachments (path, mime_type, user_id, channel, created_at, updated_at) 
 VALUES 

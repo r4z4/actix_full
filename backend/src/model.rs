@@ -25,6 +25,26 @@ pub enum AttachmentChannel {
     Upload,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseConsult {
+    pub consult_id: i32,
+    pub location_id: i32,
+    // #[serde(serialize_with = "serialize_dt", skip_serializing_if  = "Option::is_none")]
+    // pub consult_start_utc: Option<DateTime<Utc>>,
+    pub notes: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ConsultPostResponse {
+    pub consult_id: i32,
+    pub consult_slug: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseConsultList {
+    pub consults: Vec<ResponseConsult>,
+}
+
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 #[allow(non_snake_case)]
 pub struct EngagementModel {
@@ -111,7 +131,7 @@ pub struct ConsultModel {
     pub consult_id: i32,
     pub client_id: i32,
     pub consultant_id: i32,
-    pub consult_location: i32,
+    pub location_id: i32,
     pub consult_start: Option<chrono::DateTime<chrono::Utc>>,
     pub consult_end: Option<chrono::DateTime<chrono::Utc>>,
     pub notes: Option<String>,

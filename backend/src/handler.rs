@@ -1,6 +1,6 @@
 use crate::{
     extractors::jwt_auth,
-    model::{EngagementModel, ConsultModel},
+    model::{EngagementModel, ConsultModel, ResponseConsult, ResponseConsultList},
     schema::{CreateEngagementSchema, FilterOptions, UpdateEngagementSchema},
     AppState,
 };
@@ -237,10 +237,10 @@ async fn consults_form_handler(path: web::Path<i32>, data: web::Data<AppState>) 
     }
 }
 
-#[derive(FromRow, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, FromRow, Deserialize)]
 pub struct ConsultPostResponse {
     pub consult_id: i32,
-    pub consult_start: DateTime<FixedOffset>,
+    pub consult_slug: String,
 }
 
 fn build_time(date: String, time: String) -> DateTime<FixedOffset> {
@@ -265,7 +265,7 @@ async fn consults_form_submit_handler(body: web::Json<ConsultPostRequest>, data:
     match sqlx::query_as::<_, ConsultPostResponse>(
         "INSERT INTO consults (client_id, consultant_id, consult_location, consult_start, consult_end)
         VALUES ($1, $2, $3, $4, $5)
-        RETURNING consult_id, consult_start",
+        RETURNING consult_id, consult_slug",
     )
     .bind(consult.client_id)
     .bind(consult.consultant_id)
@@ -503,6 +503,44 @@ pub async fn get_users_handler(
     // HttpResponse::NoContent().finish()
 }
 
+#[get("/consults")]
+pub async fn get_consults_handler(
+    opts: web::Query<FilterOptions>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let limit = opts.limit.unwrap_or(10);
+    let offset = (opts.page.unwrap_or(1) - 1) * limit;
+
+    let query_result = sqlx::query_as!(
+        ResponseConsult,
+        "SELECT consult_id, location_id, notes FROM consults ORDER by consult_id LIMIT $1 OFFSET $2",
+        limit as i32,
+        offset as i32
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    if query_result.is_err() {
+        let message = "Error occurred while fetching all consult records";
+        return HttpResponse::InternalServerError()
+            .json(json!({"status": "error","message": message}));
+    }
+
+    let consults = query_result.unwrap();
+
+    let json_response = ResponseConsultList {
+        consults: consults,
+    };
+
+    // let json_response = serde_json::json!({
+    //     "status": "success",
+    //     "results": users.len(),
+    //     "engagements": users
+    // });
+    HttpResponse::Ok().json(json_response)
+    // HttpResponse::NoContent().finish()
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseConsultantList {
     pub consultants: Vec<ResponseConsultant>,
@@ -510,7 +548,7 @@ pub struct ResponseConsultantList {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseConsultant {
     pub consultant_id: i32,
-    pub specialty: String,
+    pub specialty_id: i32,
     pub img_path: Option<String>,
 }
 
@@ -524,7 +562,7 @@ pub async fn get_consultants_handler(
 
     let query_result = sqlx::query_as!(
         ResponseConsultant,
-        "SELECT consultant_id, specialty, img_path FROM consultants ORDER by consultant_id LIMIT $1 OFFSET $2",
+        "SELECT consultant_id, specialty_id, img_path FROM consultants ORDER by consultant_id LIMIT $1 OFFSET $2",
         limit as i32,
         offset as i32
     )
@@ -565,6 +603,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(location_options_handler)
         .service(consultant_options_handler)
         .service(client_options_handler)
+        .service(get_consults_handler)
         .service(consults_form_submit_handler)
         .service(account_options_handler);
 

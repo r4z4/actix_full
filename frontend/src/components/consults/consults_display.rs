@@ -1,30 +1,43 @@
+use chrono::{DateTime, Utc};
 use reqwasm::http::Request;
-use stylist::{yew::styled_component};
+use serde::{Deserialize, Serialize};
+use stylist::yew::styled_component;
 use yew::prelude::*;
-
-use common::Consult;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub title: String,
-    // pub specialty: Specialty,
     pub on_load: Callback<String>,
 }
 
-// #[derive(PartialEq)]
-// pub enum Specialty {
-//     Insurance,
-//     Finance,
-//     Government,
-// }
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct ResponseConsult {
+    pub consult_id: i32,
+    pub location_id: i32,
+    // #[serde(serialize_with = "serialize_dt", skip_serializing_if  = "Option::is_none")]
+    pub consult_start: Option<DateTime<Utc>>,
+    pub notes: Option<String>,
+}
 
-fn vec_to_html(list: &Vec<Consult>) -> Vec<Html> {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ConsultPostResponse {
+    pub consult_id: i32,
+    pub consult_slug: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseConsultList {
+    pub consults: Vec<ResponseConsult>,
+}
+
+fn vec_to_html(list: &Vec<ResponseConsult>) -> Vec<Html> {
     list.iter()
         .map(|consult| {
             html! {<ul class="data-display">
                 <li>{consult.consult_id.clone()}</li>
-                <li>{consult.client_id.clone()}</li>
-                <li>{consult.consultant_id.clone()}</li>
+                <li>{consult.location_id.clone()}</li>
+                <li>{consult.notes.clone()}</li>
+                <li>{consult.consult_start.unwrap()}</li>
             </ul>}
         })
         .collect()
@@ -43,25 +56,34 @@ fn vec_to_html(list: &Vec<Consult>) -> Vec<Html> {
 #[styled_component(ConsultsDisplay)]
 pub fn consults_display(props: &Props) -> Html {
     let entity = use_state(|| "consult".to_owned());
-    let data: UseStateHandle<Option<Vec<Consult>>> = use_state(|| None);
-    let cloned_data = data.clone();
+    let data: UseStateHandle<Option<Vec<ResponseConsult>>> = use_state(|| None);
+    let c_data = data.clone();
+
+    use_effect_with_deps(
+        move |_| {
+            ()
+        },
+        (c_data),
+    );
+
     let onclick = {
         let entity = entity.clone();
+        let data = data.clone();
         Callback::from(move |_| {
-            let data = data.clone();
+            let c_data = data.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let response = Request::get("http://localhost:3000/get_consults")
+                let response = Request::get("http://localhost:8000/api/consults")
                     //.header("x-auth-token", &state.token)
                     .send()
                     .await
                     // FIXME unwrap_or_else - handle
                     .unwrap()
-                    .json::<Vec<Consult>>()
+                    .json::<ResponseConsultList>()
                     .await
                     .unwrap();
 
                 // log!(serde_json::to_string_pretty(&response).unwrap());
-                data.set(Some(response))
+                c_data.set(Some(response.consults))
             });
         })
     };
@@ -70,14 +92,20 @@ pub fn consults_display(props: &Props) -> Html {
         <div class={"data-display"}>
             <h1>{&props.title}</h1>
             <h4>{"Click Below to Fetch Data"}</h4>
-            if cloned_data.is_some() {
-                {vec_to_html(cloned_data.as_ref().unwrap())}
+            if data.is_some() {
+                {vec_to_html(data.as_ref().unwrap())}
             }
-            <button {onclick}>{"Get Data"}</button>
+            <button {onclick}>{
+                if data.is_none() {
+                    "Get Data"
+                } else {
+                    "Refresh Data"
+                }
+            }
+            </button>
         </div>
     }
 }
-
 #[cfg(test)]
 mod tests {
     // Bring things into scope

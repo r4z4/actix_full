@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use stylist::yew::styled_component;
 use yew::prelude::*;
 
+use crate::components::consults::consults_display::{ResponseConsultList, ResponseConsult};
+
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub title: String,
@@ -28,9 +30,8 @@ pub struct ResponseConsultant {
 //     Government,
 // }
 
-fn vec_to_html(list: &ResponseConsultantList) -> Vec<Html> {
-    list.consultants
-        .iter()
+fn vec_to_html(list: &Vec<ResponseConsultant>) -> Vec<Html> {
+    list.iter()
         .map(|consultant| {
             html! {<ul class="data-display">
                 <li>{consultant.consultant_id.clone()}</li>
@@ -57,16 +58,16 @@ fn vec_to_html(list: &ResponseConsultantList) -> Vec<Html> {
 // }
 
 #[styled_component(ConsultantsDisplay)]
-pub fn consultants_display(props: &Props) -> Html {
+pub fn consults_display(props: &Props) -> Html {
     let entity = use_state(|| "consult".to_owned());
-    let data: UseStateHandle<Option<ResponseConsultantList>> = use_state(|| None);
+    let data: UseStateHandle<Option<Vec<ResponseConsultant>>> = use_state(|| None);
     let cloned_data = data.clone();
     let onclick = {
         let entity = entity.clone();
         Callback::from(move |_| {
             let data = data.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let response = Request::get("http://localhost:8000/api/consultants")
+                let response = Request::get("http://localhost:8000/api/consults")
                     //.header("x-auth-token", &state.token)
                     .send()
                     .await
@@ -77,7 +78,7 @@ pub fn consultants_display(props: &Props) -> Html {
                     .unwrap();
 
                 // log!(serde_json::to_string_pretty(&response).unwrap());
-                data.set(Some(response))
+                data.set(Some(response.consultants))
             });
         })
     };
@@ -89,7 +90,14 @@ pub fn consultants_display(props: &Props) -> Html {
             if cloned_data.is_some() {
                 {vec_to_html(cloned_data.as_ref().unwrap())}
             }
-            <button {onclick}>{"Get Data"}</button>
+            <button {onclick}>{
+                if cloned_data.is_some() {
+                    "Get Data"
+                } else {
+                    "Refresh Data"
+                }
+            }
+            </button>
         </div>
     }
 }

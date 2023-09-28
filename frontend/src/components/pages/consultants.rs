@@ -1,8 +1,7 @@
-use crate::components::consultants::{
-    consultants_display::ConsultantsDisplay,
-};
 use gloo::console::log;
 use yew::prelude::*;
+
+use crate::components::consultants::consultants_display::ConsultantsDisplay;
 
 #[function_component(Consultants)]
 pub fn consultants() -> Html {
