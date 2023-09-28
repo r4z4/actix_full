@@ -552,6 +552,56 @@ pub struct ResponseConsultant {
     pub img_path: Option<String>,
 }
 
+#[get("/clients")]
+pub async fn get_clients_handler(
+    opts: web::Query<FilterOptions>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let limit = opts.limit.unwrap_or(10);
+    let offset = (opts.page.unwrap_or(1) - 1) * limit;
+
+    let query_result = sqlx::query_as!(
+        ResponseClient,
+        "SELECT client_id, client_address_one, client_city, client_zip FROM clients ORDER by client_id LIMIT $1 OFFSET $2",
+        limit as i32,
+        offset as i32
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    if query_result.is_err() {
+        let message = "Error occurred while fetching all consult records";
+        return HttpResponse::InternalServerError()
+            .json(json!({"status": "error","message": message}));
+    }
+
+    let clients = query_result.unwrap();
+
+    let json_response = ResponseClientList {
+        clients: clients,
+    };
+
+    // let json_response = serde_json::json!({
+    //     "status": "success",
+    //     "results": users.len(),
+    //     "engagements": users
+    // });
+    HttpResponse::Ok().json(json_response)
+    // HttpResponse::NoContent().finish()
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseClientList {
+    pub clients: Vec<ResponseClient>,
+}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseClient {
+    pub client_id: i32,
+    pub client_address_one: String,
+    pub client_city: String,
+    pub client_zip: String,
+}
+
 #[get("/consultants")]
 pub async fn get_consultants_handler(
     opts: web::Query<FilterOptions>,
@@ -604,6 +654,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(consultant_options_handler)
         .service(client_options_handler)
         .service(get_consults_handler)
+        .service(get_clients_handler)
         .service(consults_form_submit_handler)
         .service(account_options_handler);
 

@@ -1,7 +1,7 @@
 use gloo::console::log;
 use yew::prelude::*;
 
-use crate::components::clients::{clients_display::ClientsDisplay, clients_form::ClientsForm};
+use crate::components::clients::{clients_table::ClientsTable, clients_form::ClientsForm};
 
 #[function_component(Clients)]
 pub fn clients() -> Html {
@@ -16,7 +16,7 @@ pub fn clients() -> Html {
                 </div>
             </details>
             <div id={"provider_display"}>
-                <ClientsDisplay title={"Clients"} on_load={data_display_loaded} />
+                <ClientsTable title={"Clients"} on_load={data_display_loaded} />
             </div>
         </div>
     }
