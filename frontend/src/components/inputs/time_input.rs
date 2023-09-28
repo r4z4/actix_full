@@ -1,8 +1,4 @@
-use std::ops::Deref;
-
-use common::{SelectOption, SelectOptionResponse};
 use gloo_console::log;
-use reqwasm::http::Request;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;

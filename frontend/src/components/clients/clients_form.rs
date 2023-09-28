@@ -4,7 +4,7 @@ use reqwasm::{Error, http::Request};
 use serde_json::json;
 use crate::{
     components::inputs::{select_input::SelectInput, date_input::DateInput, text_input::TextInput},
-    store::{set_engagement, set_loading, set_show_alert, Store},
+    store::{set_loading, set_show_alert, Store},
 };
 use common::{ClientPostRequest, ApiClientResponse};
 use gloo::file::File;

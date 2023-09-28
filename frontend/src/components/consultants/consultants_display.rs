@@ -3,8 +3,6 @@ use serde::{Deserialize, Serialize};
 use stylist::yew::styled_component;
 use yew::prelude::*;
 
-use crate::components::consults::consults_display::{ResponseConsultList, ResponseConsult};
-
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub title: String,
@@ -19,55 +17,42 @@ pub struct ResponseConsultantList {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseConsultant {
     pub consultant_id: i32,
-    pub specialty: String,
+    pub specialty_id: i32,
     pub img_path: Option<String>,
 }
-
-// #[derive(PartialEq)]
-// pub enum Specialty {
-//     Insurance,
-//     Finance,
-//     Government,
-// }
 
 fn vec_to_html(list: &Vec<ResponseConsultant>) -> Vec<Html> {
     list.iter()
         .map(|consultant| {
-            html! {<ul class="data-display">
-                <li>{consultant.consultant_id.clone()}</li>
-                <li>{consultant.specialty.clone()}</li>
-                <li>{consultant.img_path.clone()}</li>
-                <li>
-                    <div>
-                        <img src={consultant.img_path.clone()} width={50} height={50} />
-                    </div>
-                </li>
-            </ul>}
+            html! {
+            <div class="entity-display">
+                <ul class="display-list">
+                    <li>{consultant.consultant_id.clone()}</li>
+                    <li>{consultant.specialty_id.clone()}</li>
+                    <li>{consultant.img_path.clone()}</li>
+                    <li>
+                        <div>
+                            <img src={consultant.img_path.clone()} width={50} height={50} />
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        }
         })
         .collect()
 }
 
-// impl Entity {
-//     pub fn to_string(&self) -> String {
-//         match self {
-//             Specialty::Government => "Government Entity".to_owned(),
-//             Specialty::Finance => "Finance".to_owned(),
-//             Specialty::Insurance => "Insurance".to_owned(),
-//         }
-//     }
-// }
 
 #[styled_component(ConsultantsDisplay)]
 pub fn consults_display(props: &Props) -> Html {
     let entity = use_state(|| "consult".to_owned());
     let data: UseStateHandle<Option<Vec<ResponseConsultant>>> = use_state(|| None);
-    let cloned_data = data.clone();
     let onclick = {
-        let entity = entity.clone();
+        let data = data.clone();
         Callback::from(move |_| {
             let data = data.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let response = Request::get("http://localhost:8000/api/consults")
+                let response = Request::get("http://localhost:8000/api/consultants")
                     //.header("x-auth-token", &state.token)
                     .send()
                     .await
@@ -87,11 +72,11 @@ pub fn consults_display(props: &Props) -> Html {
         <div class={"data-display"}>
             <h1>{&props.title}</h1>
             <h4>{"Click Below to Fetch Data"}</h4>
-            if cloned_data.is_some() {
-                {vec_to_html(cloned_data.as_ref().unwrap())}
+            if data.is_some() {
+                {vec_to_html(data.as_ref().unwrap())}
             }
             <button {onclick}>{
-                if cloned_data.is_some() {
+                if data.is_none() {
                     "Get Data"
                 } else {
                     "Refresh Data"

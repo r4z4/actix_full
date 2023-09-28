@@ -1,17 +1,39 @@
 summary {
     text-align: center;
     cursor: pointer;
-  }
+}
 
-  summary::marker {
-    content: '➕';
-    font-size: 1.4em;
-  }
-
-  details[open] > summary::marker {
-    content: "➖";
+summary::marker {
+    content: '+';
+    font-weight: bold;
+    color: rgb(120, 246, 24);
     font-size: 1.4em;
 }
+
+details[open] > summary::marker {
+    content: "-";
+    font-weight: bold;
+    color: rgb(120, 246, 24);
+    font-size: 1.4em;
+}
+
+/************************
+**** Entity Displays ****
+************************/
+
+.entity-display {
+    width: 80%;
+    margin: auto;
+    color: #eaedee;
+}
+
+.display-list {
+    list-style-type: none;
+}
+
+/**************
+**** Forms ****
+**************/
 
 .form-container {
     position: relative; 
@@ -55,6 +77,10 @@ summary {
     color: #374151; 
     background-color: #ffffff;
 }
+
+/*******************
+**** Engagement ****
+*******************/
 
 .rating-block {
     display: flex; 
@@ -278,6 +304,10 @@ body {
     color: white;
 }
 
+/*******************
+***** Home Card ****
+*******************/
+
 .home-card-main {
     padding-left: 2rem;
     padding-right: 2rem; 
@@ -293,7 +323,7 @@ body {
     position: relative; 
     align-items: center; 
     @media (min-width: 768px) { 
-    display: flex; 
+        display: flex; 
     }
 }
 
@@ -304,9 +334,6 @@ body {
     width: 100%; 
     background-color: #F3F4F6; 
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
-    @media (min-width: 768px) { 
-      width: 50%; 
-     }
 }
 
 .card-header {
@@ -327,15 +354,8 @@ body {
     padding-left: 2rem;
     padding-right: 2rem; 
     width: 100%; 
-    
-    @media (min-width: 768px) { 
-      padding-left: 0;
-    padding-right: 0; 
-    padding-top: 4rem;
-    padding-bottom: 4rem; 
-    width: 50%; 
-     } 
 }
+
 .card-two-inner {
     overflow: hidden; 
     border-bottom-right-radius: 0.25rem;
@@ -343,14 +363,8 @@ body {
     color: #ffffff; 
     background-color: #1E3A8A; 
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
-
-@media (min-width: 768px) { 
-  border-bottom-right-radius: 0;
-border-bottom-left-radius: 0; 
-border-top-right-radius: 0.25rem;
-border-bottom-right-radius: 0.25rem; 
- }
 }
+
 .c2-header {
     padding: 2rem; 
     border-bottom-width: 1px; 
@@ -372,18 +386,8 @@ border-bottom-right-radius: 0.25rem;
 .euro-center {
     margin-top: 2rem; 
     text-align: center; 
-
-@media (min-width: 640px) { 
-  margin: 2rem; 
- }
-@media (min-width: 768px) { 
-  margin: 0; 
-  margin-top: 2rem; 
- }
-@media (min-width: 1024px) { 
-  margin: 2rem; 
- }
 }
+
 .euro-subcenter {
     display: inline-flex; 
     align-items: center; 
@@ -397,24 +401,23 @@ border-bottom-right-radius: 0.25rem;
     line-height: 1.25rem; 
     text-align: center; 
     color: #BFDBFE; 
-
-@media (min-width: 1024px) { 
-  padding-left: 0;
-  padding-right: 0; 
- }
 }
+
 .div-list {
     display: inline-flex; 
 }
+
 .c1-list {
     display: flex; 
     margin-top: 0.75rem; 
     justify-content: center; 
 }
+
 .svg-ico {
     width: 1rem; 
     height: 1rem; 
 }
+
 .card-tile {
     display: flex; 
     padding: 1rem; 
@@ -426,6 +429,7 @@ border-bottom-right-radius: 0.25rem;
     width: 50%; 
     text-align: center; 
 }
+
 .flex-div {
     display: flex; 
     margin-left: 2rem;
@@ -434,12 +438,8 @@ border-bottom-right-radius: 0.25rem;
     flex-wrap: wrap; 
     border-width: 1px; 
     border-color: #1E40AF; 
-
-@media (min-width: 1024px) { 
-  margin-left: 4rem;
-margin-right: 4rem; 
- }
 }
+
 .block-link {
     display: block; 
     display: flex; 
@@ -467,19 +467,8 @@ margin-right: 4rem;
     margin-top: 1rem; 
     margin-bottom: 2rem; 
     text-align: center; 
-
-@media (min-width: 640px) { 
-  margin: 2rem; 
- }
-@media (min-width: 768px) { 
-  margin: 0; 
-margin-top: 1rem; 
-margin-bottom: 2rem; 
- }
-@media (min-width: 1024px) { 
-  margin: 2rem; 
- }
 }
+
 .pay-text {
     margin-left: 0.75rem; 
     font-size: 1.125rem;
@@ -491,16 +480,6 @@ margin-bottom: 2rem;
     display: block; 
     justify-content: center; 
     align-items: center; 
-
-@media (min-width: 640px) { 
-  display: flex; 
- }
-@media (min-width: 768px) { 
-  display: block; 
- }
-@media (min-width: 1024px) { 
-  display: flex; 
- }
 }
 
 #nav-list {
@@ -617,21 +596,6 @@ input[type=password] {
     box-sizing: border-box;
   }
 
-  summary {
-    text-align: center;
-    cursor: pointer;
-  }
-
-  summary::marker {
-    content: '➕';
-    font-size: 1.4em;
-  }
-
-  details[open] > summary::marker {
-    content: "➖";
-    font-size: 1.4em;
-}
-
 .container {
     margin: auto;
     width: 60%;
@@ -698,20 +662,13 @@ input[type=time] {
     width: 180px;
   }
   
-  /* Wrapper around the hour, minute, second, and am/pm fields as well as 
-  the up and down buttons and the 'X' button */
   input[type=time]::-webkit-datetime-edit-fields-wrapper {
     display: flex;
   }
   
-  /* The space between the fields - between hour and minute, the minute and 
-  second, second and am/pm */
   input[type=time]::-webkit-datetime-edit-text {
     padding: 19px 4px;
   }
-  
-  /* The naming convention for the hour, minute, second, and am/pm field is
-  `-webkit-datetime-edit-{field}-field` */
   
   /* Hour */
   input[type=time]::-webkit-datetime-edit-hour-field {
@@ -825,7 +782,7 @@ input[type=time] {
     display: inline-block;
   }
   
-  .dropdown-content {
+.dropdown-content {
     display: none;
     position: absolute;
     background-color: #3b2842;
@@ -834,15 +791,15 @@ input[type=time] {
     width: auto;
     white-space: nowrap;
     z-index: 1;
-  }
+}
 
-  .dropdown-content p {
+.dropdown-content p {
     color: white;
-  }
-  
-  .dropdown:hover .dropdown-content {
+}
+
+.dropdown:hover .dropdown-content {
     display: block;
-  }
+}
 
 .logout {
     background-color: rgb(244, 245, 247); 
@@ -882,8 +839,66 @@ input[type=time] {
   }
 } 
 
+@media (min-width: 640px) { 
+    .euro-center {
+       margin: 2rem; 
+    }
+    .card-align {
+        display: flex;
+    }
+    .pay-div {
+        margin: 2rem; 
+    }
+}
 @media (min-width: 768px) { 
-    .main-class {
+   .euro-center {
+       margin: 0; 
+       margin-top: 2rem; 
+   }
+   .card-align {
+        display: block;
+    }
+   .main-class {
         margin-top: 6rem; 
+    }
+    .pay-div {
+        margin: 0; 
+        margin-top: 1rem; 
+        margin-bottom: 2rem; 
+    }
+    .home-card-outline {
+        width: 50%;
+    }
+    .card-two-div {
+        padding-left: 0;
+        padding-right: 0; 
+        padding-top: 4rem;
+        padding-bottom: 4rem; 
+        width: 50%; 
+    }
+    .card-two-inner {
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0; 
+        border-top-right-radius: 0.25rem;
+        border-bottom-right-radius: 0.25rem; 
+    }
+}
+@media (min-width: 1024px) { 
+   .euro-center {
+       margin: 2rem; 
+   }
+   .card-align {
+        display: flex;
+    }
+    .pay-div {
+        margin: 2rem; 
+    }
+    .flex-div {
+        margin-left: 4rem;
+        margin-right: 4rem; 
+    }
+    .c2-subhead {
+        padding-left: 0;
+        padding-right: 0; 
     }
 }

@@ -1,7 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, Statement};
-use uuid::Uuid;
+use sqlx::FromRow;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum StateAbbr {

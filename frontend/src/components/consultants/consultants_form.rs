@@ -4,7 +4,7 @@ use reqwasm::{Error, http::Request};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::{
-    components::inputs::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput, required_text_input::RequiredTextInput},
+    components::inputs::{select_input::SelectInput, date_input::DateInput, required_text_input::RequiredTextInput},
     store::{set_loading, set_show_alert, Store},
 };
 use gloo::file::File;

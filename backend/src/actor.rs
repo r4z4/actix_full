@@ -1,5 +1,4 @@
 use futures_util::io;
-use std::io::Read;
 use std::{io::Write, net::TcpStream};
 use tokio::sync::{mpsc, oneshot};
 struct MyActor {

@@ -36,25 +36,19 @@ pub struct ResponseConsultList {
 fn vec_to_html(list: &Vec<ResponseConsult>) -> Vec<Html> {
     list.iter()
         .map(|consult| {
-            html! {<ul class="data-display">
-                <li>{consult.consult_id.clone()}</li>
-                <li>{consult.location_id.clone()}</li>
-                <li>{consult.notes.clone()}</li>
-                <li>{consult.consult_start.unwrap()}</li>
-            </ul>}
+            html! {
+            <div class="entity-display">
+                <ul class="display-list">
+                    <li>{consult.consult_id.clone()}</li>
+                    <li>{consult.location_id.clone()}</li>
+                    <li>{consult.notes.clone()}</li>
+                    <li>{consult.consult_start.unwrap()}</li>
+                </ul>
+            </div>
+        }
         })
         .collect()
 }
-
-// impl Entity {
-//     pub fn to_string(&self) -> String {
-//         match self {
-//             Specialty::Government => "Government Entity".to_owned(),
-//             Specialty::Finance => "Finance".to_owned(),
-//             Specialty::Insurance => "Insurance".to_owned(),
-//         }
-//     }
-// }
 
 #[styled_component(ConsultsDisplay)]
 pub fn consults_display(props: &Props) -> Html {

@@ -1,5 +1,5 @@
 use crate::AppState;
-use crate::{redis_connect, Claims};
+use crate::Claims;
 use actix_web::HttpMessage;
 use actix_web::{
     dev::Payload,

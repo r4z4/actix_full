@@ -6,7 +6,7 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{extractors::jwt_auth::JwtAuth, Claims};
+use crate::Claims;
 
 pub fn user_scope() -> Scope {
     web::scope("/user")

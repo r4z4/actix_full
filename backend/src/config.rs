@@ -1,9 +1,7 @@
 //! src/configuration.rs
 
 use std::collections::HashMap;
-
-use actix_web::HttpResponse;
-use config::{Config, File};
+use config::Config;
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,

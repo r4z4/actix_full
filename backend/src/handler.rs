@@ -10,7 +10,7 @@ use actix_web::{
     delete, get, http::header::CONTENT_LENGTH, patch, post, web, HttpMessage, HttpRequest,
     HttpResponse, Responder,
 };
-use chrono::{prelude::*, format::strftime};
+use chrono::prelude::*;
 use common::{SelectOption, ConsultPostRequest};
 use futures_util::TryStreamExt;
 use image::{imageops::FilterType, DynamicImage};

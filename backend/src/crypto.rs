@@ -1,24 +1,19 @@
 use actix_web::{
     get,
-    http::StatusCode,
     post,
     web::{Data, Json},
     HttpResponse, Responder,
 };
-use actix_web_httpauth::extractors::basic::BasicAuth;
 use argonautica::{Hasher, Verifier};
-use chrono::{Duration, NaiveDateTime, Utc};
+use chrono::{Duration, Utc};
 use common::ApiLoginResponse;
-use hmac::{digest::KeyInit, Hmac};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use sha2::Sha256;
 use sqlx::FromRow;
-use std::{io::Error, ops::Add, sync::Arc};
+use std::sync::Arc;
 use tracing::{instrument, Instrument};
-use uuid::Uuid;
 use validator::{Validate, ValidationError};
 
 use crate::{extractors::jwt_auth::LoginUser, redis_connect, set_str, AppState, Claims};
