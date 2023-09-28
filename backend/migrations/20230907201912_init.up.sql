@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS consults (
         consultant_id INTEGER NOT NULL,
         client_id INTEGER NOT NULL,
         location_id INTEGER NOT NULL,
-        consult_start TIMESTAMPTZ DEFAULT NOW(),
+        consult_start TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         consult_end TIMESTAMPTZ DEFAULT NULL,
         notes TEXT DEFAULT NULL,
         created_at TIMESTAMPTZ DEFAULT NOW(),

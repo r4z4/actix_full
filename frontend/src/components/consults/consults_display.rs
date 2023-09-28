@@ -3,6 +3,9 @@ use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
 use stylist::yew::styled_component;
 use yew::prelude::*;
+use yewdux::prelude::use_store;
+
+use crate::store::{ConsultStore, set_consults};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -10,7 +13,7 @@ pub struct Props {
     pub on_load: Callback<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct ResponseConsult {
     pub consult_id: i32,
     pub location_id: i32,
@@ -57,6 +60,7 @@ fn vec_to_html(list: &Vec<ResponseConsult>) -> Vec<Html> {
 pub fn consults_display(props: &Props) -> Html {
     let entity = use_state(|| "consult".to_owned());
     let data: UseStateHandle<Option<Vec<ResponseConsult>>> = use_state(|| None);
+    let (store, dispatch) = use_store::<ConsultStore>();
     let c_data = data.clone();
 
     use_effect_with_deps(
@@ -71,6 +75,7 @@ pub fn consults_display(props: &Props) -> Html {
         let data = data.clone();
         Callback::from(move |_| {
             let c_data = data.clone();
+            let dispatch_clone = dispatch.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let response = Request::get("http://localhost:8000/api/consults")
                     //.header("x-auth-token", &state.token)
@@ -83,7 +88,9 @@ pub fn consults_display(props: &Props) -> Html {
                     .unwrap();
 
                 // log!(serde_json::to_string_pretty(&response).unwrap());
-                c_data.set(Some(response.consults))
+                let consults_clone = response.consults.clone();
+                c_data.set(Some(response.consults));
+                // set_consults(consults_clone, dispatch_clone);
             });
         })
     };

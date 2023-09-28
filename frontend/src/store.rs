@@ -2,6 +2,8 @@ use common::{Engagement, SelectOption};
 use serde::{Deserialize, Serialize};
 use yewdux::prelude::*;
 
+use crate::components::consults::consults_display::ResponseConsult;
+
 #[derive(Debug, PartialEq, Serialize, Deserialize, Default, Clone)]
 pub struct AlertInput {
     pub show_alert: bool,
@@ -16,6 +18,19 @@ pub struct AuthStore {
     pub token: Option<String>,
     pub is_authenticated: bool,
 }
+
+#[derive(Store, Default, PartialEq, Clone, Serialize, Deserialize)]
+#[store(storage = "local", storage_tab_sync)]
+pub struct ConsultStore {
+    pub consults: Vec<ResponseConsult>,
+}
+
+pub fn set_consults(consults: Vec<ResponseConsult>, dispatch: Dispatch<ConsultStore>) {
+    dispatch.reduce_mut(move |store| {
+        store.consults = consults;
+    })
+}
+
 #[derive(Store, Default, PartialEq, Clone, Serialize, Deserialize)]
 #[store(storage = "local", storage_tab_sync)]
 pub struct OptionsStore {
