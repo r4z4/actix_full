@@ -52,7 +52,7 @@ pub fn consults_display(props: &Props) -> Html {
         Callback::from(move |_| {
             let data = data.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let response = Request::get("http://localhost:8000/api/consultants")
+                let response = Request::get("http://localhost:8000/admin/consultants")
                     //.header("x-auth-token", &state.token)
                     .send()
                     .await

@@ -2,7 +2,7 @@ use common::{Engagement, EngagementListResponse, EngagementResponse, ErrorRespon
 use reqwasm::http;
 
 pub async fn api_create_engagement(engagement_data: &str) -> Result<Engagement, String> {
-    let response = match http::Request::post("http://localhost:8000/api/engagement/")
+    let response = match http::Request::post("http://localhost:8000/api/engagements/create")
         .header("Content-Type", "application/json")
         .body(engagement_data)
         .send()
@@ -30,7 +30,7 @@ pub async fn api_create_engagement(engagement_data: &str) -> Result<Engagement, 
 
 pub async fn _api_fetch_single_engagement(engagement_id: &str) -> Result<Engagement, String> {
     let response = match http::Request::get(
-        format!("http://localhost:8000/api/engagement/{}", engagement_id).as_str(),
+        format!("http://localhost:8000/api/engagements/{}", engagement_id).as_str(),
     )
     .send()
     .await
@@ -58,7 +58,7 @@ pub async fn _api_fetch_single_engagement(engagement_id: &str) -> Result<Engagem
 pub async fn api_fetch_engagements((page, limit): (i32, i32)) -> Result<Vec<Engagement>, String> {
     let response = match http::Request::get(
         format!(
-            "http://localhost:8000/api/engagement?page={}&limit={}",
+            "http://localhost:8000/api/engagements?page={}&limit={}",
             page, limit
         )
         .as_str(),
@@ -88,7 +88,7 @@ pub async fn api_fetch_engagements((page, limit): (i32, i32)) -> Result<Vec<Enga
 
 pub async fn api_delete_engagement(engagement_id: &str) -> Result<(), String> {
     let response = match http::Request::delete(
-        format!("http://localhost:8000/api/engagement/{}", engagement_id).as_str(),
+        format!("http://localhost:8000/api/engagements/{}", engagement_id).as_str(),
     )
     .send()
     .await

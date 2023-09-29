@@ -836,11 +836,16 @@ input[type=time] {
 .data-display table {
     border-collapse: collapse;
     color: white;
-    margin: 25px 0;
-    font-size: 0.9em;
-    font-family: sans-serif;
-    min-width: 400px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    text-align: left;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 
 .data-display thead tr {
@@ -849,12 +854,36 @@ input[type=time] {
     text-align: left;
 }
 
-.data-display th,
+.data-display th {
+    background-color: #ff9800;
+    color: #fff;
+    font-weight: bold;
+    padding: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #ccc;
+}
+
 .data-display td {
     padding: 12px 15px;
 }
 
-.data-display tbody tr {
+.data-display tr:nth-child(even) td {
+    background-color: #514454;
+}
+  
+.data-display tr:hover td {
+    background-color: #ffedcc;
+}
+.data-display td {
+    background-color: #1f1821;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    font-weight: bold;
+}
+
+/* .data-display tbody tr {
     border-bottom: 1px solid #dddddd;
 }
 
@@ -869,7 +898,7 @@ input[type=time] {
 .data-display tbody tr.active-row {
     font-weight: bold;
     color: #009879;
-}
+} */
 
 
 @keyframes spin {

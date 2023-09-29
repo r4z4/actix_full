@@ -5,6 +5,8 @@ use yew::prelude::*;
 
 use common::Consult;
 
+use crate::components::clients::edit_modal::EditModal;
+
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub title: String,
@@ -40,6 +42,7 @@ fn render_td_table_rows(list: &Vec<ResponseClient>) -> Vec<Html> {
                 <td>{client.client_address_one.clone()}</td>
                 <td>{client.client_city.clone()}</td>
                 <td>{client.client_zip.clone()}</td>
+                <td><button><EditModal id={client.client_id} button_text={"Edit"} /></button></td>
             </tr>
         }
         })
@@ -75,15 +78,18 @@ pub fn clients_table(props: &Props) -> Html {
         <div class={"data-display"}>
 
             if data.is_some() {
-                <table border="1" >
-                    <tr>
-                        <th>{"ID"}</th>
-                        <th>{"Address"}</th>  
-                        <th>{"City"}</th>
-                        <th>{"Zip"}</th>
-                    </tr>
-                    {render_td_table_rows(data.as_ref().unwrap())}
-                </table>
+                <div class="table-display">
+                    <table border="1" >
+                        <tr>
+                            <th>{"ID"}</th>
+                            <th>{"Address"}</th>  
+                            <th>{"City"}</th>
+                            <th>{"Zip"}</th>
+                            <th>{"Action(s)"}</th>
+                        </tr>
+                        {render_td_table_rows(data.as_ref().unwrap())}
+                    </table>
+                </div>
             }
             <button {onclick}>{
                 if data.is_none() {
