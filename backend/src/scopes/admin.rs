@@ -9,6 +9,7 @@ pub fn admin_scope() -> Scope {
         // .route("/users", web::get().to(get_users_handler))
         .service(get_users_handler)
         .service(get_consultants_handler)
+        .service(get_consultant_handler)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,7 +43,9 @@ pub struct ResponseConsultantList {
 pub struct ResponseConsultant {
     pub consultant_id: i32,
     pub specialty_id: i32,
-    pub img_path: Option<String>,
+    pub consultant_f_name: String,
+    pub consultant_l_name: String,
+    pub consultant_slug: String,
 }
 
 // #[get("/users")]
@@ -145,7 +148,7 @@ pub async fn get_consultants_handler(
 
     let query_result = sqlx::query_as!(
         ResponseConsultant,
-        "SELECT consultant_id, specialty_id, img_path FROM consultants ORDER by consultant_id LIMIT $1 OFFSET $2",
+        "SELECT consultant_id, consultant_slug, consultant_f_name, consultant_l_name, specialty_id FROM consultants ORDER by consultant_id LIMIT $1 OFFSET $2",
         limit as i32,
         offset as i32
     )
@@ -162,6 +165,45 @@ pub async fn get_consultants_handler(
 
     let json_response = ResponseConsultantList {
         consultants: consultants,
+    };
+
+    // let json_response = serde_json::json!({
+    //     "status": "success",
+    //     "results": users.len(),
+    //     "engagements": users
+    // });
+    HttpResponse::Ok().json(json_response)
+    // HttpResponse::NoContent().finish()
+}
+
+#[get("/consultants/{id}")]
+pub async fn get_consultant_handler(
+    path: web::Path<i32>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let consultant_id = path.into_inner();
+    let query_result = sqlx::query_as!(
+        ResponseConsultant,
+        "SELECT consultant_id, consultant_slug, consultant_f_name, consultant_l_name, specialty_id FROM consultants WHERE consultant_id = $1",
+        consultant_id
+    )
+    .fetch_one(&data.db)
+    .await;
+
+    if query_result.is_err() {
+        let message = "Error occurred while fetching all consult records";
+        return HttpResponse::InternalServerError()
+            .json(json!({"status": "error","message": message}));
+    }
+
+    let consultant = query_result.unwrap();
+
+    let json_response = ResponseConsultant {
+        consultant_id: consultant.consultant_id,
+        specialty_id: consultant.specialty_id,
+        consultant_f_name: consultant.consultant_f_name,
+        consultant_l_name: consultant.consultant_l_name,
+        consultant_slug: consultant.consultant_slug,
     };
 
     // let json_response = serde_json::json!({

@@ -34,10 +34,6 @@ pub struct ResponseClientList {
     pub clients: Vec<ResponseClient>,
 }
 
-pub fn address_one_changed() -> () {
-    todo!();
-}
-
 #[styled_component(EditModal)]
 pub fn edit_modal(props: &Props) -> Html {
     // let entity = use_state(|| "consult".to_owned());
@@ -58,6 +54,30 @@ pub fn edit_modal(props: &Props) -> Html {
             client_address_one: addr,
             client_city: data_clone.deref().clone().unwrap().client_city,
             client_zip: data_clone.deref().clone().unwrap().client_zip,
+        };
+        cloned_state.set(Some(resp));
+    });
+    let data_clone = data.clone();
+    let city_changed: Callback<String> = Callback::from(move |city| {
+        // Move this inside so it clones the data in there
+        let cloned_state: UseStateHandle<Option<ResponseClient>> = data_clone.clone();
+        let resp = ResponseClient {
+            client_id: data_clone.deref().clone().unwrap().client_id,
+            client_address_one: data_clone.deref().clone().unwrap().client_address_one,
+            client_city: city,
+            client_zip: data_clone.deref().clone().unwrap().client_zip,
+        };
+        cloned_state.set(Some(resp));
+    });
+    let data_clone = data.clone();
+    let zip_changed: Callback<String> = Callback::from(move |zip| {
+        // Move this inside so it clones the data in there
+        let cloned_state: UseStateHandle<Option<ResponseClient>> = data_clone.clone();
+        let resp = ResponseClient {
+            client_id: data_clone.deref().clone().unwrap().client_id,
+            client_address_one: data_clone.deref().clone().unwrap().client_address_one,
+            client_city: data_clone.deref().clone().unwrap().client_city,
+            client_zip: zip,
         };
         cloned_state.set(Some(resp));
     });
@@ -88,7 +108,9 @@ pub fn edit_modal(props: &Props) -> Html {
                 <dialog open={true} class="dialog-display">
                 <h3>{format!("Form for {}", data.deref().clone().unwrap().client_id)}</h3>
                     <form method="dialog">
-                        <RequiredTextInput input_type={"text"} name={"client_address_one"} class={"half-input"} placeholder={"Address"} value={data.deref().clone().unwrap().client_address_one} onchange={address_one_changed} />
+                        <RequiredTextInput input_type={"text"} name={"client_address_one"} placeholder={"Address"} value={data.deref().clone().unwrap().client_address_one} onchange={address_one_changed} />
+                        <RequiredTextInput input_type={"text"} name={"client_city"} class={"half-input"} placeholder={"City"} value={data.deref().clone().unwrap().client_city} onchange={city_changed} />
+                        <RequiredTextInput input_type={"text"} name={"client_zip"} class={"half-input"} placeholder={"Zip Code"} value={data.deref().clone().unwrap().client_zip} onchange={zip_changed} />
                         <button>{"OK"}</button>
                     </form>
                 </dialog >

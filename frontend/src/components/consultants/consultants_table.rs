@@ -1,9 +1,11 @@
 use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
-use stylist::yew::styled_component;
+use stylist::{yew::styled_component};
 use yew::prelude::*;
 
-use super::consultants_table::ResponseConsultant;
+use common::Consult;
+
+use crate::components::consultants::edit_modal::EditModal;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -12,42 +14,49 @@ pub struct Props {
     pub on_load: Callback<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct ResponseConsultant {
+    pub consultant_id: i32,
+    pub specialty_id: i32,
+    pub consultant_f_name: String,
+    pub consultant_l_name: String,
+    pub consultant_slug: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ConsultantPostResponse {
+    pub consultant_id: i32,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseConsultantList {
     pub consultants: Vec<ResponseConsultant>,
 }
 
-fn vec_to_html(list: &Vec<ResponseConsultant>) -> Vec<Html> {
+fn render_td_table_rows(list: &Vec<ResponseConsultant>) -> Vec<Html> {
     list.iter()
         .map(|consultant| {
             html! {
-            <div class="entity-display">
-                <ul class="display-list">
-                    <li>{consultant.consultant_id.clone()}</li>
-                    <li>{consultant.specialty_id.clone()}</li>
-                    <li>
-                        <div>
-                            // Using static string interpolated with ID vs. img_path field. Not sure yet.
-                            // <img src={consultant.img_path.clone()} width={50} height={50} />
-                            <img src={format!("/img/consultants/consultant_{}.svg", consultant.consultant_id.clone())} width={50} height={50} />
-                        </div>
-                    </li>
-                </ul>
-            </div>
+            <tr>
+                <td>{consultant.consultant_id}</td>
+                <td>{consultant.specialty_id.clone()}</td>
+                <td>{consultant.consultant_f_name.clone()}</td>
+                <td>{consultant.consultant_l_name.clone()}</td>
+                <td><button><EditModal id={consultant.consultant_id} button_text={"Edit"} /></button></td>
+            </tr>
         }
         })
         .collect()
 }
 
-
-#[styled_component(ConsultantsDisplay)]
-pub fn consults_display(props: &Props) -> Html {
-    let entity = use_state(|| "consult".to_owned());
+#[styled_component(ConsultantsTable)]
+pub fn consultants_table(props: &Props) -> Html {
+    // let entity = use_state(|| "consult".to_owned());
     let data: UseStateHandle<Option<Vec<ResponseConsultant>>> = use_state(|| None);
     let onclick = {
         let data = data.clone();
         Callback::from(move |_| {
-            let data = data.clone();
+            let data_c = data.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let response = Request::get("http://localhost:8000/admin/consultants")
                     //.header("x-auth-token", &state.token)
@@ -60,17 +69,27 @@ pub fn consults_display(props: &Props) -> Html {
                     .unwrap();
 
                 // log!(serde_json::to_string_pretty(&response).unwrap());
-                data.set(Some(response.consultants))
+                data_c.set(Some(response.consultants))
             });
         })
     };
     props.on_load.emit("Data Display Loaded".to_string());
     html! {
         <div class={"data-display"}>
-            <h1>{&props.title}</h1>
-            <h4>{"Click Below to Fetch Data"}</h4>
+
             if data.is_some() {
-                {vec_to_html(data.as_ref().unwrap())}
+                <div class="table-display">
+                    <table border="1" >
+                        <tr>
+                            <th>{"ID"}</th>
+                            <th>{"Specialty"}</th>  
+                            <th>{"First Name"}</th>
+                            <th>{"Last Name"}</th>
+                            <th>{"Action(s)"}</th>
+                        </tr>
+                        {render_td_table_rows(data.as_ref().unwrap())}
+                    </table>
+                </div>
             }
             <button {onclick}>{
                 if data.is_none() {
