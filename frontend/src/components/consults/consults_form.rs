@@ -13,6 +13,14 @@ use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;
 
+use super::consults_display::ResponseConsult;
+
+#[derive(Properties, PartialEq)]
+pub struct Props {
+    pub data: Option<ResponseConsult>,
+}
+
+
 pub async fn post_consult(new_consult: ConsultPostRequest) -> Result<ApiConsultResponse, Error> {
     let body = json!(new_consult);
     let response = Request::post("http://localhost:8000/api/consults/form")
@@ -31,10 +39,12 @@ pub async fn post_consult(new_consult: ConsultPostRequest) -> Result<ApiConsultR
 }
 
 #[function_component]
-pub fn ConsultsForm() -> Html {
+pub fn ConsultsForm(props: &Props) -> Html {
     let (store, dispatch) = use_store::<Store>();
     let loading = &store.loading;
     let file: UseStateHandle<Option<File>> = use_state(|| None);
+
+    let header = if props.data.is_some() {"Edit Consult"} else {"Add Consult"};
 
     let consultant_id: UseStateHandle<Option<i32>> = use_state(|| None);
     let client_id: UseStateHandle<Option<i32>> = use_state(|| None);
@@ -213,7 +223,7 @@ pub fn ConsultsForm() -> Html {
     html! {
         <div class="form-container">
             <header class="form-header">
-                <h2 class="header-text">{"Please rate your experience! We value your input."}</h2>
+                <h2 class="header-text">{header}</h2>
             </header>
             <form onsubmit={on_submit}>
                 <div class="form-body">

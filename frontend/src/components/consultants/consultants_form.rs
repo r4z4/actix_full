@@ -13,6 +13,13 @@ use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;
 
+use super::consultants_table::ResponseConsultant;
+
+#[derive(Properties, PartialEq)]
+pub struct Props {
+    pub data: Option<ResponseConsultant>,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ApiConsultantResponse {
     pub consultant_id: i32,
@@ -48,7 +55,7 @@ pub async fn post_consultant(new_consultant: ConsultantPostRequest) -> Result<Ap
 }
 
 #[function_component]
-pub fn ConsultsForm() -> Html {
+pub fn ConsultantsForm(props: &Props) -> Html {
     let (store, dispatch) = use_store::<Store>();
     let loading = &store.loading;
     let file: UseStateHandle<Option<File>> = use_state(|| None);
@@ -56,6 +63,12 @@ pub fn ConsultsForm() -> Html {
     let l_state: UseStateHandle<String> = use_state(|| String::from(""));
 
     let error_state = use_state(|| None);
+
+    let consultant = if props.data.is_some() {
+        &props.data
+    } else {
+        &None
+    };
 
     let f_state_clone = f_state.clone();
     let consultant_f_name_changed: Callback<String> = Callback::from(move |consultant_f_name| {
@@ -76,8 +89,8 @@ pub fn ConsultsForm() -> Html {
     let specialty_id: UseStateHandle<Option<i32>> = use_state(|| None);
     let territory_id: UseStateHandle<Option<i32>> = use_state(|| None);
 
-    let consultant_f_name: UseStateHandle<Option<String>> = use_state(|| None);
-    let consultant_l_name: UseStateHandle<Option<String>> = use_state(|| None);
+    let consultant_f_name: UseStateHandle<String> = use_state(|| if consultant.is_some() {consultant.clone().unwrap().consultant_f_name} else {"".to_owned()});
+    let consultant_l_name: UseStateHandle<String> = use_state(|| if consultant.is_some() {consultant.clone().unwrap().consultant_l_name} else {"".to_owned()});
 
     let notes = use_state(|| None);
 
@@ -154,11 +167,15 @@ pub fn ConsultsForm() -> Html {
         let message = message.clone();
         let text_input_ref = text_input_ref.clone();
 
+        let ta_consultant_f_name = consultant_f_name.clone();
+        let ta_consultant_l_name = consultant_l_name.clone();
+
         Callback::from(move |event: SubmitEvent| {
             log!("hitting callback");
             let dispatch = cloned_dispatch.clone();
-            let consultant_f_name = consultant_f_name.deref();
-            let consultant_l_name = consultant_l_name.deref();
+            let c_consultant_f_name = ta_consultant_f_name.clone();
+            let c_consultant_l_name = ta_consultant_l_name.clone();
+            
             let error_state_ref = error_state_clone.clone();
             event.prevent_default();
             let notes = notes.clone();
@@ -180,8 +197,8 @@ pub fn ConsultsForm() -> Html {
             let new_consultant = ConsultantPostRequest {
                 // consult_id: i32,
 
-                consultant_f_name: consultant_f_name.clone().unwrap(),
-                consultant_l_name: consultant_l_name.clone().unwrap(),
+                consultant_f_name: c_consultant_f_name.deref().clone(),
+                consultant_l_name: c_consultant_l_name.deref().clone(),
                 specialty_id: specialty_id.unwrap(),
                 territory_id: specialty_id.unwrap(),
                 start_date: start_date_ta,
@@ -230,8 +247,8 @@ pub fn ConsultsForm() -> Html {
             <form onsubmit={on_submit}>
                 <div class="form-body">
 
-                    <RequiredTextInput input_type={"text"} name={"consultant_f_name"} class={"half-input"} placeholder={"First Name"} onchange={consultant_f_name_changed} />
-                    <RequiredTextInput input_type={"text"} name={"consultant_l_name"} class={"half-input"} placeholder={"Userame"} onchange={consultant_l_name_changed} />
+                    <RequiredTextInput input_type={"text"} name={"consultant_f_name"} class={"half-input"} value={consultant_f_name.deref().clone()} placeholder={"First Name"} onchange={consultant_f_name_changed} />
+                    <RequiredTextInput input_type={"text"} name={"consultant_l_name"} class={"half-input"} value={consultant_l_name.deref().clone()} placeholder={"Last Name"} onchange={consultant_l_name_changed} />
 
                     <SelectInput label={"Specialty"} select_type={"location"} onchange={handle_specialty_id_select} />
                     <SelectInput label={"Terrotiry"} select_type={"consultant"} onchange={handle_territory_id_select} />

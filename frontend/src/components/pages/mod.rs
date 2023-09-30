@@ -5,4 +5,5 @@ pub mod engagements;
 pub mod home;
 pub mod login;
 pub mod inquire;
+pub mod user_profile;
 pub mod register;

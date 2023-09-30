@@ -3,9 +3,12 @@ use std::ops::Deref;
 use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
 use stylist::{yew::styled_component};
+use wasm_bindgen::JsCast;
+use web_sys::HtmlDialogElement;
 use yew::prelude::*;
 
 use crate::components::{inputs::required_text_input::RequiredTextInput, consultants::consultants_table::ResponseConsultant};
+use super::consultants_form::ConsultantsForm;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -22,6 +25,16 @@ pub struct ConsultantPostResponse {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseConsultantList {
     pub consultants: Vec<ResponseConsultant>,
+}
+
+fn close_modal() -> () {
+    let window = web_sys::window()
+        .unwrap();
+    let document = window
+        .document()
+        .unwrap();
+    let modal: HtmlDialogElement = document.get_element_by_id("edit_modal").unwrap().unchecked_into::<HtmlDialogElement>();
+    modal.close();
 }
 
 #[styled_component(EditModal)]
@@ -86,14 +99,19 @@ pub fn edit_modal(props: &Props) -> Html {
     html! {
         <div>
             if data.is_some() {
-                <dialog open={true} class="dialog-display">
+                // FIXME: Ensure only ONE dialog can be open at once
+                <dialog open={true} id={"edit_modal"} class="dialog-display">
+                <button onclick={|_| close_modal()}>{"Close"}</button>
                 <h3>{format!("Form for {}", data.deref().clone().unwrap().consultant_id)}</h3>
                 <img src={format!("/img/consultants/consultant_{}.svg", data.deref().clone().unwrap().consultant_id)} />
-                    <form method="dialog">
-                        <RequiredTextInput input_type={"text"} name={"consultant_f_name"} placeholder={"First Name"} value={data.deref().clone().unwrap().consultant_f_name} onchange={f_name_changed} />
-                        <RequiredTextInput input_type={"text"} name={"consultant_l_name"} placeholder={"Last Name"} value={data.deref().clone().unwrap().consultant_l_name} onchange={l_name_changed} />
-                        <button>{"OK"}</button>
-                    </form>
+                    <ConsultantsForm data={data.deref().clone().unwrap()} />
+                    // <form method="dialog">
+                    //     <RequiredTextInput input_type={"text"} name={"consultant_f_name"} placeholder={"First Name"} value={data.deref().clone().unwrap().consultant_f_name} onchange={f_name_changed} />
+                    //     <RequiredTextInput input_type={"text"} name={"consultant_l_name"} placeholder={"Last Name"} value={data.deref().clone().unwrap().consultant_l_name} onchange={l_name_changed} />
+
+                    //     <SelectInput label={"Specialty"} select_type={"specialty"} onchange={handle_specialty_id_select} />
+                    //     <button>{"OK"}</button>
+                    // </form>
                 </dialog >
             }
             <button {onclick}>{button_text}</button>

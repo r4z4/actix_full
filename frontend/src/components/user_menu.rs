@@ -1,6 +1,6 @@
 use stylist::yew::styled_component;
 use yew::prelude::*;
-use yew_router::prelude::use_navigator;
+use yew_router::prelude::{use_navigator, Link};
 use yewdux::prelude::use_store;
 
 use crate::router::Route;
@@ -20,7 +20,7 @@ pub fn user_menu(props: &Props) -> Html {
         <div class="dropdown">
             <span>{"👤"}</span>
             <div class="dropdown-content">
-                <p>{"Profile 🧑"}</p>
+                <p><Link<Route> to={Route::UserProfile}>{"Profile 🧑"}</Link<Route>></p>
                 <hr />
                 <p>{"Settings ⚙"}</p>
             </div>

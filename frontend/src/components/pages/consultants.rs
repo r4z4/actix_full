@@ -1,7 +1,7 @@
 use gloo::console::log;
 use yew::prelude::*;
 
-use crate::components::consultants::{consultants_display::ConsultantsDisplay, consultants_table::ConsultantsTable};
+use crate::components::consultants::{consultants_display::ConsultantsDisplay, consultants_table::ConsultantsTable, consultants_form::ConsultantsForm};
 
 #[function_component(Consultants)]
 pub fn consultants() -> Html {
@@ -17,7 +17,7 @@ pub fn consultants() -> Html {
             <details>
                 <summary>{"Add a Consultant"}</summary>
                 <div class={"container"}>
-
+                    <ConsultantsForm />
                 </div>
             </details>
             <div id={"provider_display"}>

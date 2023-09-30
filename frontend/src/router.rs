@@ -4,6 +4,7 @@ use crate::components::pages::clients::Clients;
 use crate::components::pages::engagements::Engagements;
 use crate::components::pages::home::Home;
 use crate::components::pages::inquire::Inquire;
+use crate::components::pages::user_profile::UserProfile;
 use crate::components::pages::login::Login;
 use crate::components::pages::register::Register;
 use yew::prelude::*;
@@ -19,6 +20,8 @@ pub enum Route {
     Register,
     #[at("/inquire")]
     Inquire,
+    #[at("/profile")]
+    UserProfile,
     #[at("/consults")]
     Consults,
     #[at("/clients")]
@@ -34,6 +37,7 @@ pub fn switch(route: Route) -> Html {
         Route::Home => html! { <Home /> },
         Route::Login => html! { <Login /> },
         Route::Inquire => html! { <Inquire /> },
+        Route::UserProfile => html! { <UserProfile /> },
         Route::Clients => html! { <Clients /> },
         Route::Register => html! { <Register /> },
         Route::Consults => html! { <Consults /> },
