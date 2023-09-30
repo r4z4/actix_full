@@ -156,7 +156,7 @@ async fn account_options_handler(data: web::Data<AppState>) -> impl Responder {
 async fn client_options_handler(data: web::Data<AppState>) -> impl Responder {
     let query_result = sqlx::query_as!(
         SelectOption,
-        "SELECT client_slug AS key, client_id AS value FROM clients"
+        "SELECT COALESCE(client_company_name, CONCAT(client_f_name, ' ', client_l_name)) AS key, client_id AS value FROM clients"
     )
     .fetch_all(&data.db)
     .await;
@@ -181,7 +181,7 @@ async fn consultant_options_handler(data: web::Data<AppState>) -> impl Responder
     // Maintain a map of slugs to names then
     let query_result = sqlx::query_as!(
         SelectOption,
-        "SELECT consultant_slug AS key, consultant_id AS value FROM consultants"
+        "SELECT CONCAT(consultant_f_name, ' ',consultant_l_name) AS key, consultant_id AS value FROM consultants"
     )
     .fetch_all(&data.db)
     .await;
@@ -197,6 +197,54 @@ async fn consultant_options_handler(data: web::Data<AppState>) -> impl Responder
             let message = format!("errpr fetching consultants");
             return HttpResponse::NotFound()
                 .json(serde_json::json!({"status": "fail", "message": message}));
+        }
+    }
+}
+
+#[get("/specialty-options")]
+async fn specialty_options_handler(data: web::Data<AppState>) -> impl Responder {
+    let query_result = sqlx::query_as!(
+        SelectOption,
+        "SELECT specialty_name AS key, specialty_id AS value FROM specialties"
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    match query_result {
+        Ok(options) => {
+            let options_response = serde_json::json!({"status": "success", "options": options
+            });
+
+            return HttpResponse::Ok().json(options_response);
+        }
+        Err(_) => {
+            let message = format!("errpr fetching locations");
+            return HttpResponse::NotFound()
+                .json(serde_json::json!({"status": "fail","message": message}));
+        }
+    }
+}
+
+#[get("/territory-options")]
+async fn territory_options_handler(data: web::Data<AppState>) -> impl Responder {
+    let query_result = sqlx::query_as!(
+        SelectOption,
+        "SELECT territory_name AS key, territory_id AS value FROM territories"
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    match query_result {
+        Ok(options) => {
+            let options_response = serde_json::json!({"status": "success", "options": options
+            });
+
+            return HttpResponse::Ok().json(options_response);
+        }
+        Err(_) => {
+            let message = format!("errpr fetching locations");
+            return HttpResponse::NotFound()
+                .json(serde_json::json!({"status": "fail","message": message}));
         }
     }
 }
@@ -404,6 +452,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(location_options_handler)
         .service(consultant_options_handler)
         .service(client_options_handler)
+        .service(territory_options_handler)
+        .service(specialty_options_handler)
         .service(get_consults_handler)
         .service(get_clients_handler)
         .service(get_client_handler)

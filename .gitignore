@@ -21,3 +21,5 @@ Cargo.lock
 *.wasm
 *.js
 ____notes.txt
+
+/frontend/dist/*

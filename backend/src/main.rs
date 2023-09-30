@@ -246,11 +246,11 @@ async fn main() -> std::io::Result<()> {
     let mut con = redis_connect();
     let location_options: Vec<SelectOption> = vec![
         SelectOption {
-            key: "location_one".to_string(),
+            key: Some("location_one".to_string()),
             value: 1,
         },
         SelectOption {
-            key: "location_two".to_string(),
+            key: Some("location_two".to_string()),
             value: 2,
         },
     ];

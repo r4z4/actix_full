@@ -45,7 +45,7 @@ pub struct SelectOptionResponse {
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct SelectOption {
-    pub key: String,
+    pub key: Option<String>,
     pub value: i32,
 }
 
