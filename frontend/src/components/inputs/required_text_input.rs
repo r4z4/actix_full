@@ -11,6 +11,8 @@ pub struct Props {
     #[prop_or_default]
     pub class: String,
     #[prop_or_default]
+    pub value: Option<String>,
+    #[prop_or_default]
     pub input_type: String,
     #[prop_or_default]
     pub placeholder: String,
@@ -25,6 +27,11 @@ pub fn RequiredTextInput(props: &Props) -> Html {
     let input_type = &props.input_type;
     let label = &props.label;
     let name = &props.name;
+    let value = if props.value.is_some() {
+        props.value.clone().unwrap()
+    } else {
+        "".to_owned()
+    };
     let text_input_ref = use_node_ref();
     // let state = use_state_eq(|| None);
     // let cloned_state = state.clone();
@@ -43,6 +50,7 @@ pub fn RequiredTextInput(props: &Props) -> Html {
                 type={input_type.to_owned()}
                 ref={text_input_ref}
                 name={name.clone()}
+                value={value}
                 class={class.clone()}
                 oninput={on_input_change}
                 placeholder={placeholder.clone()}

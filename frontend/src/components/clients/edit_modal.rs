@@ -7,6 +7,8 @@ use yew::prelude::*;
 
 use common::Consult;
 
+use crate::components::inputs::required_text_input::RequiredTextInput;
+
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub button_text: String,
@@ -32,12 +34,33 @@ pub struct ResponseClientList {
     pub clients: Vec<ResponseClient>,
 }
 
+pub fn address_one_changed() -> () {
+    todo!();
+}
+
 #[styled_component(EditModal)]
 pub fn edit_modal(props: &Props) -> Html {
     // let entity = use_state(|| "consult".to_owned());
     let button_text = &props.button_text;
     let id = props.id;
     let data: UseStateHandle<Option<ResponseClient>> = use_state(|| None);
+    // let addr_state: UseStateHandle<String> = use_state(|| String::from(""));
+    // let city_state: UseStateHandle<String> = use_state(|| String::from(""));
+    // let zip_state: UseStateHandle<String> = use_state(|| String::from(""));
+    // let error_state = use_state(|| None);
+
+    let data_clone = data.clone();
+    let address_one_changed: Callback<String> = Callback::from(move |addr| {
+        // Move this inside so it clones the data in there
+        let cloned_state: UseStateHandle<Option<ResponseClient>> = data_clone.clone();
+        let resp = ResponseClient {
+            client_id: data_clone.deref().clone().unwrap().client_id,
+            client_address_one: addr,
+            client_city: data_clone.deref().clone().unwrap().client_city,
+            client_zip: data_clone.deref().clone().unwrap().client_zip,
+        };
+        cloned_state.set(Some(resp));
+    });
     let onclick = {
         let data = data.clone();
         Callback::from(move |_| {
@@ -63,9 +86,9 @@ pub fn edit_modal(props: &Props) -> Html {
         <div>
             if data.is_some() {
                 <dialog open={true} class="dialog-display">
-                    <p>{"Greetings, one and all!"}</p>
+                <h3>{format!("Form for {}", data.deref().clone().unwrap().client_id)}</h3>
                     <form method="dialog">
-                        <h3>{format!("Form for {}", data.deref().clone().unwrap().client_id)}</h3>
+                        <RequiredTextInput input_type={"text"} name={"client_address_one"} class={"half-input"} placeholder={"Address"} value={data.deref().clone().unwrap().client_address_one} onchange={address_one_changed} />
                         <button>{"OK"}</button>
                     </form>
                 </dialog >
