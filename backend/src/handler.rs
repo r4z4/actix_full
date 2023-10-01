@@ -330,7 +330,10 @@ pub async fn get_consults_handler(
 
     let query_result = sqlx::query_as!(
         ResponseConsult,
-        "SELECT consult_id, location_id, consult_start, notes FROM consults ORDER by consult_id LIMIT $1 OFFSET $2",
+        "SELECT consults.consult_id, location_id, consult_start, CONCAT_WS('_', attachment_id) AS consult_attachments, notes 
+        FROM consults 
+        LEFT JOIN consult_attachments ON consult_attachments.consult_id = consults.consult_id
+        ORDER by consult_id LIMIT $1 OFFSET $2",
         limit as i32,
         offset as i32
     )

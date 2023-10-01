@@ -12,6 +12,41 @@ pub struct Props {
     pub onchange: Callback<u8>,
 }
 
+// fn attachment_to_html(attachment: AttachmentData) -> Html {
+    
+// }
+
+fn vec_to_html(list: &Vec<AttachmentData>) -> Vec<Html> {
+    list.iter()
+        .map(|attachment| {
+            html! {
+            <div class="media-display">
+                if attachment.typ == "img/png".to_owned() {
+                    <img src={attachment.url.clone()} />
+                }
+                if attachment.typ == "img/jpg".to_owned() {
+                    <img src={attachment.url.clone()} />
+                }
+                if attachment.typ == "audio/wav".to_owned() {
+                    <audio controls={true}>
+                        <source src={attachment.url.clone()} type="audio/wav" />
+                        {"Your browser does not support the audio element."}
+                    </audio>
+                }
+                if attachment.typ == "video/webm".to_owned() {
+                    <video width="320" height="240" controls={true} >
+                        <source src={attachment.url.clone()} type="video/webm" />
+                        // Use with multiple types
+                        // <source src="movie.ogg" type="video/ogg">
+                        {"Your browser does not support the video tag."}
+                    </video>
+                }
+            </div>
+        }
+        })
+        .collect()
+}
+
 #[function_component]
 pub fn AttachmentsDisplay(props: &Props) -> Html {
     let attachments_data = &props.attachments_data;
@@ -25,17 +60,8 @@ pub fn AttachmentsDisplay(props: &Props) -> Html {
     });
 
     html! {
-        <ul class="list-none flex items-center justify-around my-7">
-            { for (1..=10).map(|i| {
-                let label = i.to_string();
-                let id = format!("num{}", i);
-
-                html! {
-                    <li>
-
-                    </li>
-                }
-            })}
-        </ul>
+        <div>
+            {vec_to_html(attachments_data)}
+        </div>
     }
 }
