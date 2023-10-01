@@ -1,5 +1,6 @@
 -- Add down migration script here
 DROP TABLE IF EXISTS consultant_ties;
+DROP TABLE IF EXISTS consult_attachments;
 DROP TABLE IF EXISTS engagements;
 DROP TABLE IF EXISTS consults;
 DROP TABLE IF EXISTS clients;

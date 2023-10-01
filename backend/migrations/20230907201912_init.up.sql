@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS attachments (
         mime_type TEXT NOT NULL,
         channel TEXT NOT NULL,
         created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NULL,
         CONSTRAINT fk_user_id
             FOREIGN KEY(user_id) 
 	            REFERENCES users(user_id)
@@ -238,6 +238,18 @@ CREATE TABLE IF NOT EXISTS consults (
         CONSTRAINT fk_consultant
             FOREIGN KEY(consultant_id) 
 	            REFERENCES consultants(consultant_id)
+    );
+
+CREATE TABLE IF NOT EXISTS consult_attachments (
+        consult_attachment_id SERIAL PRIMARY KEY,
+        attachment_id INTEGER NOT NULL,
+        consult_id INTEGER NOT NULL,
+        CONSTRAINT fk_attachment_id
+            FOREIGN KEY(attachment_id) 
+	            REFERENCES attachments(attachment_id),
+        CONSTRAINT fk_consult_id
+            FOREIGN KEY(consult_id) 
+	            REFERENCES consults(consult_id)
     );
 
 INSERT INTO territories (territory_id, territory_name, territory_states)
@@ -313,6 +325,7 @@ INSERT INTO locations (location_name, location_address_one, location_address_two
 VALUES 
 ('Default - Main Office', '1234 Main St.', NULL, 'Omaha', 'NE', '68114', '555-555-5555', DEFAULT, 4),
 ('Bend Conference Center', '5432 Postgres Ave', 'Ste. 101', 'Bend', 'OR', '97701', '555-555-5555', DEFAULT, 3),
+('Mazgajs', '6767 Hoy Ave', NULL, 'Miami', 'FL', '33126', '555-555-5555', DEFAULT, 2),
 ('Austin Heights', '6379 Redis Lane', NULL, 'Austin', 'TX', '78799', '555-555-5555', 2, 4);
 
 INSERT INTO engagements (rating, text, user_id) 
@@ -322,10 +335,24 @@ VALUES
 
 INSERT INTO consults (consultant_id, client_id, location_id, consult_start, consult_end, notes) 
 VALUES 
-(1, 1, 2, '2023-09-11 19:10:25', '2023-09-11 19:30:25', NULL),
+(1, 4, 2, '2023-09-11 19:10:25', '2023-09-11 19:30:25', NULL),
+(3, 5, 4, '2023-09-13 12:10:25', '2023-09-13 13:20:11', 'Arp Swanson and Aribiter met on this one'),
+(4, 2, 3, '2023-09-14 14:00:00', '2023-09-14 15:11:25', 'Hour long session w/ Billy Gil and Tobias. Lots of media!!! See attachments.'),
 (2, 2, 1, '2023-09-11 16:00:25', '2023-09-11 16:50:11', 'Using the Default Address. Location not persisted. Location was at the Clevelander.');
 
-INSERT INTO attachments (path, mime_type, user_id, channel, created_at, updated_at) 
+-- audio/flac
+INSERT INTO attachments (path, mime_type, user_id, channel, created_at) 
 VALUES 
-('https://upload.wikimedia.org/wikipedia/commons/5/5d/Kuchnia_polska-p243b.png', 'image/png', 3, 'Upload', '2023-09-11 19:10:25-06', '2023-09-11 19:30:25-06'),
-('https://upload.wikimedia.org/wikipedia/commons/f/f5/Kuchnia_polska-p35b.png', 'image/png', 4, 'Email', '2023-09-11 16:00:25-06', '2023-09-11 16:50:11-06');
+('https://upload.wikimedia.org/wikipedia/commons/5/5d/Kuchnia_polska-p243b.png', 'image/png', 3, 'Upload', '2023-09-11 19:10:25-06'),
+('https://upload.wikimedia.org/wikipedia/commons/3/3f/Rail_tickets_of_Poland.jpg', 'image/jpeg', 3, 'Upload', '2023-09-11 19:10:25-06'),
+('https://upload.wikimedia.org/wikipedia/commons/f/f4/Larynx-HiFi-GAN_speech_sample.wav', 'audio/wav', 3, 'Upload', '2023-09-11 19:10:25-06'),
+('https://upload.wikimedia.org/wikipedia/commons/6/6e/Mindannyian-vagyunk.webm', 'video/webm', 3, 'Upload', '2023-09-14 19:16:25-06'),
+('https://upload.wikimedia.org/wikipedia/commons/f/f5/Kuchnia_polska-p35b.png', 'image/png', 4, 'Email', '2023-09-16 16:00:25-06');
+
+INSERT INTO consult_attachments (attachment_id, consult_id) 
+VALUES 
+(1, 3),
+(2, 1),
+(3, 3),
+(4, 3),
+(5, 2);

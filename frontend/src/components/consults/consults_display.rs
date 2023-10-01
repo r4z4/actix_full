@@ -19,6 +19,7 @@ pub struct ResponseConsult {
     pub location_id: i32,
     // #[serde(serialize_with = "serialize_dt", skip_serializing_if  = "Option::is_none")]
     pub consult_start: Option<DateTime<Utc>>,
+    pub consult_attachments: Option<Vec<i32>>,
     pub notes: Option<String>,
 }
 

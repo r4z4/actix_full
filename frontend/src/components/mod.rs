@@ -7,7 +7,7 @@ pub mod consults;
 pub mod clients;
 
 pub mod engagements;
-
+pub mod attachments_display;
 pub mod auth;
 pub mod logout;
 pub mod nav;
