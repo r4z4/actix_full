@@ -4,6 +4,7 @@ use crate::{
     schema::FilterOptions,
     AppState,
 };
+use serde_with::{StringWithSeparator, formats::CommaSeparator};
 use validator::Validate;
 use actix_multipart::Multipart;
 use actix_web::{
@@ -326,27 +327,27 @@ pub async fn get_consults_handler(
     data: web::Data<AppState>,
 ) -> impl Responder {
     let limit = opts.limit.unwrap_or(10);
-    let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
     let query_result = sqlx::query_as!(
         ResponseConsult,
-        "SELECT consults.consult_id, location_id, consult_start, CONCAT_WS('_', attachment_id) AS consult_attachments, notes 
+        "SELECT consult_id, location_id, consult_start, consult_attachments, notes 
         FROM consults 
-        LEFT JOIN consult_attachments ON consult_attachments.consult_id = consults.consult_id
-        ORDER by consult_id LIMIT $1 OFFSET $2",
-        limit as i32,
-        offset as i32
+		LIMIT $1",
+        limit as i32
     )
     .fetch_all(&data.db)
     .await;
 
     if query_result.is_err() {
+        let _ = dbg!(query_result);
         let message = "Error occurred while fetching all consult records";
         return HttpResponse::InternalServerError()
             .json(json!({"status": "error","message": message}));
     }
 
     let consults = query_result.unwrap();
+
+    dbg!(consults.clone());
 
     let json_response = ResponseConsultList {
         consults: consults,
@@ -449,6 +450,57 @@ pub struct ResponseClient {
     pub client_zip: String,
 }
 
+#[serde_with::serde_as]
+#[serde_with::skip_serializing_none]
+#[derive(Debug,Serialize,Deserialize)]
+pub struct AttachmentIdParams {
+    #[serde_as(as = "StringWithSeparator::<CommaSeparator, String>")]
+    pub ids: Vec<String>
+}
+
+#[get("/attachments/{ids}")]
+pub async fn get_attachments_handler(
+    path: web::Path<AttachmentIdParams>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let attachment_id_strs = path.into_inner().ids;
+    let attachment_id_ints: Vec<i32> = attachment_id_strs.iter().map(|x| x.parse::<i32>().unwrap()).collect();
+    let ints = &vec![1,2];
+    let query_result = sqlx::query_as!(
+        ResponseAttachment,
+        "SELECT attachment_id, path, mime_type FROM attachments WHERE attachment_id = ANY($1::integer[])",
+        ints
+    )
+    .fetch_all(&data.db)
+    .await;
+
+    if query_result.is_err() {
+        let message = "Error occurred while fetching all consult records";
+        return HttpResponse::InternalServerError()
+            .json(json!({"status": "error","message": message}));
+    }
+
+    let attachments = query_result.unwrap();
+
+    let json_response = ResponseAttachmentList {
+        attachments: attachments,
+    };
+
+    HttpResponse::Ok().json(json_response)
+    // HttpResponse::NoContent().finish()
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseAttachmentList {
+    pub attachments: Vec<ResponseAttachment>,
+}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseAttachment {
+    pub attachment_id: i32,
+    pub path: String,
+    pub mime_type: String,
+}
+
 pub fn config(conf: &mut web::ServiceConfig) {
     let scope = web::scope("/api")
         .service(health_checker_handler)
@@ -461,6 +513,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(get_clients_handler)
         .service(get_client_handler)
         .service(consults_form_submit_handler)
+        .service(get_attachments_handler)
         .service(account_options_handler);
 
     conf.service(scope);

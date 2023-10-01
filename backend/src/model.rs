@@ -25,14 +25,14 @@ pub enum AttachmentChannel {
     Upload,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct ResponseConsult {
     pub consult_id: i32,
     pub location_id: i32,
     // #[serde(serialize_with = "serialize_dt", skip_serializing_if  = "Option::is_none")]
     pub consult_start: DateTime<Utc>,
-    // Using CONCAT does not return a Vec<>
-    pub consult_attachments: Option<String>,
+    // CASTing to varchar
+    pub consult_attachments: Option<Vec<i32>>,
     pub notes: Option<String>,
 }
 
@@ -137,6 +137,7 @@ pub struct ConsultModel {
     pub consult_start: Option<chrono::DateTime<chrono::Utc>>,
     pub consult_end: Option<chrono::DateTime<chrono::Utc>>,
     pub notes: Option<String>,
+    pub consult_attachments: Option<Vec<i32>>,
     #[serde(rename = "createdAt")]
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "updatedAt")]

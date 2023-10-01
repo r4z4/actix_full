@@ -227,6 +227,7 @@ CREATE TABLE IF NOT EXISTS consults (
         consult_start TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         consult_end TIMESTAMPTZ DEFAULT NULL,
         notes TEXT DEFAULT NULL,
+        consult_attachments INTEGER[] DEFAULT NULL,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_client
@@ -333,12 +334,12 @@ VALUES
 (7, 'It was a seven.', 1),
 (3, 'I give it a 3', 2);
 
-INSERT INTO consults (consultant_id, client_id, location_id, consult_start, consult_end, notes) 
+INSERT INTO consults (consultant_id, client_id, location_id, consult_start, consult_end, consult_attachments, notes) 
 VALUES 
-(1, 4, 2, '2023-09-11 19:10:25', '2023-09-11 19:30:25', NULL),
-(3, 5, 4, '2023-09-13 12:10:25', '2023-09-13 13:20:11', 'Arp Swanson and Aribiter met on this one'),
-(4, 2, 3, '2023-09-14 14:00:00', '2023-09-14 15:11:25', 'Hour long session w/ Billy Gil and Tobias. Lots of media!!! See attachments.'),
-(2, 2, 1, '2023-09-11 16:00:25', '2023-09-11 16:50:11', 'Using the Default Address. Location not persisted. Location was at the Clevelander.');
+(1, 4, 2, '2023-09-11 19:10:25', '2023-09-11 19:30:25', ARRAY[2], NULL),
+(3, 5, 4, '2023-09-13 12:10:25', '2023-09-13 13:20:11', ARRAY[5], 'Arp Swanson and Aribiter met on this one'),
+(4, 2, 3, '2023-09-14 14:00:00', '2023-09-14 15:11:25', ARRAY[1, 3, 4], 'Hour long session w/ Billy Gil and Tobias. Lots of media!!! See attachments.'),
+(2, 2, 1, '2023-09-11 16:00:25', '2023-09-11 16:50:11', NULL, 'Using the Default Address. Location not persisted. Location was at the Clevelander.');
 
 -- audio/flac
 INSERT INTO attachments (path, mime_type, user_id, channel, created_at) 
