@@ -469,7 +469,7 @@ pub async fn get_attachments_handler(
     let query_result = sqlx::query_as!(
         ResponseAttachment,
         "SELECT attachment_id, path, mime_type FROM attachments WHERE attachment_id = ANY($1::integer[])",
-        ints
+        &attachment_id_ints
     )
     .fetch_all(&data.db)
     .await;
