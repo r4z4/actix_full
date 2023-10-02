@@ -19,7 +19,7 @@ pub struct ResponseConsult {
     pub location_id: i32,
     // #[serde(serialize_with = "serialize_dt", skip_serializing_if  = "Option::is_none")]
     pub consult_start: Option<DateTime<Utc>>,
-    pub consult_attachments: Option<String>,
+    pub consult_attachments: Option<Vec<i32>>,
     pub notes: Option<String>,
 }
 
@@ -44,7 +44,11 @@ fn vec_to_html(list: &Vec<ResponseConsult>) -> Vec<Html> {
                     <li>{consult.location_id.clone()}</li>
                     <li>{consult.notes.clone()}</li>
                     <li>{consult.consult_start.unwrap()}</li>
-                    <li>{consult.consult_attachments.clone().unwrap()}</li>
+                    <li>{if let Some(atts) = &consult.consult_attachments {
+                            let joined: String = atts.iter().map( |&id| id.to_string() + ",").collect(); 
+                            joined
+                        } else {"".to_owned()}}
+                    </li>
                 </ul>
             </div>
         }

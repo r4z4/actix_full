@@ -19,6 +19,14 @@ pub struct ConsultPostResponse {
     pub consult_id: i32,
 }
 
+fn get_attachments(attachment_ids: Option<Vec<i32>>) -> Vec<i32> {
+    if let Some(attachments) = attachment_ids {
+        attachments
+    } else {
+        vec![]
+    }
+}
+
 fn render_td_table_rows(list: &Vec<ResponseConsult>) -> Vec<Html> {
     list.iter()
         .map(|consult| {
@@ -28,7 +36,8 @@ fn render_td_table_rows(list: &Vec<ResponseConsult>) -> Vec<Html> {
                 <td>{consult.location_id.clone()}</td>
                 <td>{consult.consult_start.clone()}</td>
                 <td>{consult.notes.clone()}</td>
-                <td><button><ViewModal attachment_ids={vec![]} button_text={"Edit"} consult_id={consult.consult_id} /></button></td>
+                // <td><button><ViewModal attachment_ids={get_attachments(consult.consult_attachments.clone())} button_text={"Edit"} consult_id={consult.consult_id} /></button></td>
+                <td><button><ViewModal attachment_ids={consult.consult_attachments.clone()} button_text={"Edit"} consult_id={consult.consult_id} /></button></td>
                 <td><button><EditModal id={consult.consult_id} button_text={"Edit"} /></button></td>
             </tr>
         }
