@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
 use common::{SelectOption, SelectOptionResponse};
+use gloo_console::log;
 use reqwasm::http::Request;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
@@ -12,6 +13,8 @@ pub struct Props {
     pub label: String,
     #[prop_or_default]
     pub selected: u8,
+    #[prop_or_default]
+    pub required: bool,
     #[prop_or_default]
     pub select_type: String,
     #[prop_or_default]
@@ -39,6 +42,7 @@ pub struct Props {
 #[function_component]
 pub fn SelectInput(props: &Props) -> Html {
     let selected = props.selected;
+    let required = props.required;
     let label = &props.label;
     let select_type = props.select_type.clone();
     let route = 
@@ -70,21 +74,12 @@ pub fn SelectInput(props: &Props) -> Html {
         }
     });
 
-    let location_options: Vec<SelectOption> = vec![
-        SelectOption {
-            key: Some("location_one".to_string()),
-            value: 1,
-        },
-        SelectOption {
-            key: Some("location_two".to_string()),
-            value: 2,
-        },
-    ];
     let mut option_html = vec![];
     let cloned_state = state.clone();
     let data = cloned_state.deref().clone();
     if let Some(options) = data {
         if let Some(option) = options {
+            option_html.push(html! {<option value="" selected={true} disabled={true} hidden={true}>{"Select an Option"}</option>});
             for opt in option {
                 option_html.push(html! {
                     <option value={opt.value.to_string()}>{ opt.key }</option>
@@ -103,7 +98,7 @@ pub fn SelectInput(props: &Props) -> Html {
     html! {
         <div class={"input-div"}>
             <label for="select">{label}</label>
-            <select id="select" onchange={on_input_change}>
+            <select id="select" onchange={on_input_change} required={required}>
                 {option_html}
             </select>
         </div>

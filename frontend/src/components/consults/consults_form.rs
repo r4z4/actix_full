@@ -1,9 +1,9 @@
-use std::ops::Deref;
+use std::{ops::Deref, borrow::Borrow};
 use gloo_console::log;
 use reqwasm::{Error, http::Request};
 use serde_json::json;
 use crate::{
-    components::inputs::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput},
+    components::inputs::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput, textarea_input::TextAreaInput},
     store::{set_loading, set_show_alert, Store},
 };
 use common::{ApiConsultResponse, ConsultPostRequest};
@@ -38,6 +38,19 @@ pub async fn post_consult(new_consult: ConsultPostRequest) -> Result<ApiConsultR
     }
 }
 
+#[derive(Debug)]
+pub struct YewTempFile {
+    /// The temporary file on disk.
+    pub file: String,
+    pub path: String,
+    /// The value of the `content-type` header.
+    pub content_type: Option<String>,
+    /// The `filename` value in the `content-disposition` header.
+    pub file_name: Option<String>,
+    /// The size in bytes of the file.
+    pub size: usize,
+}
+
 #[function_component]
 pub fn ConsultsForm(props: &Props) -> Html {
     let (store, dispatch) = use_store::<Store>();
@@ -55,6 +68,8 @@ pub fn ConsultsForm(props: &Props) -> Html {
 
     let start_time: UseStateHandle<Option<String>> = use_state(|| None);
     let end_time: UseStateHandle<Option<String>> = use_state(|| None);
+
+    let attachments: UseStateHandle<Option<YewTempFile>> = use_state(|| None);
 
     let notes = use_state(|| None);
 
@@ -88,6 +103,14 @@ pub fn ConsultsForm(props: &Props) -> Html {
             notes.set(Some(value));
         })
     };
+
+    let notes_handler = notes.clone();
+
+    let handle_notes_input: Callback<String> = Callback::from(move |form_notes| {
+        // Move this inside so it clones the data in there
+        let cloned_state: UseStateHandle<Option<String>> = notes.clone();
+        cloned_state.set(Some(form_notes));
+    });
 
     let handle_client_id_select = {
         let id = client_id.clone();
@@ -139,6 +162,8 @@ pub fn ConsultsForm(props: &Props) -> Html {
         })
     };
 
+    
+    let notes_h = notes_handler.clone();
     let on_submit = {
         log!("on submit");
         let cloned_dispatch = dispatch.clone();
@@ -150,7 +175,7 @@ pub fn ConsultsForm(props: &Props) -> Html {
         let end_date = end_date.deref().clone();
         let start_time = start_time.deref().clone();
         let end_time = end_time.deref().clone();
-        let notes = notes.clone();
+        let notes = notes_handler.deref().clone();
         let message = message.clone();
         let text_input_ref = text_input_ref.clone();
 
@@ -164,7 +189,7 @@ pub fn ConsultsForm(props: &Props) -> Html {
             let start_time_ta = start_time.clone();
             let end_time_ta = end_time.clone();
             let binding = notes.clone();
-            let notes_ta = binding.deref();
+            let notes_ta = binding.borrow();
             set_loading(true, dispatch.clone());
 
             if let Some(notes) = notes_ta {
@@ -186,7 +211,7 @@ pub fn ConsultsForm(props: &Props) -> Html {
                 end_time: end_time_ta,
                 notes: notes_ta.clone(),
             };
-
+            
             wasm_bindgen_futures::spawn_local(async move {
                 log!("local spawned");
                 let response = post_consult(new_consult).await;
@@ -212,7 +237,7 @@ pub fn ConsultsForm(props: &Props) -> Html {
             let dispatch = cloned_dispatch.clone();
             let text_input = text_input_ref.cast::<HtmlInputElement>().unwrap();
             text_input.set_value("");
-            notes.set(None);
+            notes_handler.set(None);
             set_loading(false, dispatch);
         })
     };
@@ -220,22 +245,26 @@ pub fn ConsultsForm(props: &Props) -> Html {
     let final_end_date_clone = end_date.clone().deref().clone();
     let final_start_time_clone = start_time.clone().deref().clone();
     let final_end_time_clone = end_time.clone().deref().clone();
+    let notes_h = notes_h.clone();
     html! {
         <div class="form-container">
             <header class="form-header">
                 <h2 class="header-text">{header}</h2>
             </header>
-            <form onsubmit={on_submit}>
+            <form onsubmit={on_submit} enctype={"multipart/form-data"}>
                 <div class="form-body">
-                    <SelectInput label={"Location"} select_type={"location"} onchange={handle_location_id_select} />
-                    <SelectInput label={"Consultant"} select_type={"consultant"} onchange={handle_consultant_id_select} />
-                    <SelectInput label={"Client"} select_type={"client"} onchange={handle_client_id_select} />
+                    <SelectInput required={true} label={"Location"} select_type={"location"} onchange={handle_location_id_select} />
+                    <SelectInput required={true} label={"Consultant"} select_type={"consultant"} onchange={handle_consultant_id_select} />
+                    <SelectInput required={true} label={"Client"} select_type={"client"} onchange={handle_client_id_select} />
 
-                    <DateInput date={final_start_date_clone} label={"Start Date"} onchange={handle_start_date_select} />
+                    <DateInput required={true} date={final_start_date_clone} label={"Start Date"} onchange={handle_start_date_select} />
                     <DateInput date={final_end_date_clone} label={"End Date"} onchange={handle_end_date_select} />
 
                     <TimeInput time={final_start_time_clone} label={"Start Time"} onchange={handle_start_time_select} />
                     <TimeInput time={final_end_time_clone} label={"End Time"} onchange={handle_end_time_select} />
+
+                    <TextAreaInput name={"notes"} label={"Notes"} class={"text-input"} value={notes_h.deref().clone()} placeholder={"Consult notes ..."} onchange={handle_notes_input} />
+
                     <input
                         type="textarea"
                         ref={text_input_ref}
@@ -243,6 +272,8 @@ pub fn ConsultsForm(props: &Props) -> Html {
                         class="text-input"
                         placeholder="Consult notes ..."
                     />
+                // FIXME: Convert accept from PHTMap of accepted mime_types
+                <input type={"file"} name={"file"} accept={"image/*,audio/*,video/*"} multiple={true} />
                 <button
                     type="submit"
                     class={format!(
@@ -258,7 +289,10 @@ pub fn ConsultsForm(props: &Props) -> Html {
                 } else {
                     html! {}
                 }}
-                <input type="file" />
+                // <form action="/upload" method="post" enctype="multipart/form-data">
+                //     <input type={"file"} name={"file"} />
+                //     <input type={"submit"} />
+                // </form>
             </form>
         </div>
     }

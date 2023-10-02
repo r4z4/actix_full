@@ -93,6 +93,7 @@ pub struct ConsultPostRequest {
     pub end_time: Option<String>,
     #[validate(length(min = 10, message = "Notes must be greater than 10 chars"))]
     pub notes: Option<String>,
+    // pub files: Option<Vec<TempFile>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]

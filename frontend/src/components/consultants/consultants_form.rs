@@ -250,8 +250,8 @@ pub fn ConsultantsForm(props: &Props) -> Html {
                     <RequiredTextInput input_type={"text"} name={"consultant_f_name"} class={"half-input"} value={consultant_f_name.deref().clone()} placeholder={"First Name"} onchange={consultant_f_name_changed} />
                     <RequiredTextInput input_type={"text"} name={"consultant_l_name"} class={"half-input"} value={consultant_l_name.deref().clone()} placeholder={"Last Name"} onchange={consultant_l_name_changed} />
 
-                    <SelectInput label={"Specialty"} select_type={"location"} onchange={handle_specialty_id_select} />
-                    <SelectInput label={"Territory"} select_type={"consultant"} onchange={handle_territory_id_select} />
+                    <SelectInput required={true} label={"Specialty"} select_type={"location"} onchange={handle_specialty_id_select} />
+                    <SelectInput required={true} label={"Territory"} select_type={"consultant"} onchange={handle_territory_id_select} />
 
                     <DateInput date={final_start_date_clone} label={"Start Date"} onchange={handle_start_date_select} />
                     <DateInput date={final_end_date_clone} label={"End Date"} onchange={handle_end_date_select} />

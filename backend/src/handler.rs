@@ -6,9 +6,9 @@ use crate::{
 };
 use serde_with::{StringWithSeparator, formats::CommaSeparator};
 use validator::Validate;
-use actix_multipart::Multipart;
+use actix_multipart::{Multipart, form::{MultipartForm, tempfile::TempFile}};
 use actix_web::{
-    delete, get, http::header::CONTENT_LENGTH, patch, post, web, HttpMessage, HttpRequest,
+    delete, get, http::{header::CONTENT_LENGTH, Error}, patch, post, web, HttpMessage, HttpRequest,
     HttpResponse, Responder,
 };
 use chrono::prelude::*;
@@ -250,6 +250,25 @@ async fn territory_options_handler(data: web::Data<AppState>) -> impl Responder 
     }
 }
 
+// #[derive(Debug, MultipartForm)]
+// struct UploadForm {
+//     #[multipart(rename = "file")]
+//     files: Vec<TempFile>,
+// }
+
+// async fn save_files(
+//     MultipartForm(form): MultipartForm<UploadForm>,
+// ) -> Result<impl Responder, Error> {
+//     for f in form.files {
+//         let path = format!("./tmp/{}", f.file_name.unwrap());
+//         // log::info!("saving to {path}");
+//         println!("saving to {path}");
+//         f.file.persist(path).unwrap();
+//     }
+
+//     Ok(HttpResponse::Ok())
+// }
+
 #[post("/upload/{id}")]
 async fn upload(mut payload: Multipart, req: HttpRequest) -> HttpResponse {
     // 1. Limit file size
@@ -317,7 +336,7 @@ async fn upload(mut payload: Multipart, req: HttpRequest) -> HttpResponse {
         }
         current_count += 1;
     }
-
+    
     HttpResponse::Ok().into()
 }
 

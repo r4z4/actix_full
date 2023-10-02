@@ -9,6 +9,8 @@ pub struct Props {
     #[prop_or_default]
     pub name: String,
     #[prop_or_default]
+    pub required: bool,
+    #[prop_or_default]
     pub date: Option<String>,
     #[prop_or_default]
     pub onchange: Callback<String>,
@@ -19,6 +21,7 @@ pub struct Props {
 pub fn DateInput(props: &Props) -> Html {
     let date = props.date.clone();
     let label = &props.label;
+    let required = props.required;
     let name = &props.name;
     let cloned_name = name.clone();
 
@@ -36,7 +39,7 @@ pub fn DateInput(props: &Props) -> Html {
             <label for="start">{label}</label>
             <span class={"datepicker-toggle"}>
                 <span class={"datepicker-toggle-button"}></span>
-                <input type="date" class={"datepicker-input"} name={cloned_name} onchange={on_input_change.clone()} value={date} min="2023-01-01" max="2025-12-31" />
+                <input type="date" class={"datepicker-input"} name={cloned_name} onchange={on_input_change.clone()} value={date} min="2023-01-01" max="2025-12-31" required={required}/>
             </span>
         </div>
     }
