@@ -24,7 +24,8 @@ pub fn logout(props: &Props) -> Html {
     });
     html! {
         <div>
-            <button class={"logout"} onclick={user_logout}>{&props.label}</button>
+            // <button class={"logout"} onclick={user_logout}>{&props.label}</button>
+            <button class={"logout"} onclick={user_logout}><img src={"/img/logout.svg"} /></button>
         </div>
     }
 }

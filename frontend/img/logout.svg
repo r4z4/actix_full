@@ -1,1 +1,11 @@
-<?xml version="1.0" ?><svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs><style>.cls-1{fill:#d8e1ef;}.cls-2{fill:#0593ff;}</style></defs><title/><g id="out"><rect class="cls-1" height="26" rx="4" ry="4" width="20" x="2" y="3"/><path class="cls-2" d="M29.71,15.29l-4-4a1,1,0,0,0-1.42,1.42L26.59,15H12a1,1,0,0,0,0,2H26.59l-2.3,2.29a1,1,0,0,0,0,1.42,1,1,0,0,0,1.42,0l4-4A1,1,0,0,0,29.71,15.29Z"/></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Iconly/Curved/Logout</title>
+    <g id="Iconly/Curved/Logout" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="Logout" transform="translate(2.000000, 2.000000)" stroke="#000000" stroke-width="1.5">
+            <line x1="19.791" y1="10.1207" x2="7.75" y2="10.1207" id="Stroke-1"></line>
+            <polyline id="Stroke-3" points="16.8643 7.2047 19.7923 10.1207 16.8643 13.0367"></polyline>
+            <path d="M0.2588,5.6299 C0.5888,2.0499 1.9288,0.7499 7.2588,0.7499 C14.3598,0.7499 14.3598,3.0599 14.3598,9.9999 C14.3598,16.9399 14.3598,19.2499 7.2588,19.2499 C1.9288,19.2499 0.5888,17.9499 0.2588,14.3699" id="Stroke-4" transform="translate(7.309300, 9.999900) scale(-1, 1) translate(-7.309300, -9.999900) "></path>
+        </g>
+    </g>
+</svg>

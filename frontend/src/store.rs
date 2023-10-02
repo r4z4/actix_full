@@ -15,6 +15,7 @@ pub struct AlertInput {
 pub struct AuthStore {
     pub username: Option<String>,
     pub password: Option<String>,
+    pub user_id: Option<i32>,
     pub token: Option<String>,
     pub is_authenticated: bool,
 }
@@ -59,6 +60,12 @@ pub fn set_password(password: String, dispatch: Dispatch<AuthStore>) {
 pub fn set_token(token: String, dispatch: Dispatch<AuthStore>) {
     dispatch.reduce_mut(move |store| {
         store.token = Some(token);
+    })
+}
+
+pub fn set_user_id(user_id: i32, dispatch: Dispatch<AuthStore>) {
+    dispatch.reduce_mut(move |store| {
+        store.user_id = Some(user_id);
     })
 }
 

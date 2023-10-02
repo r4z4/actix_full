@@ -113,6 +113,7 @@ pub fn login_form(props: &Props) -> Html {
                 Ok(response) => {
                     dispatch.reduce_mut(|store| store.token = Some(response.token));
                     dispatch.reduce_mut(|store| store.is_authenticated = true);
+                    dispatch.reduce_mut(|store| store.user_id = Some(response.user_id));
                     navigator.push(&Route::Home);
                 }
                 Err(err) => {

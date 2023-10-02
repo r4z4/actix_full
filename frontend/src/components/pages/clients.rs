@@ -15,7 +15,7 @@ pub fn clients() -> Html {
                     <ClientsForm />
                 </div>
             </details>
-            <div id={"provider_display"}>
+            <div id={"entity-table"}>
                 <ClientsTable title={"Clients"} on_load={data_display_loaded} />
             </div>
         </div>

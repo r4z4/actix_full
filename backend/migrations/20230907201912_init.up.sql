@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS accounts (
         account_id SERIAL PRIMARY KEY,
         account_name TEXT NOT NULL UNIQUE,
         account_secret TEXT DEFAULT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
     );
 
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS users (
         email TEXT NOT NULL UNIQUE,
         secret TEXT DEFAULT NULL,
         password TEXT NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_account_id
             FOREIGN KEY(account_id) 
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS consultants (
         territory_id INTEGER NULL,
         user_id INTEGER NOT NULL,
         img_path TEXT DEFAULT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_user
             FOREIGN KEY(user_id) 
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS consultant_ties (
         territory_id INTEGER NULL,
         consultant_start DATE NOT NULL DEFAULT CURRENT_DATE,
         consultant_end DATE DEFAULT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_consultant
             FOREIGN KEY(consultant_id) 
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS clients (
         client_email TEXT NULL,
         account_id INTEGER NOT NULL,
         territory_id INTEGER NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_territory
             FOREIGN KEY(territory_id) 
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS contacts (
         contact_email TEXT NOT NULL,
         contact_primary_phone TEXT NULL,
         contact_secondary_phone TEXT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
     );
 
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS locations (
         location_phone TEXT NULL,
         location_contact_id INTEGER DEFAULT 1,
         territory_id INTEGER NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_contact
             FOREIGN KEY(location_contact_id) 
@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS engagements (
         rating INTEGER NOT NULL,
         text TEXT NOT NULL UNIQUE,
         user_id INTEGER DEFAULT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_user
             FOREIGN KEY(user_id) 
@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS messages (
         subject TEXT NOT NULL,
         sent_to INTEGER NOT NULL,
         sent_from INTEGER NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         sent_at TIMESTAMPTZ DEFAULT NULL,
         read_at TIMESTAMPTZ DEFAULT NULL,
@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS attachments (
         -- channel attachment_channel NOT NULL,
         mime_type_id INTEGER NOT NULL,
         channel TEXT NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NULL,
         CONSTRAINT fk_user_id
             FOREIGN KEY(user_id) 
@@ -233,7 +233,7 @@ CREATE TABLE IF NOT EXISTS consults (
         consult_end TIMESTAMPTZ DEFAULT NULL,
         notes TEXT DEFAULT NULL,
         consult_attachments INTEGER[] DEFAULT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_client
             FOREIGN KEY(client_id) 

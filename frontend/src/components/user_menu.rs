@@ -18,7 +18,7 @@ pub fn user_menu(props: &Props) -> Html {
 
     html! {
         <div class="dropdown">
-            <span>{"👤"}</span>
+            <span><img width={30px} src={"/img/anon.svg"} /></span>
             <div class="dropdown-content">
                 <p><Link<Route> to={Route::UserProfile}>{"Profile 🧑"}</Link<Route>></p>
                 <hr />

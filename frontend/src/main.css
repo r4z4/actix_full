@@ -27,8 +27,23 @@ details[open] > summary::marker {
     color: #eaedee;
 }
 
+#entity-table {
+    width: 80%;
+    margin: auto;
+}
+
 .display-list {
     list-style-type: none;
+}
+
+.loading-span:active {
+    overflow: hidden; 
+    position: absolute; 
+    padding: 0; 
+    margin: 1px; 
+    border-width: 0; 
+    width: 1px; 
+    white-space: nowrap; 
 }
 
 /**************
@@ -483,6 +498,10 @@ body {
     align-items: center; 
 }
 
+/************
+**** Nav ****
+************/
+
 #nav-list {
     /* margin: auto;
     text-align: center;
@@ -505,6 +524,15 @@ body {
     padding: 10px; 
 }
 
+/* #nav-list li:last-of-type {
+    margin-left: auto;
+} */
+
+#nav-list li:nth-last-child(2) {
+    margin-left: auto;
+}
+
+
 #nav-list a {
     text-decoration: none;
 }
@@ -512,6 +540,14 @@ body {
 a:visited {
     color: rgb(208, 223, 154);
 }
+
+.dropdown img {
+    color: white;
+}
+
+/*********************
+**** Entity Pages ****
+*********************/
 
 .data-display {
     margin: auto;

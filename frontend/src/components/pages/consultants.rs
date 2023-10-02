@@ -20,7 +20,7 @@ pub fn consultants() -> Html {
                     <ConsultantsForm />
                 </div>
             </details>
-            <div id={"provider_display"}>
+            <div id={"entity-table"}>
                 // <ConsultantsDisplay title={"Consultants Display"} on_load={data_display_loaded} />
                 <ConsultantsTable title={"Consultants Display"} on_load={data_display_loaded} />
             </div>
