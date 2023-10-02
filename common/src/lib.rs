@@ -1,5 +1,17 @@
 use serde::{Deserialize, Serialize};
 use validator::Validate;
+use phf::{phf_map};
+
+static MIME_TYPES: phf::Map<&'static str, i32> = phf_map! {
+    "image/png" => 1,
+    "image/jpeg" => 2,
+    "audio/wav" => 6,
+    "video/webm" => 9,
+};
+
+pub fn parse_mime_type(mime_type: &str) -> i32 {
+    *MIME_TYPES.get(mime_type).unwrap_or(&0)
+}
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct Consult {

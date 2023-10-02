@@ -468,7 +468,7 @@ pub async fn get_attachments_handler(
     let ints = &vec![1,2];
     let query_result = sqlx::query_as!(
         ResponseAttachment,
-        "SELECT attachment_id, path, mime_type FROM attachments WHERE attachment_id = ANY($1::integer[])",
+        "SELECT attachment_id, path, mime_type_id FROM attachments WHERE attachment_id = ANY($1::integer[])",
         &attachment_id_ints
     )
     .fetch_all(&data.db)
@@ -498,7 +498,7 @@ pub struct ResponseAttachmentList {
 pub struct ResponseAttachment {
     pub attachment_id: i32,
     pub path: String,
-    pub mime_type: String,
+    pub mime_type_id: i32,
 }
 
 pub fn config(conf: &mut web::ServiceConfig) {

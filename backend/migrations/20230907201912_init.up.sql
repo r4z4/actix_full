@@ -57,6 +57,11 @@ CREATE TABLE IF NOT EXISTS specialties (
         specialty_name TEXT NOT NULL
     );
 
+CREATE TABLE IF NOT EXISTS mime_types (
+        mime_type_id SERIAL PRIMARY KEY,
+        mime_type_name TEXT NOT NULL
+    );
+
 CREATE TABLE IF NOT EXISTS territories (
         territory_id SERIAL PRIMARY KEY,
         territory_name TEXT NOT NULL,
@@ -210,7 +215,7 @@ CREATE TABLE IF NOT EXISTS attachments (
         user_id INTEGER NOT NULL,
         -- mime_type mime_type NOT NULL,
         -- channel attachment_channel NOT NULL,
-        mime_type TEXT NOT NULL,
+        mime_type_id INTEGER NOT NULL,
         channel TEXT NOT NULL,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NULL,
@@ -266,6 +271,25 @@ VALUES
 (2, 'Insurance'),
 (3, 'Technology'),
 (4, 'Government');
+
+INSERT INTO mime_types (mime_type_id, mime_type_name)
+VALUES
+(1, 'image/png'),
+(2, 'image/jpeg'),
+(3, 'image/gif'),
+(4, 'image/webp'),
+(5, 'image/svg+xml'),
+(6, 'audio/wav'),
+(7, 'audio/mpeg'),
+(8, 'audio/webm'),
+(9, 'video/webm'),
+(10, 'video/mpeg'),
+(11, 'video/mp4'),
+(12, 'application/json'),
+(13, 'application/pdf'),
+(14, 'text/csv'),
+(15, 'text/html'),
+(16, 'text/calendar');
 
 INSERT INTO accounts (account_name, account_secret) 
 VALUES 
@@ -342,14 +366,16 @@ VALUES
 (2, 2, 1, '2023-09-11 16:00:25', '2023-09-11 16:50:11', NULL, 'Using the Default Address. Location not persisted. Location was at the Clevelander.');
 
 -- audio/flac
-INSERT INTO attachments (path, mime_type, user_id, channel, created_at) 
+INSERT INTO attachments (path, mime_type_id, user_id, channel, created_at) 
 VALUES 
-('https://upload.wikimedia.org/wikipedia/commons/5/5d/Kuchnia_polska-p243b.png', 'image/png', 3, 'Upload', '2023-09-11 19:10:25-06'),
-('https://upload.wikimedia.org/wikipedia/commons/3/3f/Rail_tickets_of_Poland.jpg', 'image/jpeg', 3, 'Upload', '2023-09-11 19:10:25-06'),
-('https://upload.wikimedia.org/wikipedia/commons/f/f4/Larynx-HiFi-GAN_speech_sample.wav', 'audio/wav', 3, 'Upload', '2023-09-11 19:10:25-06'),
-('https://upload.wikimedia.org/wikipedia/commons/6/6e/Mindannyian-vagyunk.webm', 'video/webm', 3, 'Upload', '2023-09-14 19:16:25-06'),
-('https://upload.wikimedia.org/wikipedia/commons/f/f5/Kuchnia_polska-p35b.png', 'image/png', 4, 'Email', '2023-09-16 16:00:25-06');
+('https://upload.wikimedia.org/wikipedia/commons/5/5d/Kuchnia_polska-p243b.png', 1, 3, 'Upload', '2023-09-11 19:10:25-06'),
+('https://upload.wikimedia.org/wikipedia/commons/3/3f/Rail_tickets_of_Poland.jpg', 2, 3, 'Upload', '2023-09-11 19:10:25-06'),
+('https://upload.wikimedia.org/wikipedia/commons/f/f4/Larynx-HiFi-GAN_speech_sample.wav', 6, 3, 'Upload', '2023-09-11 19:10:25-06'),
+('https://upload.wikimedia.org/wikipedia/commons/6/6e/Mindannyian-vagyunk.webm', 9, 3, 'Upload', '2023-09-14 19:16:25-06'),
+('https://upload.wikimedia.org/wikipedia/commons/f/f5/Kuchnia_polska-p35b.png', 1, 4, 'Email', '2023-09-16 16:00:25-06');
 
+-- SQLx error for UnexpectedNull when trying to query
+-- Find in Postgres though
 INSERT INTO consult_attachments (attachment_id, consult_id) 
 VALUES 
 (1, 3),

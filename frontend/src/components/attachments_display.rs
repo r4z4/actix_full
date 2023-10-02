@@ -1,3 +1,4 @@
+use common::parse_mime_type;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -21,19 +22,19 @@ fn vec_to_html(list: &Vec<AttachmentData>) -> Vec<Html> {
         .map(|attachment| {
             html! {
             <div class="media-display">
-                if attachment.mime_type == "image/png".to_owned() {
+                if attachment.mime_type_id == parse_mime_type("image/png") {
                     <img src={attachment.path.clone()} />
                 }
-                if attachment.mime_type == "image/jpeg".to_owned() {
+                if attachment.mime_type_id == parse_mime_type("image/jpeg") {
                     <img src={attachment.path.clone()} />
                 }
-                if attachment.mime_type == "audio/wav".to_owned() {
+                if attachment.mime_type_id == parse_mime_type("audio/wav") {
                     <audio controls={true}>
                         <source src={attachment.path.clone()} type="audio/wav" />
                         {"Your browser does not support the audio element."}
                     </audio>
                 }
-                if attachment.mime_type == "video/webm".to_owned() {
+                if attachment.mime_type_id == parse_mime_type("video/webm") { // Replace w/ MIME_TYPE_VIDEO_WEBM
                     <video width="320" height="240" controls={true} >
                         <source src={attachment.path.clone()} type="video/webm" />
                         // Use with multiple types

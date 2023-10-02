@@ -27,7 +27,7 @@ pub struct AttachmentsResponse {
 pub struct AttachmentData {
     pub attachment_id: i32,
     pub path: String,
-    pub mime_type: String,
+    pub mime_type_id: i32,
 }
 
 fn close_modal() -> () {
