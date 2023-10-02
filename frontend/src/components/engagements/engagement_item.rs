@@ -26,7 +26,7 @@ pub fn EngagementItem(props: &Props) -> Html {
 
             if confirmed {
                 delete_engagement(engagement_id, dispatch.clone());
-                set_show_alert("Engagement deleted successfully".to_string(), dispatch);
+                set_show_alert("Engagement deleted successfully".to_string(), 1, dispatch);
             }
         })
     };

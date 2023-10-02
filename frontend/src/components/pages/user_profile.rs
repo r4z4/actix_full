@@ -6,15 +6,15 @@ use yew::prelude::*;
 use yewdux::prelude::use_store;
 use reqwasm::http::Request;
 
-use crate::store::AuthStore;
+use crate::{store::{AuthStore, set_loading, Store}, components::user_profile_display::UserProfileDisplay};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Default, Deserialize, Clone, PartialEq)]
 pub struct UserProfileData {
-    user_id: i32,
-    account_id: i32,
-    email: String,
-    username: String,
-    created_at: DateTime<Utc>,
+    pub user_id: i32,
+    pub account_id: i32,
+    pub email: String,
+    pub username: String,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -24,9 +24,10 @@ pub struct ResponseUserProfile {
 
 #[function_component(UserProfile)]
 pub fn user_profile() -> Html {
-    let (store, dispatch) = use_store::<AuthStore>();
+    let (auth_store, auth_dispatch) = use_store::<AuthStore>();
+    let (store, dispatch) = use_store::<Store>();
     let data: UseStateHandle<Option<UserProfileData>> = use_state(|| None);
-    let user_id = store.user_id.unwrap_or(1);
+    let user_id = auth_store.user_id.unwrap_or(1);
 
     let c_data = data.clone();
     let view_data = data.clone();
@@ -44,6 +45,7 @@ pub fn user_profile() -> Html {
                     .unwrap();
         
                 c_data.set(Some(response.user));
+                set_loading(false, dispatch.clone());
             });
         },
         data,
@@ -52,12 +54,10 @@ pub fn user_profile() -> Html {
     
     html! {
         <div class={"entity-page"}>
-            <h1>{format!("User Profile for {}", store.username.clone().unwrap())}</h1>
+            <h1>{format!("User Profile for {}", auth_store.username.clone().unwrap())}</h1>
             if view_data.is_some() {
                 <div class={"container"}>
-                    <p>{"Username"}</p>
-                    <p>{view_data.as_ref().unwrap().email.clone()}</p>
-                    // <UserProfileTable />
+                    <UserProfileDisplay user_data={view_data.as_ref().unwrap().clone()} />
                 </div>
             }
         </div>

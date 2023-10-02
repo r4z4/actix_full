@@ -137,7 +137,8 @@ details[open] > summary::marker {
 }
 
 .submit-button {
-    margin-top: 2em;
+    margin: 2em auto;
+    background-color: #fff;
     border-radius: 0.375rem; 
     border-width: 0; 
     width: 7rem; 
@@ -237,41 +238,6 @@ details[open] > summary::marker {
     align-items: center; 
 }
 
-.toast {
-    position: fixed; 
-    right: 2.5rem; 
-    top: 3.5rem; 
-    padding-top: 1rem;
-    padding-bottom: 1rem; 
-    padding-left: 1.25rem;
-    padding-right: 1.25rem; 
-    border-right-width: 8px; 
-    background-color: #ffffff; 
-    drop-shadow: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1)); 
-}
-
-.white {
-    color: white;
-}
-
-.toast-p {
-    font-size: 0.875rem;
-    line-height: 1.25rem; 
-}
-
-.toast-icon {
-    display: inline-block; 
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem; 
-    padding-left: 0.75rem;
-    padding-right: 0.75rem; 
-    margin-right: 0.5rem; 
-    border-radius: 9999px; 
-    font-weight: 800; 
-    color: #ffffff; 
-    background-color: #3B82F6; 
-}
-
 .loading-anim {
     display: inline-block; 
     position: fixed; 
@@ -286,10 +252,6 @@ details[open] > summary::marker {
     animation: spin 1s linear infinite;
 }
 
-ul {
-    border: 2px solid #64649b;
-}
-
 #home-main h1 {
     text-align: center;
     color: white;
@@ -298,10 +260,6 @@ ul {
 /* li {
     color: white;
 } */
-
-p {
-    color: purple;
-}
 
 body {
     background-color: #ADADAD;
@@ -513,6 +471,8 @@ body {
     padding-right: 2rem; 
     gap: 2rem; 
     justify-content: flex-start; 
+    align-items: center;
+    border-bottom: 1px solid rgba(73, 62, 76, 0.971);
 }
 
 #nav-list ul {
@@ -645,7 +605,7 @@ input[type=password] {
     font-family: inherit;
     font-size: 16px;
     transition: all 150ms ease;
-    background: url('img/select_arrow.svg') no-repeat right #ddd;
+    background: url('img/select_arrow.svg') no-repeat right #f7f9f9;
     -webkit-appearance: none;
     background-position-x: x-end;  
 }
@@ -673,6 +633,15 @@ option:focus {
     outline: none;
     border-color: #0077FF;
     box-shadow: 0 0 0 2px rgba(#0077FF,.2);
+}
+
+#user-profile-display {
+    color: white;
+    text-align: center;
+}
+
+.item-label {
+    margin-right: 20px;
 }
 
 .container {
@@ -783,14 +752,14 @@ input[type=time] {
     display: none;
   }
 
+/**************
+**** Toast ****
+**************/
+
 .my-toast {
     position: fixed; 
-    right: 2.5rem; 
-    top: 3.5rem; 
-    padding-top: 1rem;
-    padding-bottom: 1rem; 
-    padding-left: 1.25rem;
-    padding-right: 1.25rem; 
+    left: 2.5rem; 
+    bottom: 2.5rem; 
     border-right-width: 8px; 
     background-color: #ffffff; 
     drop-shadow: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1)); 
@@ -807,6 +776,40 @@ input[type=time] {
     font-weight: 800; 
     color: #ffffff; 
     background-color: #3B82F6; 
+}
+
+.toast-icon {
+    display: inline-block; 
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem; 
+    padding-left: 0.75rem;
+    padding-right: 0.75rem; 
+    margin-right: 0.5rem; 
+    border-radius: 9999px; 
+    font-weight: 800; 
+    color: #ffffff; 
+    background-color: #3B82F6; 
+}
+
+.toast-p {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem; 
+    padding-left: 1.25rem;
+    padding-right: 1.25rem; 
+}
+
+.alert-success {
+    background-color: green;
+}
+
+.alert-failure {
+    background-color: red;
+}
+
+.white {
+    color: white;
 }
 
 #form-container {

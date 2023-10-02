@@ -19,7 +19,7 @@ pub fn nav(props: &Props) -> Html {
                 <li><Link<Route> to={Route::Engagements}>{"Engagements"}</Link<Route>></li>
                 <li><Link<Route> to={Route::Consultants}>{"Consultants"}</Link<Route>></li>
                 <li><Link<Route> to={Route::Clients}>{"Clients"}</Link<Route>></li>
-                <li><Link<Route> to={Route::Home}>{"🏠"}</Link<Route>></li>
+                <li><Link<Route> to={Route::Home}><img width={30px} src={"img/home.svg"} /></Link<Route>></li>
                 <li><UserMenu label={"label"} /></li>
                 <li><Logout label={"->"}/></li>
             </ul>

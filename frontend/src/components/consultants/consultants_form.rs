@@ -214,10 +214,10 @@ pub fn ConsultantsForm(props: &Props) -> Html {
                     Ok(response) => {
                         // dispatch.reduce_mut(|store| store.token = Some(response.token));
                         // navigator.push(&Route::Consult);
-                        set_show_alert(format!("Consult {} added successfully", response.consultant_id).to_string(), dispatch.clone());
+                        set_show_alert(format!("Consult {} added successfully", response.consultant_id).to_string(), 1, dispatch.clone());
                     }
                     Err(err) => {
-                        set_show_alert(format!("Error adding consultant {}", err).to_string(), dispatch.clone());
+                        set_show_alert(format!("Error adding consultant {}", err).to_string(), 2, dispatch.clone());
                         let mut error_list = vec![];
                         let mut errors = error_state_ref.clone();
                         error_list.push(err.to_string());
@@ -251,7 +251,7 @@ pub fn ConsultantsForm(props: &Props) -> Html {
                     <RequiredTextInput input_type={"text"} name={"consultant_l_name"} class={"half-input"} value={consultant_l_name.deref().clone()} placeholder={"Last Name"} onchange={consultant_l_name_changed} />
 
                     <SelectInput label={"Specialty"} select_type={"location"} onchange={handle_specialty_id_select} />
-                    <SelectInput label={"Terrotiry"} select_type={"consultant"} onchange={handle_territory_id_select} />
+                    <SelectInput label={"Territory"} select_type={"consultant"} onchange={handle_territory_id_select} />
 
                     <DateInput date={final_start_date_clone} label={"Start Date"} onchange={handle_start_date_select} />
                     <DateInput date={final_end_date_clone} label={"End Date"} onchange={handle_end_date_select} />

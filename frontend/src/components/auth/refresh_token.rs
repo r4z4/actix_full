@@ -73,6 +73,7 @@ pub fn refresh_token() -> Html {
                             set_token(token, auth_dispatch.clone());
                             set_show_alert(
                                 "Token has been refreshed. Thank you!".to_string(),
+                                1,
                                 dispatch,
                             );
                         }

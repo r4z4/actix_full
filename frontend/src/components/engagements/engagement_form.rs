@@ -70,7 +70,7 @@ pub fn EngagementForm() -> Html {
             };
 
             set_engagement(new_engagement, dispatch.clone());
-            set_show_alert("Feeback added successfully".to_string(), dispatch.clone());
+            set_show_alert("Feeback added successfully".to_string(), 1, dispatch.clone());
 
             let text_input = text_input_ref.cast::<HtmlInputElement>().unwrap();
             text_input.set_value("");

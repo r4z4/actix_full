@@ -194,13 +194,13 @@ pub fn ConsultsForm(props: &Props) -> Html {
                     Ok(response) => {
                         // dispatch.reduce_mut(|store| store.token = Some(response.token));
                         // navigator.push(&Route::Consult);
-                        set_show_alert(format!("Consult {} added successfully", response.consult_id).to_string(), dispatch.clone());
+                        set_show_alert(format!("Consult {} added successfully", response.consult_id).to_string(), 1, dispatch.clone());
                     }
                     Err(err) => {
                         // let mut form_data = cloned_form_data.deref().clone();
                         // form_data.error = Some(err.to_string());
                         // cloned_form_data.set(data);
-                        set_show_alert(format!("Error adding consult {}", err).to_string(), dispatch.clone());
+                        set_show_alert(format!("Error adding consult {}", err).to_string(), 2, dispatch.clone());
                         // navigator.push(&Route::Home);
                     }
                 }

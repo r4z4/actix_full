@@ -125,7 +125,7 @@ pub fn register_form(props: &Props) -> Html {
             let response = register_user(new_user).await;
             match response {
                 Ok(response) => {
-                    set_show_alert(format!("Congrats {}. You have registered successfully. Click here to log in!", response.username).to_string(), dispatch_clone.clone());
+                    set_show_alert(format!("Congrats {}. You have registered successfully. Click here to log in!", response.username).to_string(), 1, dispatch_clone.clone());
                     // dispatch.reduce_mut(|store| store.is_authenticated = true);
                     // navigator.push(&Route::Home);
                 }

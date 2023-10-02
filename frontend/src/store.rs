@@ -8,6 +8,7 @@ use crate::components::consults::consults_display::ResponseConsult;
 pub struct AlertInput {
     pub show_alert: bool,
     pub alert_message: String,
+    pub alert_typ: i32,
 }
 
 #[derive(Store, Default, PartialEq, Clone, Serialize, Deserialize)]
@@ -101,10 +102,11 @@ pub fn set_loading(loading: bool, dispatch: Dispatch<Store>) {
     })
 }
 
-pub fn set_show_alert(message: String, dispatch: Dispatch<Store>) {
+pub fn set_show_alert(message: String, typ: i32, dispatch: Dispatch<Store>) {
     dispatch.reduce_mut(move |store| {
         store.alert_input = AlertInput {
             alert_message: message,
+            alert_typ: typ,
             show_alert: true,
         };
     })
