@@ -10,7 +10,6 @@ mod tests;
 use crate::actor::MyActorHandle;
 use crate::config::get_config;
 use crate::crypto::{basic_auth, register_user};
-use crate::scopes::api_engagement::api_engagement_scope;
 use actix_cors::Cors;
 use actix_web::dev::ServiceRequest;
 use actix_web::http::header::HeaderValue;
@@ -38,6 +37,8 @@ use std::{env, thread};
 use scopes::admin::admin_scope;
 use scopes::message::message_scope;
 use scopes::user::user_scope;
+use scopes::api_engagement::api_engagement_scope;
+use scopes::api_consult::api_consult_scope;
 
 #[derive(Debug)]
 pub struct AppState {
@@ -319,6 +320,7 @@ async fn main() -> std::io::Result<()> {
             .service(user_scope())
             .service(admin_scope())
             .service(api_engagement_scope())
+            .service(api_consult_scope())
             // .service(message_scope())
             .configure(handler::config)
             .wrap(cors)

@@ -82,11 +82,24 @@ pub struct ApiRegisterResponse {
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct ConsultPostRequest {
-    // If passing, it is an edit
-    // pub consult_id: Option<i32>,
     pub client_id: i32,
     pub consultant_id: i32,
-    pub consult_location: i32,
+    pub location_id: i32,
+    pub start_date: Option<String>,
+    pub end_date: Option<String>,
+    pub start_time: Option<String>,
+    pub end_time: Option<String>,
+    #[validate(length(min = 10, message = "Notes must be greater than 10 chars"))]
+    pub notes: Option<String>,
+    // pub files: Option<Vec<TempFile>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct ConsultPutRequest {
+    pub consult_id: i32,
+    pub client_id: i32,
+    pub consultant_id: i32,
+    pub location_id: i32,
     pub start_date: Option<String>,
     pub end_date: Option<String>,
     pub start_time: Option<String>,
@@ -123,7 +136,6 @@ pub struct ApiClientResponse {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ApiConsultResponse {
     pub consult_id: i32,
-    pub consult_start: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]

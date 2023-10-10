@@ -802,10 +802,14 @@ input[type=time] {
 
 .alert-success {
     background-color: green;
+    z-index: -1;
+    position:relative;
 }
 
 .alert-failure {
     background-color: red;
+    z-index: -1;
+    position:relative;
 }
 
 .white {

@@ -54,7 +54,7 @@ pub fn consults_table(props: &Props) -> Html {
         Callback::from(move |_| {
             let data_c = data.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let response = Request::get("http://localhost:8000/api/consults")
+                let response = Request::get("http://localhost:8000/api/consults/")
                     //.header("x-auth-token", &state.token)
                     .send()
                     .await

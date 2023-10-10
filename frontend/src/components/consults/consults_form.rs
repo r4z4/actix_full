@@ -6,24 +6,41 @@ use crate::{
     components::inputs::{select_input::SelectInput, date_input::DateInput, time_input::TimeInput, textarea_input::TextAreaInput},
     store::{set_loading, set_show_alert, Store},
 };
-use common::{ApiConsultResponse, ConsultPostRequest};
+use common::{ApiConsultResponse, ConsultPostRequest, ConsultPutRequest};
 use gloo::file::File;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;
 
-use super::consults_display::ResponseConsult;
+use super::{edit_modal::FormConsultEdit};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub data: Option<ResponseConsult>,
+    pub data: Option<FormConsultEdit>,
 }
 
 
 pub async fn post_consult(new_consult: ConsultPostRequest) -> Result<ApiConsultResponse, Error> {
     let body = json!(new_consult);
     let response = Request::post("http://localhost:8000/api/consults/form")
+        .header("Content-Type", "application/json")
+        .body(body.to_string())
+        .send()
+        .await
+        .unwrap()
+        .json::<ApiConsultResponse>()
+        .await;
+
+    match response {
+        Ok(response) => Ok(response),
+        Err(err) => Err(err),
+    }
+}
+
+pub async fn put_consult(new_consult: ConsultPutRequest) -> Result<ApiConsultResponse, Error> {
+    let body = json!(new_consult);
+    let response = Request::put(&format!("http://localhost:8000/api/consults/form/{}", new_consult.consult_id))
         .header("Content-Type", "application/json")
         .body(body.to_string())
         .send()
@@ -59,6 +76,8 @@ pub fn ConsultsForm(props: &Props) -> Html {
 
     let header = if props.data.is_some() {"Edit Consult"} else {"Add Consult"};
 
+    let data: UseStateHandle<Option<FormConsultEdit>> = use_state(|| props.data.clone());
+
     let consultant_id: UseStateHandle<Option<i32>> = use_state(|| None);
     let client_id: UseStateHandle<Option<i32>> = use_state(|| None);
     let location_id: UseStateHandle<Option<i32>> = use_state(|| None);
@@ -69,7 +88,7 @@ pub fn ConsultsForm(props: &Props) -> Html {
     let start_time: UseStateHandle<Option<String>> = use_state(|| None);
     let end_time: UseStateHandle<Option<String>> = use_state(|| None);
 
-    let attachments: UseStateHandle<Option<YewTempFile>> = use_state(|| None);
+    let attachments: UseStateHandle<Option<Vec<i32>>> = use_state(|| None);
 
     let notes = use_state(|| None);
 
@@ -188,51 +207,84 @@ pub fn ConsultsForm(props: &Props) -> Html {
             let end_date_ta = end_date.clone();
             let start_time_ta = start_time.clone();
             let end_time_ta = end_time.clone();
-            let binding = notes.clone();
-            let notes_ta = binding.borrow();
+            let notes_ta = notes.clone();
             set_loading(true, dispatch.clone());
 
-            if let Some(notes) = notes_ta {
-                if notes.trim().len() < *min {
+            if let Some(nts) = notes_ta {
+                if nts.trim().len() < *min {
                     message.set(Some("Text must be at least 10 characters".to_string()));
                     set_loading(false, dispatch.clone());
                     return;
                 }
             }
-
-            let new_consult = ConsultPostRequest {
-                // consult_id: i32,
-                client_id: client_id.unwrap(),
-                consultant_id: consultant_id.unwrap(),
-                consult_location: location_id.unwrap(),
-                start_date: start_date_ta,
-                end_date: end_date_ta,
-                start_time: start_time_ta,
-                end_time: end_time_ta,
-                notes: notes_ta.clone(),
-            };
             
-            wasm_bindgen_futures::spawn_local(async move {
-                log!("local spawned");
-                let response = post_consult(new_consult).await;
-                match response {
-                    Ok(response) => {
-                        // dispatch.reduce_mut(|store| store.token = Some(response.token));
-                        // navigator.push(&Route::Consult);
-                        set_show_alert(format!("Consult {} added successfully", response.consult_id).to_string(), 1, dispatch.clone());
+            if let Some(consult) = data.deref() {
+                let edit_consult = ConsultPutRequest {
+                    consult_id: client_id.unwrap(),
+                    client_id: client_id.unwrap(),
+                    consultant_id: consultant_id.unwrap(),
+                    location_id: location_id.unwrap(),
+                    start_date: start_date_ta,
+                    end_date: end_date_ta,
+                    start_time: start_time_ta,
+                    end_time: end_time_ta,
+                    notes: notes.clone(),
+                };
+                wasm_bindgen_futures::spawn_local(async move {
+                    log!("local spawned");
+                    let response = put_consult(edit_consult).await;
+                    match response {
+                        Ok(response) => {
+                            // dispatch.reduce_mut(|store| store.token = Some(response.token));
+                            // navigator.push(&Route::Consult);
+                            set_show_alert(format!("Consult {} updated successfully", response.consult_id).to_string(), 1, dispatch.clone());
+                        }
+                        Err(err) => {
+                            // let mut form_data = cloned_form_data.deref().clone();
+                            // form_data.error = Some(err.to_string());
+                            // cloned_form_data.set(data);
+                            log!("Logging => {}", err.to_string());
+                            set_show_alert(format!("Error updating consult {}", err).to_string(), 2, dispatch.clone());
+                            // navigator.push(&Route::Home);
+                        }
                     }
-                    Err(err) => {
-                        // let mut form_data = cloned_form_data.deref().clone();
-                        // form_data.error = Some(err.to_string());
-                        // cloned_form_data.set(data);
-                        set_show_alert(format!("Error adding consult {}", err).to_string(), 2, dispatch.clone());
-                        // navigator.push(&Route::Home);
+                    // Use this
+                    // log!(response.token)
+                })
+            } else {
+                wasm_bindgen_futures::spawn_local(async move {
+                    let new_consult = ConsultPostRequest {
+                        // consult_id: i32,
+                        client_id: client_id.unwrap(),
+                        consultant_id: consultant_id.unwrap(),
+                        location_id: location_id.unwrap(),
+                        start_date: start_date_ta,
+                        end_date: end_date_ta,
+                        start_time: start_time_ta,
+                        end_time: end_time_ta,
+                        notes: notes.clone(),
+                    };
+                    log!("local spawned");
+                    let response = post_consult(new_consult).await;
+                    match response {
+                        Ok(response) => {
+                            // dispatch.reduce_mut(|store| store.token = Some(response.token));
+                            // navigator.push(&Route::Consult);
+                            set_show_alert(format!("Consult {} added successfully", response.consult_id).to_string(), 1, dispatch.clone());
+                        }
+                        Err(err) => {
+                            // let mut form_data = cloned_form_data.deref().clone();
+                            // form_data.error = Some(err.to_string());
+                            // cloned_form_data.set(data);
+                            log!("Logging => {}", err.to_string());
+                            set_show_alert(format!("Error adding consult {}", err).to_string(), 2, dispatch.clone());
+                            // navigator.push(&Route::Home);
+                        }
                     }
-                }
-                // Use this
-                // log!(response.token)
-            });
-
+                    // Use this
+                    // log!(response.token)
+                })
+            }
             // Re-clone it
             let dispatch = cloned_dispatch.clone();
             let text_input = text_input_ref.cast::<HtmlInputElement>().unwrap();
@@ -265,13 +317,13 @@ pub fn ConsultsForm(props: &Props) -> Html {
 
                     <TextAreaInput name={"notes"} label={"Notes"} class={"text-input"} value={notes_h.deref().clone()} placeholder={"Consult notes ..."} onchange={handle_notes_input} />
 
-                    <input
-                        type="textarea"
-                        ref={text_input_ref}
-                        oninput={handle_input}
-                        class="text-input"
-                        placeholder="Consult notes ..."
-                    />
+                    // <input
+                    //     type="textarea"
+                    //     ref={text_input_ref}
+                    //     oninput={handle_input}
+                    //     class="text-input"
+                    //     placeholder="Consult notes ..."
+                    // />
                 // FIXME: Convert accept from PHTMap of accepted mime_types
                 <input type={"file"} name={"file"} accept={"image/*,audio/*,video/*"} multiple={true} />
                 <button

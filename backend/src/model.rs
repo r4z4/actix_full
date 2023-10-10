@@ -36,6 +36,19 @@ pub struct ResponseConsult {
     pub notes: Option<String>,
 }
 
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct FormConsultEdit {
+    pub consultant_id: i32,
+    pub client_id: i32,
+    pub location_id: i32,
+    // #[serde(serialize_with = "serialize_dt", skip_serializing_if  = "Option::is_none")]
+    pub consult_start: DateTime<Utc>,
+    pub consult_end: Option<DateTime<Utc>>,
+    // CASTing to varchar
+    pub consult_attachments: Option<Vec<i32>>,
+    pub notes: Option<String>,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ConsultPostResponse {
     pub consult_id: i32,

@@ -9,19 +9,16 @@ use validator::Validate;
 use actix_multipart::{Multipart, form::{MultipartForm, tempfile::TempFile}};
 use actix_web::{
     delete, get, http::{header::CONTENT_LENGTH, Error}, patch, post, web, HttpMessage, HttpRequest,
-    HttpResponse, Responder,
+    HttpResponse, Responder, put,
 };
-use chrono::prelude::*;
-use common::{SelectOption, ConsultPostRequest};
+use common::SelectOption;
 use futures_util::TryStreamExt;
 use image::{imageops::FilterType, DynamicImage};
 use mime::{Mime, IMAGE_GIF, IMAGE_JPEG, IMAGE_PNG, IMAGE_SVG};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::FromRow;
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
-use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
 #[get("/healthchecker")]
@@ -30,80 +27,6 @@ async fn health_checker_handler() -> impl Responder {
 
     HttpResponse::Ok().json(json!({"status": "success","message": MESSAGE}))
 }
-
-#[get("/consults/form/{id}")]
-async fn consults_form_handler(path: web::Path<i32>, data: web::Data<AppState>) -> impl Responder {
-    let consult_id = path.into_inner();
-    let today = Utc::now();
-    let formatted = today.format("%Y-%m-%d");
-    let consult = sqlx::query_as!(
-        ConsultModel,
-        "SELECT * FROM consults WHERE consult_id = $1",
-        consult_id
-    )
-    .fetch_one(&data.db)
-    .await;
-
-    match consult {
-        Ok(consult) => {
-            let options_response = serde_json::json!({"status": "success", "consult": consult
-            });
-
-            return HttpResponse::Ok().json(options_response);
-        }
-        Err(_) => {
-            let message = format!("errpr fetching locations");
-            return HttpResponse::NotFound()
-                .json(serde_json::json!({"status": "fail","message": message}));
-        }
-    }
-}
-
-#[derive(Clone, Debug, Serialize, FromRow, Deserialize)]
-pub struct ConsultPostResponse {
-    pub consult_id: i32,
-    pub consult_slug: String,
-}
-
-fn build_time(date: String, time: String) -> DateTime<FixedOffset> {
-    // '2023-09-11 19:10:25-06'
-    let time = date + " " + &time + ":00 -06:00";
-    let datetime = DateTime::parse_from_str(&time, "%Y-%m-%d %H:%M:%S %:z").unwrap();
-    // let datetime_utc = datetime.with_timezone(&Utc);
-    datetime
-}
-
-#[instrument]
-#[post("/consults/form")]
-async fn consults_form_submit_handler(body: web::Json<ConsultPostRequest>, data: web::Data<AppState>) -> impl Responder {
-    let is_valid = body.validate();
-    if is_valid.is_err() {
-        return HttpResponse::InternalServerError().json(format!("{:?}", is_valid.err().unwrap()));
-    }
-    let consult: ConsultPostRequest = body.into_inner();
-    let constructed_start_datetime = build_time(consult.start_date.unwrap(), consult.start_time.unwrap());
-    let constructed_end_datetime = build_time(consult.end_date.unwrap(), consult.end_time.unwrap());
-    let query_span = tracing::info_span!("Saving a new consult in the database");
-    match sqlx::query_as::<_, ConsultPostResponse>(
-        "INSERT INTO consults (client_id, consultant_id, consult_location, consult_start, consult_end)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING consult_id, consult_slug",
-    )
-    .bind(consult.client_id)
-    .bind(consult.consultant_id)
-    .bind(consult.consult_location)
-    .bind(constructed_start_datetime)
-    .bind(constructed_end_datetime)
-    .fetch_one(&data.db)
-    .instrument(query_span)
-    .await
-    {
-        Ok(consult) => HttpResponse::Ok().json(consult),
-        Err(err) => HttpResponse::InternalServerError().json(format!("{:?}", err)),
-    }
-}
-
-
 
 #[get("/location-options")]
 async fn location_options_handler(data: web::Data<AppState>) -> impl Responder {
@@ -340,47 +263,6 @@ async fn upload(mut payload: Multipart, req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().into()
 }
 
-#[get("/consults")]
-pub async fn get_consults_handler(
-    opts: web::Query<FilterOptions>,
-    data: web::Data<AppState>,
-) -> impl Responder {
-    let limit = opts.limit.unwrap_or(10);
-
-    let query_result = sqlx::query_as!(
-        ResponseConsult,
-        "SELECT consult_id, location_id, consult_start, consult_attachments, notes 
-        FROM consults 
-		LIMIT $1",
-        limit as i32
-    )
-    .fetch_all(&data.db)
-    .await;
-
-    if query_result.is_err() {
-        let _ = dbg!(query_result);
-        let message = "Error occurred while fetching all consult records";
-        return HttpResponse::InternalServerError()
-            .json(json!({"status": "error","message": message}));
-    }
-
-    let consults = query_result.unwrap();
-
-    dbg!(consults.clone());
-
-    let json_response = ResponseConsultList {
-        consults: consults,
-    };
-
-    // let json_response = serde_json::json!({
-    //     "status": "success",
-    //     "results": users.len(),
-    //     "engagements": users
-    // });
-    HttpResponse::Ok().json(json_response)
-    // HttpResponse::NoContent().finish()
-}
-
 #[get("/clients")]
 pub async fn get_clients_handler(
     opts: web::Query<FilterOptions>,
@@ -528,10 +410,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(client_options_handler)
         .service(territory_options_handler)
         .service(specialty_options_handler)
-        .service(get_consults_handler)
         .service(get_clients_handler)
         .service(get_client_handler)
-        .service(consults_form_submit_handler)
         .service(get_attachments_handler)
         .service(account_options_handler);
 
